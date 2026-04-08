@@ -39,8 +39,8 @@ export default async function DashboardLayout({
     ],
     teacher: [
       { href: "/dashboard/teacher", label: t("myProfile"), icon: "user" },
+      { href: "/dashboard/teacher/availability", label: t("schedule"), icon: "calendar" },
       { href: "/dashboard/teacher/courses", label: t("myCourses"), icon: "book-open" },
-      { href: "/dashboard/teacher/schedule", label: t("schedule"), icon: "calendar" },
       { href: "/dashboard/teacher/earnings", label: t("earnings"), icon: "wallet" },
       { href: "/dashboard/teacher/messages", label: t("messages"), icon: "message-circle" },
     ],
