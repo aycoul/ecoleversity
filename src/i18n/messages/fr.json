@@ -168,7 +168,34 @@
       "rejectTeacher": "Refuser",
       "approveTeacher": "Approuver",
       "viewDocument": "Voir le document",
-      "viewVideo": "Voir la vidéo"
+      "viewVideo": "Voir la vidéo",
+      "viewCNI": "Voir CNI",
+      "viewDiploma": "Voir diplôme",
+      "noPending": "Aucun enseignant en attente de vérification",
+      "approved": "Enseignant approuvé avec succès",
+      "rejected": "Enseignant refusé",
+      "rejectReason": "Motif du refus (optionnel)",
+      "rejectConfirm": "Confirmer le refus",
+      "joinedOn": "Inscrit le {date}",
+      "verification": "Vérification enseignants",
+      "documents": "Documents",
+      "supportTickets": "Tickets support",
+      "reports": "Rapports"
+    },
+    "sidebar": {
+      "verification": "Vérification",
+      "supportTickets": "Tickets support",
+      "reports": "Rapports",
+      "myProfile": "Mon profil",
+      "myCourses": "Mes cours",
+      "schedule": "Emploi du temps",
+      "earnings": "Revenus",
+      "messages": "Messages",
+      "myChildren": "Mes enfants",
+      "upcomingSessions": "Prochains cours",
+      "spending": "Dépenses",
+      "dashboard": "Tableau de bord",
+      "comingSoon": "Bientôt disponible"
     }
   },
   "navigation": {
