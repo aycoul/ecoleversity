@@ -304,6 +304,26 @@
     "pendingPayments": "Pending payments",
     "noPendingPayments": "No pending payments"
   },
+  "session": {
+    "title": "Live session",
+    "waiting": "Session starts in",
+    "ready": "Session is about to start!",
+    "join": "Join session",
+    "joinExternal": "Open in Jitsi Meet",
+    "live": "Live session",
+    "elapsed": "Elapsed time",
+    "ended": "Session ended",
+    "endedMessage": "Thank you for participating!",
+    "rateTeacher": "Rate the teacher",
+    "leave": "Leave session",
+    "upcoming": "Upcoming sessions",
+    "noSessions": "No upcoming sessions",
+    "prepareTips": "Make sure your camera and microphone are ready",
+    "sessionWith": "Session with {teacher}",
+    "subject": "Subject: {subject}",
+    "dateTime": "{date} at {time}",
+    "duration": "Duration: {duration} min"
+  },
   "footer": {
     "copyright": "\u00a9 2026 EcoleVersity. All rights reserved.",
     "about": "About",

@@ -304,6 +304,26 @@
     "pendingPayments": "Paiements en attente",
     "noPendingPayments": "Aucun paiement en attente"
   },
+  "session": {
+    "title": "Cours en direct",
+    "waiting": "Le cours commence dans",
+    "ready": "Le cours va bient\u00f4t commencer !",
+    "join": "Rejoindre le cours",
+    "joinExternal": "Ouvrir dans Jitsi Meet",
+    "live": "Cours en direct",
+    "elapsed": "Temps \u00e9coul\u00e9",
+    "ended": "Cours termin\u00e9",
+    "endedMessage": "Merci d'avoir particip\u00e9 !",
+    "rateTeacher": "\u00c9valuer l'enseignant",
+    "leave": "Quitter le cours",
+    "upcoming": "Prochains cours",
+    "noSessions": "Aucun cours pr\u00e9vu",
+    "prepareTips": "Pr\u00e9parez votre cam\u00e9ra et votre micro avant le cours",
+    "sessionWith": "Cours avec {teacher}",
+    "subject": "Mati\u00e8re : {subject}",
+    "dateTime": "{date} \u00e0 {time}",
+    "duration": "Dur\u00e9e : {duration} min"
+  },
   "footer": {
     "copyright": "\u00a9 2026 EcoleVersity. Tous droits r\u00e9serv\u00e9s.",
     "about": "\u00c0 propos",

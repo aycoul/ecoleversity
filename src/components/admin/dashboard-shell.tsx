@@ -15,6 +15,7 @@ import {
   Users,
   GraduationCap,
   LogOut,
+  Video,
 } from "lucide-react";
 
 type NavLink = {
@@ -41,6 +42,7 @@ const iconMap: Record<string, React.ElementType> = {
   wallet: Wallet,
   "message-circle": MessageCircle,
   users: Users,
+  video: Video,
 };
 
 export function DashboardShell({
