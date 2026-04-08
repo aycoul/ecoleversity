@@ -504,6 +504,22 @@
     "enrollError": "Enrollment error",
     "addChildFirst": "Add a child to your profile first"
   },
+  "player": {
+    "lessons": "Lessons",
+    "progress": "Progress: {percent}%",
+    "lessonOf": "Lesson {current} of {total}",
+    "completed": "Completed",
+    "markComplete": "Mark as completed",
+    "nextLesson": "Next lesson",
+    "previousLesson": "Previous lesson",
+    "downloadPdf": "Download PDF",
+    "courseCompleted": "Course completed! Congratulations!",
+    "getCertificate": "Request certificate",
+    "resumeWatching": "Resume watching",
+    "continueCourse": "Continue",
+    "myCourses": "My courses",
+    "noCourses": "No courses in progress"
+  },
   "footer": {
     "copyright": "\u00a9 2026 EcoleVersity. All rights reserved.",
     "about": "About",

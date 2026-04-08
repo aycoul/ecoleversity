@@ -504,6 +504,22 @@
     "enrollError": "Erreur lors de l'inscription",
     "addChildFirst": "Ajoutez un enfant dans votre profil d'abord"
   },
+  "player": {
+    "lessons": "Leçons",
+    "progress": "Progression : {percent}%",
+    "lessonOf": "Leçon {current} sur {total}",
+    "completed": "Terminée",
+    "markComplete": "Marquer comme terminée",
+    "nextLesson": "Leçon suivante",
+    "previousLesson": "Leçon précédente",
+    "downloadPdf": "Télécharger le PDF",
+    "courseCompleted": "Cours terminé ! Félicitations !",
+    "getCertificate": "Demander le certificat",
+    "resumeWatching": "Reprendre la lecture",
+    "continueCourse": "Continuer",
+    "myCourses": "Mes cours",
+    "noCourses": "Aucun cours en cours"
+  },
   "footer": {
     "copyright": "\u00a9 2026 EcoleVersity. Tous droits r\u00e9serv\u00e9s.",
     "about": "\u00c0 propos",

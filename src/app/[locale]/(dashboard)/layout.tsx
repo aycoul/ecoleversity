@@ -51,6 +51,7 @@ export default async function DashboardLayout({
     ],
     parent: [
       { href: "/dashboard/parent", label: t("myChildren"), icon: "users" },
+      { href: "/dashboard/parent/courses", label: t("recordedCourses"), icon: "play-circle" },
       { href: "/dashboard/parent/sessions", label: t("upcomingSessions"), icon: "calendar" },
       { href: "/dashboard/parent/payments", label: t("payments"), icon: "receipt" },
       { href: "/dashboard/parent/spending", label: t("spending"), icon: "wallet" },
