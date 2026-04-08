@@ -43,6 +43,15 @@
       "paymentDesc": "Payez avec Orange Money ou Wave. Les enseignants sont payés chaque semaine.",
       "safe": "Espace sécurisé",
       "safeDesc": "Toutes les communications restent sur la plateforme. Vos enfants sont protégés."
+    },
+    "stats": {
+      "teachers": "enseignants",
+      "students": "élèves",
+      "sessions": "cours dispensés"
+    },
+    "cta": {
+      "title": "Commencez maintenant",
+      "subtitle": "Rejoignez EcoleVersity et offrez à votre enfant le meilleur accompagnement scolaire."
     }
   },
   "auth": {

@@ -43,6 +43,15 @@
       "paymentDesc": "Pay with Orange Money or Wave. Teachers are paid every week.",
       "safe": "Safe environment",
       "safeDesc": "All communications stay on the platform. Your children are protected."
+    },
+    "stats": {
+      "teachers": "teachers",
+      "students": "students",
+      "sessions": "sessions held"
+    },
+    "cta": {
+      "title": "Get started now",
+      "subtitle": "Join EcoleVersity and give your child the best academic support."
     }
   },
   "auth": {
