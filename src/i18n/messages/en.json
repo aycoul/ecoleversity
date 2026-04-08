@@ -1,0 +1,144 @@
+{
+  "common": {
+    "appName": "EcoleVersity",
+    "tagline": "Find the best home tutor online",
+    "login": "Log in",
+    "register": "Sign up",
+    "logout": "Log out",
+    "save": "Save",
+    "cancel": "Cancel",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "search": "Search",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Operation successful",
+    "fcfa": "{amount} FCFA",
+    "back": "Back"
+  },
+  "landing": {
+    "hero": {
+      "title": "The best home tutor, online",
+      "subtitle": "Find a qualified teacher for your child. Private lessons, group classes, exam preparation — wherever you are in Ivory Coast.",
+      "ctaParent": "I'm looking for a teacher",
+      "ctaTeacher": "I'm a teacher"
+    },
+    "howItWorks": {
+      "title": "How does it work?",
+      "step1Title": "Find a teacher",
+      "step1Desc": "Browse our catalog of verified teachers by subject, grade, and city.",
+      "step2Title": "Book a class",
+      "step2Desc": "Choose a time slot and pay with Orange Money or Wave.",
+      "step3Title": "Learn live",
+      "step3Desc": "Your child joins the video class from your phone or tablet."
+    },
+    "features": {
+      "title": "Why EcoleVersity?",
+      "verified": "Verified teachers",
+      "verifiedDesc": "Every teacher is verified: national ID, diploma, and introduction video.",
+      "mobile": "100% mobile",
+      "mobileDesc": "Designed for your phone. Works even with a slow connection.",
+      "payment": "Simple payment",
+      "paymentDesc": "Pay with Orange Money or Wave. Teachers are paid every week.",
+      "safe": "Safe environment",
+      "safeDesc": "All communications stay on the platform. Your children are protected."
+    }
+  },
+  "auth": {
+    "loginTitle": "Log in",
+    "registerTitle": "Create an account",
+    "email": "Email address",
+    "phone": "Phone number",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "roleParent": "I'm a parent",
+    "roleTeacher": "I'm a teacher",
+    "roleSelect": "You are...",
+    "otpSent": "A code has been sent to {destination}",
+    "otpEnter": "Enter the verification code",
+    "otpResend": "Resend code",
+    "googleLogin": "Continue with Google",
+    "phoneLogin": "Continue with phone",
+    "displayName": "Your full name"
+  },
+  "onboarding": {
+    "teacher": {
+      "welcomeTitle": "Welcome to EcoleVersity!",
+      "welcomeDesc": "Earn money teaching online. Thousands of parents are looking for teachers like you.",
+      "profileTitle": "Complete your profile",
+      "profileDesc": "Parents will discover you through this information.",
+      "verificationTitle": "Verification",
+      "verificationDesc": "For student safety, we verify every teacher's identity.",
+      "firstCourseTitle": "Create your first course",
+      "firstCourseDesc": "We'll guide you step by step.",
+      "jitsiTitle": "Test video conferencing",
+      "jitsiDesc": "Make sure your camera and microphone are working.",
+      "payoutTitle": "Payment setup",
+      "payoutDesc": "Enter your Orange Money or Wave number to receive payments.",
+      "readyTitle": "You're ready!",
+      "readyDesc": "Your profile is complete. Publish your first course and start teaching.",
+      "uploadCNI": "Upload your national ID",
+      "uploadDiploma": "Upload your diploma",
+      "recordVideo": "Record your introduction video (60 sec)",
+      "subjects": "Subjects taught",
+      "gradeLevels": "Grade levels",
+      "city": "City",
+      "bio": "Introduce yourself in a few words",
+      "payoutPhone": "Payment number",
+      "payoutProvider": "Provider",
+      "step": "Step {current} of {total}",
+      "verificationPending": "Verification in progress — we'll notify you within 24-48h"
+    },
+    "parent": {
+      "welcomeTitle": "Welcome!",
+      "addChildTitle": "Add your child",
+      "addChildDesc": "To recommend the best teachers.",
+      "childName": "Child's first name",
+      "childGrade": "Current grade",
+      "childExam": "Target exam (optional)",
+      "recommendationsTitle": "Recommended courses",
+      "recommendationsDesc": "Based on {childName}'s profile",
+      "tourTitle": "Your dashboard",
+      "tourDesc": "Here's where you can track your children's progress.",
+      "addAnother": "Add another child"
+    }
+  },
+  "dashboard": {
+    "parent": {
+      "title": "Dashboard",
+      "children": "My children",
+      "sessions": "Upcoming classes",
+      "spending": "Spending"
+    },
+    "teacher": {
+      "title": "Teacher dashboard",
+      "earnings": "Earnings",
+      "students": "Students",
+      "classes": "My classes",
+      "schedule": "Schedule"
+    },
+    "admin": {
+      "title": "Administration",
+      "pendingTeachers": "Pending teachers",
+      "verifyTeacher": "Verify",
+      "rejectTeacher": "Reject",
+      "approveTeacher": "Approve",
+      "viewDocument": "View document",
+      "viewVideo": "View video"
+    }
+  },
+  "navigation": {
+    "home": "Home",
+    "teachers": "Teachers",
+    "courses": "Courses",
+    "classes": "Live classes",
+    "exams": "Exam prep",
+    "dashboard": "Dashboard",
+    "messages": "Messages",
+    "help": "Help"
+  }
+}

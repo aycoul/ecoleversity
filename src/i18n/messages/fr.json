@@ -1,0 +1,144 @@
+{
+  "common": {
+    "appName": "EcoleVersity",
+    "tagline": "Trouvez le meilleur maître de maison en ligne",
+    "login": "Se connecter",
+    "register": "S'inscrire",
+    "logout": "Se déconnecter",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "submit": "Envoyer",
+    "search": "Rechercher",
+    "loading": "Chargement...",
+    "error": "Une erreur est survenue",
+    "success": "Opération réussie",
+    "fcfa": "{amount} FCFA",
+    "back": "Retour"
+  },
+  "landing": {
+    "hero": {
+      "title": "Le meilleur maître de maison, en ligne",
+      "subtitle": "Trouvez un enseignant qualifié pour votre enfant. Cours particuliers, cours de groupe, préparation aux examens — où que vous soyez en Côte d'Ivoire.",
+      "ctaParent": "Je cherche un enseignant",
+      "ctaTeacher": "Je suis enseignant"
+    },
+    "howItWorks": {
+      "title": "Comment ça marche ?",
+      "step1Title": "Trouvez un enseignant",
+      "step1Desc": "Parcourez notre catalogue d'enseignants vérifiés par matière, classe et ville.",
+      "step2Title": "Réservez un cours",
+      "step2Desc": "Choisissez un créneau horaire et payez avec Orange Money ou Wave.",
+      "step3Title": "Apprenez en direct",
+      "step3Desc": "Votre enfant rejoint le cours en vidéo depuis votre téléphone ou tablette."
+    },
+    "features": {
+      "title": "Pourquoi EcoleVersity ?",
+      "verified": "Enseignants vérifiés",
+      "verifiedDesc": "Chaque enseignant est vérifié : CNI, diplôme et vidéo d'introduction.",
+      "mobile": "100% mobile",
+      "mobileDesc": "Conçu pour votre téléphone. Fonctionne même avec une connexion lente.",
+      "payment": "Paiement simple",
+      "paymentDesc": "Payez avec Orange Money ou Wave. Les enseignants sont payés chaque semaine.",
+      "safe": "Espace sécurisé",
+      "safeDesc": "Toutes les communications restent sur la plateforme. Vos enfants sont protégés."
+    }
+  },
+  "auth": {
+    "loginTitle": "Connexion",
+    "registerTitle": "Créer un compte",
+    "email": "Adresse email",
+    "phone": "Numéro de téléphone",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "forgotPassword": "Mot de passe oublié ?",
+    "noAccount": "Pas encore de compte ?",
+    "hasAccount": "Déjà un compte ?",
+    "roleParent": "Je suis parent",
+    "roleTeacher": "Je suis enseignant",
+    "roleSelect": "Vous êtes...",
+    "otpSent": "Un code a été envoyé à {destination}",
+    "otpEnter": "Entrez le code de vérification",
+    "otpResend": "Renvoyer le code",
+    "googleLogin": "Continuer avec Google",
+    "phoneLogin": "Continuer avec le téléphone",
+    "displayName": "Votre nom complet"
+  },
+  "onboarding": {
+    "teacher": {
+      "welcomeTitle": "Bienvenue sur EcoleVersity !",
+      "welcomeDesc": "Gagnez de l'argent en enseignant en ligne. Des milliers de parents cherchent des enseignants comme vous.",
+      "profileTitle": "Complétez votre profil",
+      "profileDesc": "Les parents vous découvriront grâce à ces informations.",
+      "verificationTitle": "Vérification",
+      "verificationDesc": "Pour la sécurité des élèves, nous vérifions l'identité de chaque enseignant.",
+      "firstCourseTitle": "Créez votre premier cours",
+      "firstCourseDesc": "Nous vous guiderons étape par étape.",
+      "jitsiTitle": "Testez la visioconférence",
+      "jitsiDesc": "Vérifiez que votre caméra et votre micro fonctionnent.",
+      "payoutTitle": "Configuration des paiements",
+      "payoutDesc": "Indiquez votre numéro Orange Money ou Wave pour recevoir vos paiements.",
+      "readyTitle": "Vous êtes prêt !",
+      "readyDesc": "Votre profil est complet. Publiez votre premier cours et commencez à enseigner.",
+      "uploadCNI": "Télécharger votre CNI",
+      "uploadDiploma": "Télécharger votre diplôme",
+      "recordVideo": "Enregistrer votre vidéo d'introduction (60 sec)",
+      "subjects": "Matières enseignées",
+      "gradeLevels": "Niveaux de classe",
+      "city": "Ville",
+      "bio": "Présentez-vous en quelques mots",
+      "payoutPhone": "Numéro de paiement",
+      "payoutProvider": "Opérateur",
+      "step": "Étape {current} sur {total}",
+      "verificationPending": "Vérification en cours — nous vous notifions dans 24-48h"
+    },
+    "parent": {
+      "welcomeTitle": "Bienvenue !",
+      "addChildTitle": "Ajoutez votre enfant",
+      "addChildDesc": "Pour recommander les meilleurs enseignants.",
+      "childName": "Prénom de l'enfant",
+      "childGrade": "Classe actuelle",
+      "childExam": "Examen visé (optionnel)",
+      "recommendationsTitle": "Cours recommandés",
+      "recommendationsDesc": "Basés sur le profil de {childName}",
+      "tourTitle": "Votre tableau de bord",
+      "tourDesc": "Voici où suivre les progrès de vos enfants.",
+      "addAnother": "Ajouter un autre enfant"
+    }
+  },
+  "dashboard": {
+    "parent": {
+      "title": "Tableau de bord",
+      "children": "Mes enfants",
+      "sessions": "Prochains cours",
+      "spending": "Dépenses"
+    },
+    "teacher": {
+      "title": "Tableau de bord enseignant",
+      "earnings": "Revenus",
+      "students": "Élèves",
+      "classes": "Mes cours",
+      "schedule": "Emploi du temps"
+    },
+    "admin": {
+      "title": "Administration",
+      "pendingTeachers": "Enseignants en attente",
+      "verifyTeacher": "Vérifier",
+      "rejectTeacher": "Refuser",
+      "approveTeacher": "Approuver",
+      "viewDocument": "Voir le document",
+      "viewVideo": "Voir la vidéo"
+    }
+  },
+  "navigation": {
+    "home": "Accueil",
+    "teachers": "Enseignants",
+    "courses": "Cours",
+    "classes": "Cours en direct",
+    "exams": "Préparation examens",
+    "dashboard": "Tableau de bord",
+    "messages": "Messages",
+    "help": "Aide"
+  }
+}
