@@ -34,6 +34,7 @@ export default async function DashboardLayout({
   const navConfig: Record<UserRole, Array<{ href: string; label: string; icon: string }>> = {
     admin: [
       { href: "/dashboard/admin/verification", label: t("verification"), icon: "shield-check" },
+      { href: "/dashboard/admin/payments", label: t("payments"), icon: "wallet" },
       { href: "/dashboard/admin/tickets", label: t("supportTickets"), icon: "ticket" },
       { href: "/dashboard/admin/reports", label: t("reports"), icon: "bar-chart" },
     ],

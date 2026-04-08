@@ -194,6 +194,7 @@
       "myChildren": "Mes enfants",
       "upcomingSessions": "Prochains cours",
       "spending": "Dépenses",
+      "payments": "Paiements",
       "dashboard": "Tableau de bord",
       "comingSoon": "Bientôt disponible"
     }
@@ -280,6 +281,28 @@
     "time": "Heure",
     "bookingCreated": "Réservation créée ! Procédez au paiement.",
     "slotTaken": "Ce créneau n'est plus disponible"
+  },
+  "payment": {
+    "title": "Paiement en attente",
+    "sessionWith": "Cours avec {teacher}",
+    "instructions": "Pour confirmer, envoyez {amount} FCFA \u00e0 l'un de ces num\u00e9ros :",
+    "orangeMoney": "Orange Money",
+    "wave": "Wave",
+    "copyNumber": "Copier le num\u00e9ro",
+    "copied": "Copi\u00e9 !",
+    "referenceLabel": "Ajoutez cette r\u00e9f\u00e9rence dans le message du transfert :",
+    "copyReference": "Copier la r\u00e9f\u00e9rence",
+    "autoConfirmMessage": "Votre r\u00e9servation sera confirm\u00e9e automatiquement apr\u00e8s r\u00e9ception du paiement.",
+    "waiting": "En attente de paiement...",
+    "checkStatus": "V\u00e9rifier le statut",
+    "confirmed": "Paiement confirm\u00e9 !",
+    "confirmedMessage": "Votre cours est r\u00e9serv\u00e9. Vous recevrez un rappel avant le cours.",
+    "goToSession": "Voir mon cours",
+    "expires": "R\u00e9servation expire dans {time}",
+    "expired": "R\u00e9servation expir\u00e9e",
+    "adminConfirm": "Confirmer le paiement",
+    "pendingPayments": "Paiements en attente",
+    "noPendingPayments": "Aucun paiement en attente"
   },
   "footer": {
     "copyright": "\u00a9 2026 EcoleVersity. Tous droits r\u00e9serv\u00e9s.",

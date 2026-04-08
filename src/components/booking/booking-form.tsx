@@ -201,9 +201,8 @@ export function BookingForm({
         return;
       }
 
-      // Redirect to a confirmation / payment page
-      // For now, redirect to dashboard with success
-      router.push(`/dashboard`);
+      // Redirect to payment instructions page
+      router.push(`/payment/${data.transactionId}`);
     } catch {
       setError(tCommon("error"));
       setIsSubmitting(false);

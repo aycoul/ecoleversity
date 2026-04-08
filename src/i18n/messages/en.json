@@ -194,6 +194,7 @@
       "myChildren": "My children",
       "upcomingSessions": "Upcoming sessions",
       "spending": "Spending",
+      "payments": "Payments",
       "dashboard": "Dashboard",
       "comingSoon": "Coming soon"
     }
@@ -280,6 +281,28 @@
     "time": "Time",
     "bookingCreated": "Booking created! Proceed to payment.",
     "slotTaken": "This slot is no longer available"
+  },
+  "payment": {
+    "title": "Payment pending",
+    "sessionWith": "Session with {teacher}",
+    "instructions": "To confirm, send {amount} FCFA to one of these numbers:",
+    "orangeMoney": "Orange Money",
+    "wave": "Wave",
+    "copyNumber": "Copy number",
+    "copied": "Copied!",
+    "referenceLabel": "Add this reference in the transfer message:",
+    "copyReference": "Copy reference",
+    "autoConfirmMessage": "Your booking will be confirmed automatically after payment is received.",
+    "waiting": "Waiting for payment...",
+    "checkStatus": "Check status",
+    "confirmed": "Payment confirmed!",
+    "confirmedMessage": "Your session is booked. You will receive a reminder before the session.",
+    "goToSession": "View my session",
+    "expires": "Booking expires in {time}",
+    "expired": "Booking expired",
+    "adminConfirm": "Confirm payment",
+    "pendingPayments": "Pending payments",
+    "noPendingPayments": "No pending payments"
   },
   "footer": {
     "copyright": "\u00a9 2026 EcoleVersity. All rights reserved.",
