@@ -72,7 +72,14 @@
     "otpResend": "Resend code",
     "googleLogin": "Continue with Google",
     "phoneLogin": "Continue with phone",
-    "displayName": "Your full name"
+    "displayName": "Your full name",
+    "or": "or",
+    "loginSubtitle": "Access your account",
+    "registerSubtitleParent": "Find a teacher for your child",
+    "registerSubtitleTeacher": "Earn money teaching online",
+    "createAccount": "Create an account",
+    "verifyTitle": "Verification",
+    "signUpSuccess": "Account created successfully"
   },
   "onboarding": {
     "teacher": {
