@@ -1,9 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
+import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -17,8 +19,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EcoleVersity",
-  description: "Trouvez le meilleur maître de maison en ligne",
+  title: "EcoleVersity — Le meilleur maître de maison en ligne",
+  description:
+    "Trouvez un enseignant qualifié pour votre enfant. Cours particuliers, cours de groupe, préparation aux examens — où que vous soyez en Côte d'Ivoire.",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#059669",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default async function LocaleLayout({
@@ -41,9 +50,11 @@ export default async function LocaleLayout({
       lang={locale}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="flex min-h-full flex-col bg-white text-slate-900">
         <NextIntlClientProvider messages={messages}>
-          {children}
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
         </NextIntlClientProvider>
       </body>
     </html>
