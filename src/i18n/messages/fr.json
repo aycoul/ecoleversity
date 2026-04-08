@@ -260,6 +260,27 @@
     "filters": "Filtres",
     "results": "{count} enseignant(s) trouvé(s)"
   },
+  "booking": {
+    "title": "Réserver un cours",
+    "selectDate": "Choisissez une date",
+    "selectTime": "Choisissez un créneau",
+    "noSlots": "Aucun créneau disponible ce jour",
+    "sessionDetails": "Détails du cours",
+    "subject": "Matière",
+    "child": "Élève",
+    "duration": "Durée",
+    "minutes30": "30 minutes",
+    "minutes60": "60 minutes",
+    "note": "Message pour l'enseignant (optionnel)",
+    "price": "Prix",
+    "confirm": "Confirmer la réservation",
+    "summary": "Récapitulatif",
+    "teacher": "Enseignant",
+    "date": "Date",
+    "time": "Heure",
+    "bookingCreated": "Réservation créée ! Procédez au paiement.",
+    "slotTaken": "Ce créneau n'est plus disponible"
+  },
   "footer": {
     "copyright": "\u00a9 2026 EcoleVersity. Tous droits r\u00e9serv\u00e9s.",
     "about": "\u00c0 propos",

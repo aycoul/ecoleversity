@@ -260,6 +260,27 @@
     "filters": "Filters",
     "results": "{count} teacher(s) found"
   },
+  "booking": {
+    "title": "Book a session",
+    "selectDate": "Choose a date",
+    "selectTime": "Choose a time slot",
+    "noSlots": "No slots available on this day",
+    "sessionDetails": "Session details",
+    "subject": "Subject",
+    "child": "Student",
+    "duration": "Duration",
+    "minutes30": "30 minutes",
+    "minutes60": "60 minutes",
+    "note": "Message for the teacher (optional)",
+    "price": "Price",
+    "confirm": "Confirm booking",
+    "summary": "Summary",
+    "teacher": "Teacher",
+    "date": "Date",
+    "time": "Time",
+    "bookingCreated": "Booking created! Proceed to payment.",
+    "slotTaken": "This slot is no longer available"
+  },
   "footer": {
     "copyright": "\u00a9 2026 EcoleVersity. All rights reserved.",
     "about": "About",
