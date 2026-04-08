@@ -196,6 +196,7 @@
       "spending": "Dépenses",
       "payments": "Paiements",
       "dashboard": "Tableau de bord",
+      "payouts": "Versements",
       "comingSoon": "Bientôt disponible"
     }
   },
@@ -323,6 +324,55 @@
     "subject": "Mati\u00e8re : {subject}",
     "dateTime": "{date} \u00e0 {time}",
     "duration": "Dur\u00e9e : {duration} min"
+  },
+  "rating": {
+    "title": "Évaluer votre cours",
+    "howWasIt": "Comment s'est passé le cours avec {teacher} ?",
+    "stars": "{count} étoile(s)",
+    "comment": "Laissez un commentaire (optionnel)",
+    "submit": "Envoyer mon avis",
+    "thankYou": "Merci pour votre avis !",
+    "alreadyRated": "Vous avez déjà évalué ce cours"
+  },
+  "earnings": {
+    "title": "Mes revenus",
+    "totalEarned": "Total gagné",
+    "thisMonth": "Ce mois",
+    "pendingPayout": "En attente de versement",
+    "commissionNote": "EcoleVersity retient 20%. Vous recevez 80% de chaque cours.",
+    "noTransactions": "Aucune transaction",
+    "transactionHistory": "Historique des transactions",
+    "date": "Date",
+    "student": "Élève",
+    "amount": "Montant",
+    "status": "Statut",
+    "subject": "Matière"
+  },
+  "payout": {
+    "title": "Versements aux enseignants",
+    "pending": "En attente de versement",
+    "markPaid": "Marquer comme payé",
+    "paid": "Versement effectué !",
+    "noPending": "Aucun versement en attente",
+    "payoutPhone": "Numéro de paiement",
+    "provider": "Opérateur",
+    "amount": "Montant"
+  },
+  "transactions": {
+    "title": "Historique des paiements",
+    "date": "Date",
+    "teacher": "Enseignant",
+    "parent": "Parent",
+    "subject": "Matière",
+    "amount": "Montant",
+    "commission": "Commission",
+    "status": "Statut",
+    "reference": "Référence",
+    "noTransactions": "Aucune transaction",
+    "statusPending": "En attente",
+    "statusConfirmed": "Confirmé",
+    "statusFailed": "Échoué",
+    "statusRefunded": "Remboursé"
   },
   "footer": {
     "copyright": "\u00a9 2026 EcoleVersity. Tous droits r\u00e9serv\u00e9s.",

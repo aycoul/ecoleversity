@@ -196,6 +196,7 @@
       "spending": "Spending",
       "payments": "Payments",
       "dashboard": "Dashboard",
+      "payouts": "Payouts",
       "comingSoon": "Coming soon"
     }
   },
@@ -323,6 +324,55 @@
     "subject": "Subject: {subject}",
     "dateTime": "{date} at {time}",
     "duration": "Duration: {duration} min"
+  },
+  "rating": {
+    "title": "Rate your session",
+    "howWasIt": "How was your session with {teacher}?",
+    "stars": "{count} star(s)",
+    "comment": "Leave a comment (optional)",
+    "submit": "Submit my review",
+    "thankYou": "Thank you for your review!",
+    "alreadyRated": "You have already rated this session"
+  },
+  "earnings": {
+    "title": "My earnings",
+    "totalEarned": "Total earned",
+    "thisMonth": "This month",
+    "pendingPayout": "Pending payout",
+    "commissionNote": "EcoleVersity retains 20%. You receive 80% of each session.",
+    "noTransactions": "No transactions",
+    "transactionHistory": "Transaction history",
+    "date": "Date",
+    "student": "Student",
+    "amount": "Amount",
+    "status": "Status",
+    "subject": "Subject"
+  },
+  "payout": {
+    "title": "Teacher payouts",
+    "pending": "Pending payout",
+    "markPaid": "Mark as paid",
+    "paid": "Payout completed!",
+    "noPending": "No pending payouts",
+    "payoutPhone": "Payout phone",
+    "provider": "Provider",
+    "amount": "Amount"
+  },
+  "transactions": {
+    "title": "Payment history",
+    "date": "Date",
+    "teacher": "Teacher",
+    "parent": "Parent",
+    "subject": "Subject",
+    "amount": "Amount",
+    "commission": "Commission",
+    "status": "Status",
+    "reference": "Reference",
+    "noTransactions": "No transactions",
+    "statusPending": "Pending",
+    "statusConfirmed": "Confirmed",
+    "statusFailed": "Failed",
+    "statusRefunded": "Refunded"
   },
   "footer": {
     "copyright": "\u00a9 2026 EcoleVersity. All rights reserved.",
