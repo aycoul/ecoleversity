@@ -242,6 +242,24 @@
     "5": "Vendredi",
     "6": "Samedi"
   },
+  "catalog": {
+    "title": "Trouvez votre enseignant",
+    "subtitle": "Parcourez nos enseignants vérifiés",
+    "searchPlaceholder": "Rechercher un enseignant...",
+    "filterSubject": "Matière",
+    "filterGrade": "Niveau",
+    "filterCity": "Ville",
+    "allSubjects": "Toutes les matières",
+    "allGrades": "Tous les niveaux",
+    "allCities": "Toutes les villes",
+    "reset": "Réinitialiser",
+    "noResults": "Aucun enseignant trouvé",
+    "noResultsHint": "Essayez d'élargir vos critères de recherche",
+    "viewProfile": "Voir le profil",
+    "startingFrom": "À partir de {price} FCFA",
+    "filters": "Filtres",
+    "results": "{count} enseignant(s) trouvé(s)"
+  },
   "footer": {
     "copyright": "\u00a9 2026 EcoleVersity. Tous droits r\u00e9serv\u00e9s.",
     "about": "\u00c0 propos",

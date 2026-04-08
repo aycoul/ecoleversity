@@ -242,6 +242,24 @@
     "5": "Friday",
     "6": "Saturday"
   },
+  "catalog": {
+    "title": "Find your teacher",
+    "subtitle": "Browse our verified teachers",
+    "searchPlaceholder": "Search for a teacher...",
+    "filterSubject": "Subject",
+    "filterGrade": "Grade",
+    "filterCity": "City",
+    "allSubjects": "All subjects",
+    "allGrades": "All grades",
+    "allCities": "All cities",
+    "reset": "Reset",
+    "noResults": "No teachers found",
+    "noResultsHint": "Try broadening your search criteria",
+    "viewProfile": "View profile",
+    "startingFrom": "From {price} FCFA",
+    "filters": "Filters",
+    "results": "{count} teacher(s) found"
+  },
   "footer": {
     "copyright": "\u00a9 2026 EcoleVersity. All rights reserved.",
     "about": "About",
