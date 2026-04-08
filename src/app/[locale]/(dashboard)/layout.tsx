@@ -43,7 +43,7 @@ export default async function DashboardLayout({
       { href: "/dashboard/teacher", label: t("myProfile"), icon: "user" },
       { href: "/dashboard/teacher/availability", label: t("schedule"), icon: "calendar" },
       { href: "/dashboard/teacher/sessions", label: t("upcomingSessions"), icon: "video" },
-      { href: "/dashboard/teacher/courses", label: t("myCourses"), icon: "book-open" },
+      { href: "/dashboard/teacher/classes", label: t("myCourses"), icon: "book-open" },
       { href: "/dashboard/teacher/earnings", label: t("earnings"), icon: "wallet" },
       { href: "/dashboard/teacher/transactions", label: t("payments"), icon: "receipt" },
       { href: "/dashboard/teacher/messages", label: t("messages"), icon: "message-circle" },
