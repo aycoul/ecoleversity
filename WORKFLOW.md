@@ -5,8 +5,8 @@
 
 ## Current Status
 
-**Active Phase:** Phase 2 — Live Tutoring + Bootstrap Payments + Flutterwave CC
-**Active Step:** `/ship` (Phase 2 review + simplify complete)
+**Active Phase:** Phase 3 — Group Classes + Pre-Recorded Courses
+**Active Step:** `/build` (Phase 2 shipped, starting Phase 3)
 **Last Updated:** 2026-04-09
 
 ---
@@ -45,14 +45,14 @@ When a step completes, the NEXT step becomes active. When all 7 steps complete f
 | `/test` | [x] Done | 135 tests passing (28 new), found+fixed webhook signature bug |
 | `/review` | [x] Done | 2-agent review, 8 fixes (double-spend, N+1, payout validation, etc.) |
 | `/code-simplify` | [x] Done | No new dead code — Phase 2 was lean (3 new files + fixes) |
-| `/ship` | [ ] **NEXT** | Ship Phase 2, move to Phase 3 |
+| `/ship` | [x] Done | Phase 2 shipped 2026-04-09 — dual payments, Jitsi, full transaction loop |
 
 ### Phase 3: Group Classes + Pre-Recorded Courses
 | Step | Status | Notes |
 |------|--------|-------|
 | `/spec` | [x] Done | SPEC.md v3.0 — Section 9, Phase 3 |
 | `/plan` | [x] Done | `docs/superpowers/plans/2026-04-08-phase3-group-classes-courses.md` (4 tasks) |
-| `/build` | [ ] Pending | |
+| `/build` | [ ] **NEXT** | |
 | `/test` | [ ] Pending | |
 | `/review` | [ ] Pending | |
 | `/code-simplify` | [ ] Pending | |
