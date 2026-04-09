@@ -5,8 +5,8 @@
 
 **Version:** 2.0
 **Date:** 2026-04-08
-**MVP Target:** May 8, 2026 (30-day sprint)
-**Status:** ✅ v3.0 — Full platform build. Bootstrap payments. Tutoring-first. No corners cut.
+**Launch Target:** May 8, 2026 (30-day sprint)
+**Status:** ✅ v3.0 — Full platform build. Bootstrap payments. Tutoring-first. No corners cut. No MVP mindset.
 
 ---
 
@@ -20,7 +20,7 @@
 6. [Code Style & Conventions](#6-code-style--conventions)
 7. [Testing Strategy](#7-testing-strategy)
 8. [Boundaries](#8-boundaries)
-9. [MVP Scope & Phasing](#9-mvp-scope--phasing)
+9. [Scope & Phasing](#9-scope--phasing)
 10. [Payment Architecture](#10-payment-architecture)
 11. [Infrastructure & Performance](#11-infrastructure--performance)
 12. [Security & Trust](#12-security--trust)
@@ -53,14 +53,14 @@ EcoleVersity is an online tutoring platform that digitizes the "maître de maiso
 
 ### Business Model
 - **Commission:** 20-25% on every tutoring session/class/course purchase
-- **MVP Payments (Bootstrap):** Personal Orange Money + Wave SIM cards. Parent sends payment to platform number. SMS scraping detects incoming payments and auto-confirms bookings. Manual teacher payouts.
-- **Phase 2 Payments:** CinetPay aggregator API (single integration, all providers) — when transaction volume justifies it
-- **Phase 3 Payments:** Direct provider APIs (Orange Money, Wave, MTN MoMo) — when fee savings matter at scale
+- **Launch Payments (Bootstrap):** Personal Orange Money + Wave SIM cards. Parent sends payment to platform number. SMS scraping detects incoming payments and auto-confirms bookings. Manual teacher payouts.
+- **Growth Payments:** CinetPay aggregator API (single integration, all providers) — when transaction volume justifies
+- **Scale Payments:** Direct provider APIs (Orange Money, Wave, MTN MoMo) — when fee savings matter at scale
 - **Currencies:** XOF (FCFA) only at launch. EUR/USD for diaspora later.
 - **Future:** Premium family subscription, institutional/school plans
 
 ### Bootstrap Strategy — Start Informal, Formalize When Profitable
-- **No business registration at MVP.** Côte d'Ivoire taxation on registered businesses is aggressive. Start informal, prove the model, register when revenue justifies it.
+- **No business registration at launch.** Côte d'Ivoire taxation on registered businesses is aggressive. Start informal, register when revenue justifies it.
 - **Personal mobile money accounts for payments.** No API needed. Parent sends money → SMS received → platform confirms → session unlocked.
 - **Spend money on infrastructure, not paperwork.** Cloud credits, tool subscriptions, teacher recruitment > business registration fees.
 - **Formalization triggers:** Register business (RCCM) when monthly revenue exceeds 500,000 FCFA or when API integration requires it. Apply for ARTCI data protection declaration at the same time.
@@ -99,7 +99,7 @@ EcoleVersity is an online tutoring platform that digitizes the "maître de maiso
 
 ### 3.1 Content & Classes
 
-#### Pre-Recorded Courses (Content-First — MVP Priority)
+#### Pre-Recorded Courses
 - Teachers upload video lessons (max 15 min per segment for bandwidth)
 - Automatic transcoding to multiple quality levels (240p, 360p, 480p, 720p)
 - **Offline download** — students download lessons on Wi-Fi, watch anytime
@@ -198,7 +198,7 @@ EcoleVersity is an online tutoring platform that digitizes the "maître de maiso
 - Notification cascade: system checks WhatsApp first → falls back to email → falls back to SMS
 - User chooses preferred channel per notification type (override cascade)
 
-### 3.5 AI Teacher Digital Twins (Phase 2 — Design Now, Build Post-MVP)
+### 3.5 AI Teacher Digital Twins (Phase 7)
 
 #### Concept: Teachers Get Amplified, Not Replaced
 Every live class recording and pre-recorded course becomes training data for an AI "digital twin" of that teacher. The AI twin learns the teacher's style, examples, pacing, and explanations. It then delivers interactive lessons to students who can't afford or access the live teacher — while the **human teacher earns revenue from every AI twin session**.
@@ -209,7 +209,7 @@ Every live class recording and pre-recorded course becomes training data for an 
 TRAINING PIPELINE (background, automatic — no teacher action needed):
 
 Day 1: M. Koné teaches a live class on "Fractions" to 12 students
-  → Jitsi records the class automatically (already in MVP)
+  → Jitsi records the class automatically (built in Phase 2)
   → Recording saved to Cloudflare Stream
 
 Night 1: Background job runs (Supabase Edge Function, cron)
@@ -280,7 +280,7 @@ Day 2: A student in Bouaké opens "Fractions avec M. Koné (IA)"
 | **Video Clips + Chat** | Short clips from real recordings + AI chat between clips | ~$0.02 | CF Stream + Claude API | Partial (clips downloadable) |
 | **Interactive Whiteboard** | AI draws/explains on canvas step-by-step | ~$0.03 | Excalidraw + Claude API | No |
 
-Text Chat is the MVP for twins — works offline, costs almost nothing, usable on any phone with slow internet. Video Clips mode is the upgrade when bandwidth allows.
+Text Chat is the default for twins — works offline, costs almost nothing, usable on any phone with slow internet. Video Clips mode is the upgrade when bandwidth allows.
 
 #### Teacher's "Face" — No Avatar Needed
 
@@ -675,7 +675,7 @@ Beyond the standard refund policy:
 | **Hosting** | Vercel (frontend) + Supabase (backend) | Zero-ops, auto-scaling, edge network |
 | **CDN** | Cloudflare | Free tier, African PoPs (Lagos, Johannesburg) |
 | **i18n** | next-intl | Type-safe, SSR-compatible, ICU message format |
-| **Monitoring** | Sentry (errors) + Vercel Analytics (perf) | Free tiers sufficient for MVP |
+| **Monitoring** | Sentry (errors) + Vercel Analytics (perf) | Free tiers sufficient at launch |
 
 ### Architecture Diagram
 
@@ -1134,7 +1134,7 @@ ecoleversity/
 │   │   │   ├── admin.ts          # Service role client (admin ops)
 │   │   │   └── types.ts          # Generated DB types
 │   │   ├── payments/
-│   │   │   ├── bootstrap.ts      # MVP: SMS scraping + manual confirmation logic
+│   │   │   ├── bootstrap.ts      # SMS scraping + manual confirmation logic
 │   │   │   ├── confirm.ts        # Match incoming payment to pending booking
 │   │   │   └── provider.ts       # Future: CinetPay/direct API abstraction
 │   │   ├── notifications/
@@ -1309,7 +1309,7 @@ ecoleversity/
 
 ---
 
-## 9. MVP Scope & Phasing
+## 9. Scope & Phasing
 
 ### Build Philosophy
 
@@ -1434,22 +1434,23 @@ Build each phase. Test every feature before moving on. One phase at a time, but 
 
 ---
 
-### Post-Launch Roadmap (Month 2+)
+### Post-Launch Growth Roadmap
+
+These features are built in Phase 7+ after the core platform is live and generating revenue.
 
 | When | What | Trigger |
 |------|------|---------|
-| **Month 2** | CinetPay payment API (automate payments) | >50 transactions/week |
-| **Month 2** | Offline video download (PWA + IndexedDB) | User feedback confirms demand |
-| **Month 2** | SMS notifications (Africa's Talking — fallback) | Users without WhatsApp identified |
-| **Month 3** | AI Teacher Digital Twins (Phase 7) | >30 recorded sessions per top teacher |
+| **Month 2** | CinetPay payment API (automate bootstrap payments) | >50 transactions/week |
+| **Month 2** | AI Teacher Digital Twins (Phase 7) | >30 recorded sessions per top teacher |
+| **Month 2** | Offline video download (PWA + IndexedDB) | User feedback |
 | **Month 3** | USSD access for feature phones | Rural user research |
 | **Month 3** | Local languages (Baoulé, Dioula, Bété) | Expansion beyond Abidjan |
 | **Month 4** | School/institution accounts | First school partnership |
 | **Month 6** | Business registration (RCCM) + ARTCI | Revenue > 500K FCFA/month |
-| **Month 6** | Direct payment APIs | Fee savings justify engineering |
+| **Month 6** | Direct payment APIs (replace CinetPay) | Fee savings justify engineering |
 | **Month 6** | Senegal expansion | CI model proven |
 
-### Phase 6: AI Teacher Digital Twins (Post-MVP — Month 2-3)
+### Phase 7: AI Teacher Digital Twins (Post-Launch — Month 2-3)
 **Goal:** Turn every teacher into an AI-amplified educator
 
 **6A: Training Pipeline (Week 1-2)**
@@ -1486,7 +1487,7 @@ Build each phase. Test every feature before moving on. One phase at a time, but 
 
 ### Payment Evolution — 3 Stages
 
-#### Stage 1: Bootstrap (MVP — Days 1-30)
+#### Stage 1: Bootstrap (Launch — Days 1-30)
 **No API. No business registration. Personal mobile money accounts.**
 
 ```
@@ -1532,7 +1533,7 @@ Parent books a tutoring session (2,000 FCFA)
 // API matches reference to pending transaction → confirms booking
 ```
 
-#### Stage 2: CinetPay API (Month 2 — when volume > 50 transactions/week)
+#### Stage 2: CinetPay API (Post-Launch — when volume > 50 transactions/week)
 ```
 Parent books session → "Payer" button → CinetPay checkout
   → Choose: Orange Money | Wave | MTN MoMo (single API handles all)
@@ -1542,7 +1543,7 @@ Parent books session → "Payer" button → CinetPay checkout
   → Weekly automated payouts via CinetPay disbursement
 ```
 
-#### Stage 3: Direct Provider APIs (Month 6+ — when fee savings > engineering cost)
+#### Stage 3: Direct Provider APIs (Scale — when fee savings > engineering cost)
 Direct integration with Orange Money, Wave, MTN MoMo for lower fees (~1-2% vs 2.5-3.5%).
 
 ### Commission Logic
@@ -1558,7 +1559,7 @@ function calculateSplit(priceXof: number): { platform: number; teacher: number }
 // Session at 2,000 FCFA: platform keeps 400, teacher gets 1,600
 ```
 
-### Refund Policy (MVP — Simple)
+### Refund Policy
 - **Before session:** Full refund (admin sends money back manually)
 - **After session:** No refund (dispute resolution via admin)
 - **Stage 2+:** Wallet credits for refunds, real money refunds as option
@@ -1609,22 +1610,22 @@ Cloudflare (Free tier)
 └── CDN: static assets, African PoPs
 ```
 
-### Cost Estimates (MVP / Month)
+### Cost Estimates (Monthly)
 
 | Service | Free Tier | Estimated Cost |
 |---------|-----------|---------------|
-| Vercel | 100GB bandwidth | $0 (MVP) → $20/mo |
-| Supabase | 500MB DB, 1GB storage | $0 (MVP) → $25/mo |
-| Cloudflare R2 | 10GB storage, 10M reads | $0 (MVP) → $5/mo |
+| Vercel | 100GB bandwidth | $0 (launch) → $20/mo |
+| Supabase | 500MB DB, 1GB storage | $0 (launch) → $25/mo |
+| Cloudflare R2 | 10GB storage, 10M reads | $0 (launch) → $5/mo |
 | Cloudflare Stream | — | $5/mo + $1/1000 min |
 | Orange Money API | — | Direct transaction fees (~1-2%) |
 | Wave API | — | Direct transaction fees (~1%) |
 | MTN MoMo API | — | Direct transaction fees (~1-2%) |
 | WhatsApp Business API (360dialog) | — | ~$0.005-0.03/msg (template) |
 | Africa's Talking SMS (fallback only) | — | ~3 FCFA/SMS (~$0.005) |
-| Resend | 3000 emails/mo | $0 (MVP) |
-| PostHog | 1M events/mo | $0 (MVP) |
-| **Total MVP** | | **~$10-30/month** |
+| Resend | 3000 emails/mo | $0 (launch) |
+| PostHog | 1M events/mo | $0 (launch) |
+| **Total at launch** | | **~$10-30/month** |
 
 ---
 
@@ -1712,7 +1713,7 @@ Future: automated ID verification via AI, background check integration
 
 ## 14. Acceptance Criteria
 
-The MVP is ready to ship when:
+The platform is ready to ship when:
 
 ### Launch Criteria — Platform Ships When ALL of These Work
 
@@ -1763,14 +1764,14 @@ The MVP is ready to ship when:
 - [ ] AI content moderation active
 - [ ] 10+ real tutoring sessions completed without issues
 
-### Post-Launch Features
-- [ ] AI Teacher Digital Twins (Month 3)
-- [ ] Offline video download (Month 2)
-- [ ] SMS/USSD access (Month 3)
-- [ ] Local languages: Baoulé, Dioula, Bété (Month 3)
-- [ ] School/institution accounts (Month 4)
-- [ ] CinetPay API → Direct APIs (Month 2 → Month 6)
-- [ ] Business registration when profitable (Month 6)
+### Post-Launch (Phase 7+)
+- [ ] AI Teacher Digital Twins
+- [ ] Offline video download (PWA + IndexedDB)
+- [ ] SMS/USSD access for feature phones
+- [ ] Local languages: Baoulé, Dioula, Bété
+- [ ] School/institution accounts
+- [ ] CinetPay API → Direct payment APIs
+- [ ] Business registration when profitable
 
 ---
 
@@ -1778,11 +1779,11 @@ The MVP is ready to ship when:
 
 > Previously "Open Questions" — all resolved on 2026-04-08.
 
-### 1. Video Hosting — Cloudflare Stream (MVP)
+### 1. Video Hosting — Cloudflare Stream
 **Decision:** Start with Cloudflare Stream ($5/mo + $1/1,000 min viewed). Simple, no ops burden, adaptive bitrate out of the box.
 **Revisit trigger:** At ~1,000 videos or when costs exceed $50/mo, evaluate self-hosted HLS with FFmpeg on a VPS.
 
-### 2. Jitsi Hosting — JaaS Free Tier (MVP)
+### 2. Jitsi Hosting — JaaS Free Tier
 **Decision:** Start with JaaS (Jitsi as a Service) free tier (25 users/month). Sufficient for beta and early growth.
 **Revisit trigger:** When live class usage exceeds free tier limits, migrate to self-hosted Jitsi on a VPS (~$10/mo, unlimited users).
 
