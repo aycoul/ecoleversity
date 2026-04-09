@@ -37,44 +37,62 @@ export async function GET() {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // For each conversation, get last message and unread count
-    const enriched = await Promise.all(
-      (conversations ?? []).map(async (conv) => {
-        const { data: lastMsg } = await supabase
+    const convIds = (conversations ?? []).map((c) => c.id);
+
+    // Batch: get last message per conversation (1 query instead of N)
+    const { data: allMessages } = convIds.length > 0
+      ? await supabase
           .from("messages")
-          .select("content, content_flagged, created_at, sender_id")
-          .eq("conversation_id", conv.id)
+          .select("conversation_id, content, content_flagged, created_at, sender_id")
+          .in("conversation_id", convIds)
           .order("created_at", { ascending: false })
-          .limit(1)
-          .maybeSingle();
+      : { data: [] };
 
-        const { count: unreadCount } = await supabase
+    // Build last-message map (first message per conversation_id due to DESC order)
+    type MessageRow = { conversation_id: string; content: string; content_flagged: boolean; created_at: string; sender_id: string };
+    const lastMessageMap = new Map<string, MessageRow>();
+    for (const msg of allMessages ?? []) {
+      if (!lastMessageMap.has(msg.conversation_id)) {
+        lastMessageMap.set(msg.conversation_id, msg);
+      }
+    }
+
+    // Batch: count unread per conversation (1 query instead of N)
+    const { data: unreadMessages } = convIds.length > 0
+      ? await supabase
           .from("messages")
-          .select("id", { count: "exact", head: true })
-          .eq("conversation_id", conv.id)
+          .select("conversation_id")
+          .in("conversation_id", convIds)
           .neq("sender_id", user.id)
-          .is("read_at", null);
+          .is("read_at", null)
+      : { data: [] };
 
-        const other =
-          conv.participant_1 === user.id ? conv.p2 : conv.p1;
+    const unreadMap = new Map<string, number>();
+    for (const msg of unreadMessages ?? []) {
+      unreadMap.set(msg.conversation_id, (unreadMap.get(msg.conversation_id) ?? 0) + 1);
+    }
 
-        return {
-          id: conv.id,
-          other,
-          lastMessage: lastMsg
-            ? {
-                content: lastMsg.content_flagged
-                  ? "[contenu bloqué]"
-                  : lastMsg.content,
-                createdAt: lastMsg.created_at,
-                senderId: lastMsg.sender_id,
-              }
-            : null,
-          unreadCount: unreadCount ?? 0,
-          updatedAt: conv.updated_at,
-        };
-      })
-    );
+    // Enrich conversations without additional queries
+    const enriched = (conversations ?? []).map((conv) => {
+      const other = conv.participant_1 === user.id ? conv.p2 : conv.p1;
+      const lastMsg = lastMessageMap.get(conv.id);
+
+      return {
+        id: conv.id,
+        other,
+        lastMessage: lastMsg
+          ? {
+              content: lastMsg.content_flagged
+                ? "[contenu bloqué]"
+                : lastMsg.content,
+              createdAt: lastMsg.created_at,
+              senderId: lastMsg.sender_id,
+            }
+          : null,
+        unreadCount: unreadMap.get(conv.id) ?? 0,
+        updatedAt: conv.updated_at,
+      };
+    });
 
     return NextResponse.json(enriched);
   } catch {

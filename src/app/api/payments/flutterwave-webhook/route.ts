@@ -59,19 +59,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Amount mismatch" }, { status: 400 });
     }
 
-    // Confirm the transaction
-    const { error: updateError } = await supabase
+    // Confirm the transaction atomically (prevents double-spend race)
+    const { data: updated, error: updateError } = await supabase
       .from("transactions")
       .update({
         status: "confirmed",
         payment_provider: "flutterwave",
         updated_at: new Date().toISOString(),
       })
-      .eq("id", transaction.id);
+      .eq("id", transaction.id)
+      .eq("status", "pending")
+      .select("id")
+      .maybeSingle();
 
     if (updateError) {
       console.error("[flutterwave-webhook] Update error:", updateError);
       return NextResponse.json({ error: "Failed to confirm" }, { status: 500 });
+    }
+
+    if (!updated) {
+      // Another confirmation (SMS or admin) beat us — idempotent
+      return NextResponse.json({ status: "already_confirmed" });
     }
 
     // Fetch teacher name for notification

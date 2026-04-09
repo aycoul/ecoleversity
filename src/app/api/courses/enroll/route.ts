@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
         currency: "XOF",
         commission_amount: commission,
         teacher_amount: teacherAmount,
-        payment_provider: "orange_money",
+        payment_provider: null,
         payment_reference: paymentReference,
         status: "pending",
       })

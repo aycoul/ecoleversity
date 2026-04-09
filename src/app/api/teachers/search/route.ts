@@ -68,7 +68,8 @@ export async function GET(request: NextRequest) {
 
     const { data: teachers, error } = await query
       .order("rating_avg", { ascending: false })
-      .order("rating_count", { ascending: false });
+      .order("rating_count", { ascending: false })
+      .limit(20);
 
     if (error) {
       console.error("Teacher search error:", error);

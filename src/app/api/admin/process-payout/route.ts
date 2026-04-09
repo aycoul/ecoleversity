@@ -49,6 +49,39 @@ export async function POST(request: NextRequest) {
     const { teacherId, amountXof, periodStart, periodEnd } = parsed.data;
     const adminSupabase = createAdminClient();
 
+    // Validate payout amount against confirmed transactions
+    const { data: earnings } = await adminSupabase
+      .from("transactions")
+      .select("teacher_amount")
+      .eq("teacher_id", teacherId)
+      .eq("status", "confirmed")
+      .gte("created_at", periodStart)
+      .lte("created_at", periodEnd);
+
+    const totalEarned = (earnings ?? []).reduce((sum, t) => sum + (t.teacher_amount ?? 0), 0);
+
+    // Check no existing payout overlaps this period
+    const { count: existingPayouts } = await adminSupabase
+      .from("teacher_payouts")
+      .select("id", { count: "exact", head: true })
+      .eq("teacher_id", teacherId)
+      .gte("period_end", periodStart)
+      .lte("period_start", periodEnd);
+
+    if ((existingPayouts ?? 0) > 0) {
+      return NextResponse.json(
+        { error: "Un versement existe déjà pour cette période" },
+        { status: 409 }
+      );
+    }
+
+    if (amountXof > totalEarned) {
+      return NextResponse.json(
+        { error: `Montant demandé (${amountXof}) dépasse les gains confirmés (${totalEarned})`, earned: totalEarned },
+        { status: 400 }
+      );
+    }
+
     // Fetch teacher payout info
     const { data: teacherProfile } = await adminSupabase
       .from("teacher_profiles")

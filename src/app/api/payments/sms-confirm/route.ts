@@ -110,15 +110,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Update transaction status
-    const { error: updateError } = await supabase
+    // Update transaction status atomically (prevents double-spend race)
+    const { data: updated, error: updateError } = await supabase
       .from("transactions")
       .update({
         status: "confirmed",
         payment_provider: provider.toLowerCase(),
         updated_at: new Date().toISOString(),
       })
-      .eq("id", transaction.id);
+      .eq("id", transaction.id)
+      .eq("status", "pending")
+      .select("id")
+      .maybeSingle();
 
     if (updateError) {
       console.error("Error updating transaction:", updateError);
@@ -128,6 +131,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!updated) {
+      return NextResponse.json({
+        data: { transactionId: transaction.id, status: "already_confirmed" },
+      });
+    }
+
+    // Fetch teacher name for notification
+    const { data: teacherProfile } = await supabase
+      .from("profiles")
+      .select("display_name")
+      .eq("id", transaction.teacher_id)
+      .single();
+
     // Fire notification asynchronously — don't block the response
     if (transaction.parent_id) {
       sendNotification({
@@ -135,7 +151,7 @@ export async function POST(request: NextRequest) {
         userId: transaction.parent_id,
         data: {
           amount: transaction.amount_xof,
-          teacherName: transaction.teacher_id ?? '',
+          teacherName: teacherProfile?.display_name ?? '',
           reference,
           provider,
         },
