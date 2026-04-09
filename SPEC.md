@@ -649,6 +649,83 @@ Beyond the standard refund policy:
 - **Baoulé, Dioula, Bété** (Phase 2 — UI labels, not full content)
 - i18n from day one using `next-intl`
 
+### 3.13 Admin AI Agent System — "The Operations Team"
+
+The solo admin (founder) is augmented by 5 AI agents that handle routine operations autonomously, with human escalation as backup. All agents run on a dedicated VPS (Node.js + PM2), share the Supabase database, and use Claude API for decisions.
+
+#### Architecture Principles
+- **Confidence-gated decisions:** Every agent action has a confidence score (0-100). Above threshold → auto-act + audit log. Below threshold → escalate to admin via WhatsApp with context + one-tap approve/reject.
+- **Human-in-the-loop always available:** Admin can override any agent decision. Agent dashboard shows all actions taken and pending escalations.
+- **Audit trail:** Every agent decision logged to `agent_audit_log` table (agent name, action, confidence, outcome, timestamp).
+- **Portable:** Self-contained Node.js service with PM2. All config via env vars. Docker-ready for VPS migration.
+
+#### Agent 1: Verification Agent ("Vérificateur")
+| Aspect | Detail |
+|--------|--------|
+| **Trigger** | `teacher_profiles.verification_status` changes to `id_submitted`, `diploma_submitted`, or `video_submitted` |
+| **Auto-actions** | Check document clarity (image resolution, readable text), verify video length ≥30s and face visible, cross-check name consistency across documents |
+| **Confidence threshold** | ≥85 → auto-approve step, notify teacher. <85 → send to admin with annotated issues |
+| **Escalation** | WhatsApp to admin: "Nouveau dossier enseignant: [name]. Score: [X]%. [Issues]. Approuver / Rejeter?" |
+| **Fallback** | If agent down, documents queue normally — admin reviews manually from dashboard |
+
+#### Agent 2: Payment Agent ("Caissier")
+| Aspect | Detail |
+|--------|--------|
+| **Trigger** | New SMS received (scraping service), Flutterwave webhook, or transaction stuck >15min |
+| **Auto-actions** | Match SMS amount + reference to pending transaction, confirm Flutterwave payments, detect duplicate payments, flag suspicious patterns (same phone, many small amounts) |
+| **Confidence threshold** | ≥95 → auto-confirm payment + trigger notifications. <95 → escalate with context |
+| **Escalation** | WhatsApp: "Paiement reçu [amount] FCFA de [phone]. Booking [ref] match: [score]%. Confirmer / Rejeter?" |
+| **Fallback** | Admin confirms manually from payment dashboard (existing feature) |
+
+#### Agent 3: Moderation Agent ("Gardien")
+| Aspect | Detail |
+|--------|--------|
+| **Trigger** | New message, review, or profile update with `content_flagged = true` or `moderation_status = 'pending'` |
+| **Auto-actions** | Claude Haiku analyzes content in context (education platform, minors present). Checks: profanity, harassment, contact sharing attempts, inappropriate content. Considers French + Ivorian slang |
+| **Confidence threshold** | ≥90 clean → auto-approve. ≥90 violation → auto-reject + notify user. Between → escalate |
+| **Escalation** | WhatsApp: "Contenu signalé de [user]: '[excerpt]'. Catégorie: [type]. Approuver / Supprimer?" |
+| **Fallback** | Content stays in `pending` status until admin reviews |
+
+#### Agent 4: Support Agent ("Ama+")
+| Aspect | Detail |
+|--------|--------|
+| **Trigger** | Ama chatbot escalation, support ticket created, or ticket idle >2h |
+| **Auto-actions** | Look up user's bookings/payments/profile to resolve common issues. Can: check payment status, explain refund policy, help reschedule, issue wallet credits ≤2000 FCFA, resend confirmation notifications |
+| **Confidence threshold** | ≥80 → resolve + close ticket. <80 → prepare summary for admin with recommended action |
+| **Escalation** | WhatsApp: "Ticket #[id] de [user]: [summary]. Action recommandée: [action]. Résoudre / Escalader?" |
+| **Fallback** | Ticket stays open, user notified of 24h SLA |
+
+#### Agent 5: Analytics Agent ("Tableau de Bord")
+| Aspect | Detail |
+|--------|--------|
+| **Trigger** | Daily at 8:00 AM WAT (Abidjan time), and on-demand via admin command |
+| **Auto-actions** | Generate daily digest: new signups, revenue, failed payments, pending verifications, session completion rate, Ama resolution rate, agent performance (auto-resolved vs escalated) |
+| **Delivery** | WhatsApp daily message + admin dashboard summary page |
+| **Alerts** | Immediate WhatsApp for: payment failure rate >20%, 0 signups in 24h, agent error, database connection issue |
+| **Fallback** | Admin checks Supabase dashboard directly |
+
+#### Agent Dashboard (Admin)
+- Real-time view of all 5 agents: status (running/stopped/error), actions today, escalation queue
+- One-click approve/reject for all pending escalations
+- Agent performance: accuracy rate, false positive rate, avg response time
+- Kill switch: disable any agent instantly (falls back to manual)
+
+#### Database Additions
+```
+agent_audit_log (
+  id, agent_name, action_type, target_table, target_id,
+  confidence_score, decision, details_json,
+  escalated, escalation_resolved_by, escalation_resolved_at,
+  created_at
+)
+
+agent_config (
+  id, agent_name, is_active, confidence_threshold,
+  escalation_whatsapp_number, settings_json,
+  updated_at
+)
+```
+
 ---
 
 ## 4. Technical Architecture
@@ -1360,7 +1437,11 @@ Build each phase. Test every feature before moving on. One phase at a time, but 
 - [ ] Commission tracking (20-25%)
 - [ ] Transaction history for parents and teachers
 
-**Test:** Full loop — parent books, pays via Orange Money, joins Jitsi call with teacher, rates afterward. Teacher sees earnings.
+- [ ] **Agent framework:** shared Node.js service on VPS — event router, Claude API client, confidence scoring, WhatsApp escalation, audit logging
+- [ ] **Payment Agent ("Caissier"):** auto-matches SMS/Flutterwave payments to bookings, confirms above 95% confidence, escalates below
+- [ ] Agent audit log table + agent config table migration
+
+**Test:** Full loop — parent books, pays via Orange Money, Payment Agent auto-confirms, joins Jitsi call with teacher, rates afterward. Teacher sees earnings.
 
 ### Phase 3: Group Classes + Pre-Recorded Courses (Days 13-18)
 **Goal:** Both class formats live. Teachers earn from live AND passive content.
@@ -1394,7 +1475,10 @@ Build each phase. Test every feature before moving on. One phase at a time, but 
 - [ ] Notification preferences: user chooses preferred channel, cascade logic (WhatsApp → email fallback)
 - [ ] Teacher following: parents follow teachers → notified of new classes/courses
 
-**Test:** Book a session → get WhatsApp confirmation + email receipt + push notification. Message a teacher → contact detection blocks phone numbers.
+- [ ] **Moderation Agent ("Gardien"):** Claude Haiku reviews flagged messages/content, auto-approves/rejects with confidence scoring
+- [ ] **Verification Agent ("Vérificateur"):** pre-screens teacher documents, auto-approves clear cases, escalates edge cases via WhatsApp
+
+**Test:** Book a session → get WhatsApp confirmation + email receipt + push notification. Message a teacher → contact detection blocks phone numbers. Verification Agent processes a teacher submission.
 
 ### Phase 5: Engagement + Trust (Days 24-28)
 **Goal:** Exam prep, referrals, support, safety, certificates — everything that builds trust and retention.
@@ -1416,7 +1500,11 @@ Build each phase. Test every feature before moving on. One phase at a time, but 
 - [ ] Calendar integration: .ics download + Google/Apple Calendar feed
 - [ ] Parental progress dashboard: all children, sessions, spending, progress
 
-**Test:** Full trust loop — report content, get support from Ama, earn referral credit, use wallet to book, get certificate.
+- [ ] **Support Agent ("Ama+"):** enhanced Ama that can look up user data, resolve common issues, issue small wallet credits, close tickets autonomously
+- [ ] **Analytics Agent ("Tableau de Bord"):** daily digest via WhatsApp + admin dashboard, real-time alerts for anomalies
+- [ ] **Agent Dashboard:** admin page showing all 5 agents' status, actions, escalation queue, kill switches
+
+**Test:** Full trust loop — report content (Moderation Agent handles), get support from Ama+ (auto-resolves), earn referral credit, use wallet to book, get certificate. Admin receives daily digest.
 
 ### Phase 6: Polish + Launch (Days 29-30)
 **Goal:** Real-device testing, performance, security, go live.

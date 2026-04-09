@@ -72,6 +72,8 @@ vercel --prod                      # Deploy to production
 7. **RLS for authorization** — Supabase Row-Level Security on every table.
 8. **Contact blocking** — Messages scanned for phone numbers, emails, social handles. No images in DMs. Teachers message parents only, never learner profiles.
 9. **AI Twin architecture** — All live session recordings saved to Cloudflare Stream. Full schema supports twin training pipeline from day one.
+10. **AI Operations Team** — 5 AI agents run on VPS (Payment, Verification, Moderation, Support, Analytics). Confidence-gated: auto-act above threshold, escalate to admin via WhatsApp below. Human override always available. All decisions logged to `agent_audit_log`.
+11. **Portable backend** — VPS services are self-contained (PM2 + env-only config + Docker-ready). Easy to move to a dedicated VPS later.
 
 ### Core Transaction Loop
 
@@ -100,6 +102,16 @@ src/
 ├── hooks/                 # React hooks
 ├── types/                 # TypeScript type definitions
 └── i18n/                  # Internationalization (French)
+
+agents/                    # VPS service — AI operations team (separate deploy)
+├── src/
+│   ├── framework/         # Shared: event router, confidence scoring, escalation, audit
+│   ├── agents/            # payment.ts, verification.ts, moderation.ts, support.ts, analytics.ts
+│   └── index.ts           # Entry point — starts all agents
+├── ecosystem.config.cjs   # PM2 config
+├── Dockerfile             # For VPS migration
+├── .env.example
+└── scripts/deploy.sh      # Single deploy script
 ```
 
 ## Conventions
