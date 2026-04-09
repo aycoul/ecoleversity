@@ -18,40 +18,55 @@
     "back": "Retour"
   },
   "landing": {
+    "badge": "Plateforme #1 de tutorat en Côte d'Ivoire",
     "hero": {
       "title": "Le meilleur maître de maison, en ligne",
       "subtitle": "Trouvez un enseignant qualifié pour votre enfant. Cours particuliers, cours de groupe, préparation aux examens — où que vous soyez en Côte d'Ivoire.",
       "ctaParent": "Je cherche un enseignant",
-      "ctaTeacher": "Je suis enseignant"
+      "ctaTeacher": "Je suis enseignant",
+      "trustVerified": "Enseignants vérifiés",
+      "trustPayment": "Orange Money & Wave",
+      "trustLive": "Cours en direct"
     },
     "howItWorks": {
+      "sectionLabel": "Simple & rapide",
       "title": "Comment ça marche ?",
       "step1Title": "Trouvez un enseignant",
-      "step1Desc": "Parcourez notre catalogue d'enseignants vérifiés par matière, classe et ville.",
+      "step1Desc": "Parcourez notre catalogue d'enseignants vérifiés — CNI + diplôme contrôlés. Filtrez par matière, classe et ville.",
       "step2Title": "Réservez un cours",
-      "step2Desc": "Choisissez un créneau horaire et payez avec Orange Money ou Wave.",
+      "step2Desc": "Choisissez un créneau et payez en 2 minutes avec Orange Money ou Wave. Confirmation instantanée.",
       "step3Title": "Apprenez en direct",
-      "step3Desc": "Votre enfant rejoint le cours en vidéo depuis votre téléphone ou tablette."
+      "step3Desc": "Votre enfant rejoint le cours en vidéo depuis votre téléphone. Ça fonctionne même en 3G.",
+      "verified": "CNI + diplôme vérifiés",
+      "verifiedDesc": "Chaque enseignant passe par une vérification en 3 étapes : pièce d'identité, diplôme, et vidéo d'introduction. Pas de raccourcis.",
+      "mobile": "Optimisé pour Abidjan",
+      "mobileDesc": "Conçu pour les téléphones Android sur réseau 3G. Pages légères, vidéo adaptative, fonctionne partout en Côte d'Ivoire.",
+      "payment": "Orange Money ou Wave",
+      "paymentDesc": "Envoyez le montant, c'est confirmé en 2 minutes. Pas de carte bancaire nécessaire. Les enseignants sont payés chaque semaine.",
+      "safe": "Vos enfants protégés",
+      "safeDesc": "Les enseignants ne voient jamais les coordonnées de vos enfants. Pas de numéros, pas d'emails, pas de photos dans les messages."
     },
-    "features": {
-      "title": "Pourquoi écoleVersity ?",
-      "verified": "Enseignants vérifiés",
-      "verifiedDesc": "Chaque enseignant est vérifié : CNI, diplôme et vidéo d'introduction.",
-      "mobile": "100% mobile",
-      "mobileDesc": "Conçu pour votre téléphone. Fonctionne même avec une connexion lente.",
-      "payment": "Paiement simple",
-      "paymentDesc": "Payez avec Orange Money ou Wave. Les enseignants sont payés chaque semaine.",
-      "safe": "Espace sécurisé",
-      "safeDesc": "Toutes les communications restent sur la plateforme. Vos enfants sont protégés."
+    "dreams": {
+      "sectionLabel": "L'avenir commence ici",
+      "title": "Ils peuvent tout devenir",
+      "subtitle": "Chaque enfant a un potentiel immense. Avec les bons enseignants, il n'y a pas de limites.",
+      "futureDoctor": "Demain Médecin",
+      "futureEngineer": "Demain Ingénieure",
+      "futureEntrepreneur": "Demain Entrepreneur",
+      "todayStudent": "Aujourd'hui élève"
     },
-    "stats": {
-      "teachers": "enseignants",
-      "students": "élèves",
-      "sessions": "cours dispensés"
+    "testimonial": {
+      "sectionLabel": "Ils nous font confiance",
+      "quote": "J'enseigne les mathématiques depuis 8 ans à Abidjan. Avec écoleVersity, je peux toucher des élèves dans toute la Côte d'Ivoire, même à Bouaké et San-Pédro. La plateforme gère tout — les paiements, les rappels, la sécurité. Je me concentre sur l'enseignement.",
+      "author": "Mme Koné Aminata",
+      "role": "Professeure de Mathématiques, Abidjan",
+      "quoteStudent": "Ma fille préparait le BEPC et avait du mal en physique-chimie. En 3 semaines de cours sur écoleVersity, elle a remonté sa moyenne de 8 à 14. Le professeur était patient et expliquait tout clairement.",
+      "authorStudent": "M. Touré Ibrahim",
+      "roleStudent": "Parent de 2 enfants, Yamoussoukro"
     },
     "cta": {
-      "title": "Commencez maintenant",
-      "subtitle": "Rejoignez écoleVersity et offrez à votre enfant le meilleur accompagnement scolaire."
+      "title": "Offrez le meilleur à votre enfant",
+      "subtitle": "Rejoignez écoleVersity et donnez à votre enfant accès aux meilleurs enseignants de Côte d'Ivoire — depuis votre téléphone."
     }
   },
   "auth": {

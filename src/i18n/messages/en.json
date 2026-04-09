@@ -18,40 +18,55 @@
     "back": "Back"
   },
   "landing": {
+    "badge": "#1 tutoring platform in Ivory Coast",
     "hero": {
       "title": "The best home tutor, online",
       "subtitle": "Find a qualified teacher for your child. Private lessons, group classes, exam preparation — wherever you are in Ivory Coast.",
       "ctaParent": "I'm looking for a teacher",
-      "ctaTeacher": "I'm a teacher"
+      "ctaTeacher": "I'm a teacher",
+      "trustVerified": "Verified teachers",
+      "trustPayment": "Orange Money & Wave",
+      "trustLive": "Live classes"
     },
     "howItWorks": {
+      "sectionLabel": "Simple & fast",
       "title": "How does it work?",
       "step1Title": "Find a teacher",
-      "step1Desc": "Browse our catalog of verified teachers by subject, grade, and city.",
+      "step1Desc": "Browse our catalog of verified teachers — ID + diploma checked. Filter by subject, grade, and city.",
       "step2Title": "Book a class",
-      "step2Desc": "Choose a time slot and pay with Orange Money or Wave.",
+      "step2Desc": "Choose a time slot and pay in 2 minutes with Orange Money or Wave. Instant confirmation.",
       "step3Title": "Learn live",
-      "step3Desc": "Your child joins the video class from your phone or tablet."
+      "step3Desc": "Your child joins the video class from your phone. Works even on 3G.",
+      "verified": "ID + diploma verified",
+      "verifiedDesc": "Every teacher goes through a 3-step verification: national ID, diploma, and introduction video. No shortcuts.",
+      "mobile": "Optimized for Abidjan",
+      "mobileDesc": "Built for Android phones on 3G networks. Lightweight pages, adaptive video, works everywhere in Ivory Coast.",
+      "payment": "Orange Money or Wave",
+      "paymentDesc": "Send the amount, confirmed in 2 minutes. No credit card needed. Teachers are paid every week.",
+      "safe": "Your children protected",
+      "safeDesc": "Teachers never see your children's contact information. No phone numbers, no emails, no photos in messages."
     },
-    "features": {
-      "title": "Why écoleVersity?",
-      "verified": "Verified teachers",
-      "verifiedDesc": "Every teacher is verified: national ID, diploma, and introduction video.",
-      "mobile": "100% mobile",
-      "mobileDesc": "Designed for your phone. Works even with a slow connection.",
-      "payment": "Simple payment",
-      "paymentDesc": "Pay with Orange Money or Wave. Teachers are paid every week.",
-      "safe": "Safe environment",
-      "safeDesc": "All communications stay on the platform. Your children are protected."
+    "dreams": {
+      "sectionLabel": "The future starts here",
+      "title": "They can become anything",
+      "subtitle": "Every child has immense potential. With the right teachers, there are no limits.",
+      "futureDoctor": "Tomorrow's Doctor",
+      "futureEngineer": "Tomorrow's Engineer",
+      "futureEntrepreneur": "Tomorrow's Entrepreneur",
+      "todayStudent": "Today's student"
     },
-    "stats": {
-      "teachers": "teachers",
-      "students": "students",
-      "sessions": "sessions held"
+    "testimonial": {
+      "sectionLabel": "They trust us",
+      "quote": "I've been teaching math for 8 years in Abidjan. With écoleVersity, I can reach students across all of Ivory Coast, even in Bouaké and San-Pédro. The platform handles everything — payments, reminders, safety. I just focus on teaching.",
+      "author": "Mrs. Koné Aminata",
+      "role": "Mathematics Teacher, Abidjan",
+      "quoteStudent": "My daughter was preparing for BEPC and struggling with physics. In 3 weeks of classes on écoleVersity, she raised her average from 8 to 14. The teacher was patient and explained everything clearly.",
+      "authorStudent": "Mr. Touré Ibrahim",
+      "roleStudent": "Parent of 2 children, Yamoussoukro"
     },
     "cta": {
-      "title": "Get started now",
-      "subtitle": "Join écoleVersity and give your child the best academic support."
+      "title": "Give your child the best",
+      "subtitle": "Join écoleVersity and give your child access to the best teachers in Ivory Coast — from your phone."
     }
   },
   "auth": {
