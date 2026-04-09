@@ -5,8 +5,8 @@
 
 ## Current Status
 
-**Active Phase:** Phase 1 — Foundation
-**Active Step:** `/ship` (code simplified, ready to ship Phase 1)
+**Active Phase:** Phase 2 — Live Tutoring + Bootstrap Payments + Flutterwave CC
+**Active Step:** `/build` (Phase 1 shipped, starting Phase 2 implementation)
 **Last Updated:** 2026-04-09
 
 ---
@@ -34,14 +34,14 @@ When a step completes, the NEXT step becomes active. When all 7 steps complete f
 | `/test` | [x] Done | 92 tests passing — utils, i18n, auth, booking, SMS, domain, DB verified |
 | `/review` | [x] Done | 4-agent review (security, correctness, performance, testing) — 8 critical fixes applied |
 | `/code-simplify` | [x] Done | Removed 383 LOC: dead UI components, duplicate logic, unused dep |
-| `/ship` | [ ] **NEXT** | Ship = phase complete, move to Phase 2 |
+| `/ship` | [x] Done | Phase 1 shipped 2026-04-09 — foundation live on Vercel |
 
 ### Phase 2: Live Tutoring + Bootstrap Payments + Flutterwave CC
 | Step | Status | Notes |
 |------|--------|-------|
 | `/spec` | [x] Done | SPEC.md v3.0 — Section 9, Phase 2 |
 | `/plan` | [x] Done | `docs/superpowers/plans/2026-04-08-phase2-live-tutoring-payments.md` (6 tasks) |
-| `/build` | [ ] Pending | |
+| `/build` | [ ] **NEXT** | |
 | `/test` | [ ] Pending | |
 | `/review` | [ ] Pending | |
 | `/code-simplify` | [ ] Pending | |
