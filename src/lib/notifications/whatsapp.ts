@@ -65,15 +65,7 @@ export async function sendWhatsApp(
   }
 }
 
-async function getUserPhone(userId: string): Promise<string | null> {
-  const supabase = createAdminClient();
-  const { data } = await supabase
-    .from('profiles')
-    .select('phone')
-    .eq('id', userId)
-    .single();
-  return data?.phone ?? null;
-}
+import { getUserContactInfo } from './user-profile';
 
 /**
  * Map a NotificationPayload to a WhatsApp template call.
@@ -82,7 +74,7 @@ async function getUserPhone(userId: string): Promise<string | null> {
 export async function sendWhatsAppNotification(
   payload: NotificationPayload,
 ): Promise<boolean> {
-  const phone = await getUserPhone(payload.userId);
+  const phone = (await getUserContactInfo(payload.userId)).phone;
   if (!phone) {
     console.warn(`[whatsapp] No phone for user ${payload.userId}`);
     return false;

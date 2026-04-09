@@ -120,7 +120,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Recalculate teacher rating: new_avg = ((old_avg * old_count) + new_rating) / (old_count + 1)
+    // Recalculate ratings for both teacher and class
+    const recalcRating = (oldAvg: number, oldCount: number, newRating: number) => {
+      const newCount = oldCount + 1;
+      return { newAvg: Math.round(((oldAvg * oldCount + newRating) / newCount) * 10) / 10, newCount };
+    };
+
     const { data: teacherProfile } = await adminSupabase
       .from("teacher_profiles")
       .select("rating_avg, rating_count")
@@ -128,21 +133,10 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (teacherProfile) {
-      const oldAvg = Number(teacherProfile.rating_avg) || 0;
-      const oldCount = teacherProfile.rating_count || 0;
-      const newCount = oldCount + 1;
-      const newAvg = ((oldAvg * oldCount) + rating) / newCount;
-
-      await adminSupabase
-        .from("teacher_profiles")
-        .update({
-          rating_avg: Math.round(newAvg * 10) / 10,
-          rating_count: newCount,
-        })
-        .eq("id", liveClass.teacher_id);
+      const { newAvg, newCount } = recalcRating(Number(teacherProfile.rating_avg) || 0, teacherProfile.rating_count || 0, rating);
+      await adminSupabase.from("teacher_profiles").update({ rating_avg: newAvg, rating_count: newCount }).eq("id", liveClass.teacher_id);
     }
 
-    // Update live_classes rating
     const { data: classRating } = await adminSupabase
       .from("live_classes")
       .select("rating_avg, rating_count")
@@ -150,18 +144,8 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (classRating) {
-      const oldAvg = Number(classRating.rating_avg) || 0;
-      const oldCount = classRating.rating_count || 0;
-      const newCount = oldCount + 1;
-      const newAvg = ((oldAvg * oldCount) + rating) / newCount;
-
-      await adminSupabase
-        .from("live_classes")
-        .update({
-          rating_avg: Math.round(newAvg * 10) / 10,
-          rating_count: newCount,
-        })
-        .eq("id", liveClassId);
+      const { newAvg, newCount } = recalcRating(Number(classRating.rating_avg) || 0, classRating.rating_count || 0, rating);
+      await adminSupabase.from("live_classes").update({ rating_avg: newAvg, rating_count: newCount }).eq("id", liveClassId);
     }
 
     // Notify the teacher about the new review

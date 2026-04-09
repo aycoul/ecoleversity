@@ -23,25 +23,7 @@ const FROM = process.env.NOTIFICATION_FROM_EMAIL
   ? `écoleVersity <${process.env.NOTIFICATION_FROM_EMAIL}>`
   : 'écoleVersity <notifications@ecoleversity.com>';
 
-async function getUserEmail(userId: string): Promise<string | null> {
-  const supabase = createAdminClient();
-  const { data } = await supabase
-    .from('profiles')
-    .select('email')
-    .eq('id', userId)
-    .single();
-  return data?.email ?? null;
-}
-
-async function getUserName(userId: string): Promise<string> {
-  const supabase = createAdminClient();
-  const { data } = await supabase
-    .from('profiles')
-    .select('full_name')
-    .eq('id', userId)
-    .single();
-  return data?.full_name ?? 'Utilisateur';
-}
+import { getUserContactInfo } from './user-profile';
 
 type EmailContent = { subject: string; html: string; text: string } | null;
 
@@ -93,13 +75,13 @@ async function buildEmail(payload: NotificationPayload): Promise<EmailContent> {
     }
 
     case 'teacher_verified': {
-      const name = data.teacherName ? String(data.teacherName) : await getUserName(payload.userId);
+      const name = data.teacherName ? String(data.teacherName) : (await getUserContactInfo(payload.userId)).full_name;
       const { html, text } = teacherVerifiedEmail(name);
       return { subject: 'Profil vérifié — écoleVersity', html, text };
     }
 
     case 'teacher_rejected': {
-      const name = data.teacherName ? String(data.teacherName) : await getUserName(payload.userId);
+      const name = data.teacherName ? String(data.teacherName) : (await getUserContactInfo(payload.userId)).full_name;
       const { html, text } = teacherRejectedEmail(name, data.reason ? String(data.reason) : undefined);
       return { subject: 'Vérification non approuvée — écoleVersity', html, text };
     }
@@ -135,7 +117,7 @@ export async function sendEmail(payload: NotificationPayload): Promise<void> {
   }
 
   try {
-    const email = await getUserEmail(payload.userId);
+    const email = (await getUserContactInfo(payload.userId)).email;
     if (!email) {
       console.warn(`[notifications] No email found for user ${payload.userId}`);
       return;
