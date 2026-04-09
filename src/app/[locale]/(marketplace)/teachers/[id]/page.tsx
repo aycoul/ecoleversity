@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Star, BookOpen, GraduationCap, MessageSquare } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { buttonVariants } from "@/components/ui/button";
+import { SendMessageButton } from "@/components/messaging/send-message-button";
 
 export default async function TeacherProfilePage({
   params,
@@ -69,6 +70,7 @@ export default async function TeacherProfilePage({
   } = await supabase.auth.getUser();
 
   let isFollowing = false;
+  let isParent = false;
   if (user) {
     const { data: follow } = await supabase
       .from("teacher_followers")
@@ -77,6 +79,13 @@ export default async function TeacherProfilePage({
       .eq("teacher_id", id)
       .maybeSingle();
     isFollowing = !!follow;
+
+    const { data: userProfile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    isParent = userProfile?.role === "parent";
   }
 
   const subjects = (teacherProfile.subjects ?? []) as Subject[];
@@ -168,7 +177,7 @@ export default async function TeacherProfilePage({
       </div>
 
       {/* CTA */}
-      <div className="mt-6 flex justify-center">
+      <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
         <Link
           href={`/teachers/${id}/book`}
           className={buttonVariants({
@@ -178,6 +187,7 @@ export default async function TeacherProfilePage({
         >
           {t("bookSession")}
         </Link>
+        {isParent && <SendMessageButton teacherId={id} />}
       </div>
 
       {/* Reviews */}

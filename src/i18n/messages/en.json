@@ -520,6 +520,21 @@
     "myCourses": "My courses",
     "noCourses": "No courses in progress"
   },
+  "messaging": {
+    "title": "Messages",
+    "noConversations": "No conversations",
+    "startConversation": "Send a message",
+    "typeMessage": "Type your message...",
+    "send": "Send",
+    "attachFile": "Attach a file",
+    "fileOnly": "Only PDF, DOC, and TXT files are allowed",
+    "noImages": "Images are not allowed in direct messages",
+    "contactDetected": "Your message contains contact information. For student safety, sharing personal contact details is not allowed on the platform.",
+    "contactBlocked": "Message blocked \u2014 contact information detected",
+    "unread": "{count} unread",
+    "today": "Today",
+    "yesterday": "Yesterday"
+  },
   "footer": {
     "copyright": "\u00a9 2026 EcoleVersity. All rights reserved.",
     "about": "About",
