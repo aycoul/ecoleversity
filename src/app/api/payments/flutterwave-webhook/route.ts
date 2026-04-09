@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
       }).catch((err) => console.error("[notifications] payment_confirmed error:", err));
     }
 
-    console.log(
+    console.info(
       `[flutterwave-webhook] Confirmed: ${transaction.id} — ${verification.amount} ${verification.currency} → ${verification.amountXof} XOF`,
     );
 
