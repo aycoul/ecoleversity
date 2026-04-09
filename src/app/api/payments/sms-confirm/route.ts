@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { parsePaymentSms } from "@/lib/payments/bootstrap";
+import { sendNotification } from "@/lib/notifications/service";
 
 const smsConfirmSchema = z.object({
   amount: z.number().int().positive(),
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest) {
     // Find transaction by payment reference
     const { data: transaction, error: txError } = await supabase
       .from("transactions")
-      .select("id, amount_xof, status, parent_id, teacher_id")
+      .select("id, amount_xof, status, parent_id, teacher_id, payment_reference")
       .eq("payment_reference", reference.toUpperCase())
       .single();
 
@@ -94,6 +95,20 @@ export async function POST(request: NextRequest) {
         { error: "Failed to confirm transaction" },
         { status: 500 }
       );
+    }
+
+    // Fire notification asynchronously — don't block the response
+    if (transaction.parent_id) {
+      sendNotification({
+        event: 'payment_confirmed',
+        userId: transaction.parent_id,
+        data: {
+          amount: transaction.amount_xof,
+          teacherName: transaction.teacher_id ?? '',
+          reference,
+          provider,
+        },
+      }).catch((err) => console.error('[notifications] payment_confirmed error:', err));
     }
 
     return NextResponse.json({

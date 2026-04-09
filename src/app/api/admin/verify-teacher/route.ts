@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { z } from "zod";
+import { sendNotification } from "@/lib/notifications/service";
 
 const bodySchema = z.object({
   teacherId: z.string().uuid(),
@@ -78,6 +79,18 @@ export async function POST(request: Request) {
         .from("profiles")
         .update({ verification_status: newStatus })
         .eq("id", teacherProfile.user_id);
+    }
+
+    // Fire notification to the teacher
+    if (teacherProfile) {
+      const event = action === 'approve' ? 'teacher_verified' : 'teacher_rejected';
+      sendNotification({
+        event,
+        userId: teacherProfile.user_id,
+        data: {
+          ...(reason ? { reason } : {}),
+        },
+      }).catch((err) => console.error(`[notifications] ${event} error:`, err));
     }
 
     return NextResponse.json({ success: true, status: newStatus });

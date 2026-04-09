@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendNotification } from "@/lib/notifications/service";
 
 const adminConfirmSchema = z.object({
   transactionId: z.string().uuid(),
@@ -51,7 +52,7 @@ export async function POST(request: NextRequest) {
 
     const { data: transaction, error: txError } = await adminSupabase
       .from("transactions")
-      .select("id, status")
+      .select("id, status, parent_id, amount_xof, teacher_id")
       .eq("id", transactionId)
       .single();
 
@@ -82,6 +83,18 @@ export async function POST(request: NextRequest) {
         { error: "Erreur lors de la confirmation" },
         { status: 500 }
       );
+    }
+
+    // Fire notification asynchronously
+    if (transaction.parent_id) {
+      sendNotification({
+        event: 'payment_confirmed',
+        userId: transaction.parent_id,
+        data: {
+          amount: transaction.amount_xof ?? 0,
+          teacherName: transaction.teacher_id ?? '',
+        },
+      }).catch((err) => console.error('[notifications] payment_confirmed error:', err));
     }
 
     return NextResponse.json({

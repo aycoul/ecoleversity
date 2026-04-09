@@ -535,6 +535,12 @@
     "today": "Today",
     "yesterday": "Yesterday"
   },
+  "notifications": {
+    "enablePush": "Enable notifications so you never miss anything",
+    "enable": "Enable",
+    "dismiss": "Later",
+    "pushEnabled": "Notifications enabled!"
+  },
   "footer": {
     "copyright": "\u00a9 2026 EcoleVersity. All rights reserved.",
     "about": "About",

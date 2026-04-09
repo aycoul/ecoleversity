@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendNotification } from "@/lib/notifications/service";
 
 const reviewSchema = z.object({
   liveClassId: z.string().uuid(),
@@ -154,6 +155,38 @@ export async function POST(request: NextRequest) {
           rating_count: newCount,
         })
         .eq("id", liveClassId);
+    }
+
+    // Notify the teacher about the new review
+    const { data: teacherUser } = await adminSupabase
+      .from("teacher_profiles")
+      .select("user_id")
+      .eq("id", liveClass.teacher_id)
+      .single();
+
+    const { data: reviewerProfile } = await supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("id", user.id)
+      .single();
+
+    const { data: classInfo } = await adminSupabase
+      .from("live_classes")
+      .select("title")
+      .eq("id", liveClassId)
+      .single();
+
+    if (teacherUser) {
+      sendNotification({
+        event: 'new_review',
+        userId: teacherUser.user_id,
+        data: {
+          reviewerName: reviewerProfile?.full_name ?? 'Un parent',
+          rating,
+          ...(comment ? { comment } : {}),
+          className: classInfo?.title ?? '',
+        },
+      }).catch((err) => console.error('[notifications] new_review error:', err));
     }
 
     return NextResponse.json({ data: { success: true } });

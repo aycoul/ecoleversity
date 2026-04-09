@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { z } from "zod";
 import { detectContactInfo } from "@/lib/contact-detector";
+import { sendNotification } from "@/lib/notifications/service";
 
 const sendMessageSchema = z.object({
   conversationId: z.string().uuid(),
@@ -164,6 +165,35 @@ export async function POST(request: NextRequest) {
       .from("conversations")
       .update({ updated_at: new Date().toISOString() })
       .eq("id", conversationId);
+
+    // Notify the recipient asynchronously
+    const { data: convData } = await supabase
+      .from("conversations")
+      .select("participant_1, participant_2")
+      .eq("id", conversationId)
+      .single();
+
+    if (convData) {
+      const recipientId = convData.participant_1 === user.id
+        ? convData.participant_2
+        : convData.participant_1;
+
+      const { data: senderProfile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user.id)
+        .single();
+
+      sendNotification({
+        event: 'new_message',
+        userId: recipientId,
+        data: {
+          senderName: senderProfile?.full_name ?? 'Quelqu\'un',
+          preview: finalContent.slice(0, 100),
+          conversationId,
+        },
+      }).catch((err) => console.error('[notifications] new_message error:', err));
+    }
 
     return NextResponse.json({
       message,
