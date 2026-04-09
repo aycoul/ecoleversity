@@ -12,13 +12,15 @@ export function Footer() {
         <div className="flex flex-col gap-8 md:flex-row md:justify-between">
           {/* Brand */}
           <div className="flex flex-col gap-3">
-            <Image
-              src="/logo.png"
-              alt="écoleVersity"
-              width={140}
-              height={35}
-              className="h-8 w-auto brightness-0 invert"
-            />
+            <div className="inline-flex rounded-lg bg-white/95 px-3 py-1.5">
+              <Image
+                src="/logo.png"
+                alt="écoleVersity"
+                width={140}
+                height={35}
+                className="h-8 w-auto"
+              />
+            </div>
             <p className="max-w-xs text-sm text-slate-400">
               {tc("tagline")}
             </p>
