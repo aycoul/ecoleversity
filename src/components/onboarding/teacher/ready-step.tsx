@@ -17,15 +17,15 @@ export function ReadyStep() {
   const router = useRouter();
 
   const checklist = [
-    { icon: <UserCheck className="size-5 text-emerald-600" />, label: "Profil compl\u00e9t\u00e9" },
-    { icon: <FileCheck className="size-5 text-emerald-600" />, label: "Documents envoy\u00e9s" },
-    { icon: <CreditCard className="size-5 text-emerald-600" />, label: "Paiement configur\u00e9" },
+    { icon: <UserCheck className="size-5 text-[var(--ev-blue)]" />, label: "Profil compl\u00e9t\u00e9" },
+    { icon: <FileCheck className="size-5 text-[var(--ev-blue)]" />, label: "Documents envoy\u00e9s" },
+    { icon: <CreditCard className="size-5 text-[var(--ev-blue)]" />, label: "Paiement configur\u00e9" },
   ];
 
   return (
     <div className="flex flex-col items-center text-center">
-      <div className="mb-4 flex size-20 items-center justify-center rounded-full bg-emerald-100">
-        <PartyPopper className="size-10 text-emerald-600" />
+      <div className="mb-4 flex size-20 items-center justify-center rounded-full bg-[var(--ev-green)]/10">
+        <PartyPopper className="size-10 text-[var(--ev-blue)]" />
       </div>
 
       <h2 className="text-2xl font-bold text-slate-900">{t("readyTitle")}</h2>
@@ -35,10 +35,10 @@ export function ReadyStep() {
         {checklist.map((item, i) => (
           <div
             key={i}
-            className="flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3"
+            className="flex items-center gap-3 rounded-lg border border-[var(--ev-green)]/20 bg-[var(--ev-green-50)] p-3"
           >
-            <CheckCircle2 className="size-5 text-emerald-500" />
-            <span className="flex items-center gap-2 text-sm font-medium text-emerald-700">
+            <CheckCircle2 className="size-5 text-[var(--ev-green)]" />
+            <span className="flex items-center gap-2 text-sm font-medium text-[var(--ev-blue)]">
               {item.icon}
               {item.label}
             </span>
@@ -48,7 +48,7 @@ export function ReadyStep() {
 
       <Button
         onClick={() => router.push("/dashboard/teacher")}
-        className="mt-8 bg-emerald-600 px-6 text-white hover:bg-emerald-700"
+        className="mt-8 bg-[var(--ev-blue)] px-6 text-white hover:bg-[var(--ev-blue-light)]"
         size="lg"
       >
         Acc&eacute;der &agrave; mon tableau de bord

@@ -96,7 +96,7 @@ export function JitsiEmbed({ roomId, userName, onClose }: JitsiEmbedProps) {
           href={getJitsiMeetUrl(roomId)}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700"
+          className="inline-flex items-center gap-2 rounded-lg bg-[var(--ev-blue)] px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[var(--ev-blue-light)]"
         >
           {t("joinExternal")}
         </a>
@@ -108,7 +108,7 @@ export function JitsiEmbed({ roomId, userName, onClose }: JitsiEmbedProps) {
     <div className="relative h-[600px] w-full overflow-hidden rounded-xl border border-slate-200">
       {loading && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-50">
-          <div className="size-8 animate-spin rounded-full border-4 border-emerald-200 border-t-emerald-600" />
+          <div className="size-8 animate-spin rounded-full border-4 border-[var(--ev-green)]/20 border-t-[var(--ev-blue)]" />
         </div>
       )}
       <div ref={containerRef} className="size-full" />

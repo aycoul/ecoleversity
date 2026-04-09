@@ -209,14 +209,14 @@ export function MessageInput({
           onKeyDown={handleKeyDown}
           placeholder={t("typeMessage")}
           rows={1}
-          className="flex-1 resize-none rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm placeholder:text-slate-400 focus:border-emerald-300 focus:outline-none focus:ring-1 focus:ring-emerald-300"
+          className="flex-1 resize-none rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm placeholder:text-slate-400 focus:border-[var(--ev-green)]/30 focus:outline-none focus:ring-1 focus:ring-[var(--ev-green)]/30"
         />
 
         {/* Send button */}
         <Button
           type="button"
           size="icon"
-          className="shrink-0 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50"
+          className="shrink-0 bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)] disabled:opacity-50"
           onClick={handleSend}
           disabled={!canSend}
           title={t("send")}

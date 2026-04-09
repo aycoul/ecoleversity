@@ -186,7 +186,7 @@ export function AvailabilityGrid({
             className={cn(
               "shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
               activeDayIndex === idx
-                ? "bg-emerald-600 text-white"
+                ? "bg-[var(--ev-blue)] text-white"
                 : "bg-slate-100 text-slate-600"
             )}
           >
@@ -210,7 +210,7 @@ export function AvailabilityGrid({
                 className={cn(
                   "flex w-full items-center rounded-lg border px-4 py-3 text-sm transition-colors",
                   isSelected
-                    ? "border-emerald-300 bg-emerald-50 text-emerald-700 font-medium"
+                    ? "border-[var(--ev-green)]/30 bg-[var(--ev-green-50)] text-[var(--ev-blue)] font-medium"
                     : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
                 )}
               >
@@ -218,7 +218,7 @@ export function AvailabilityGrid({
                   {time} - {endTimeFor(time)}
                 </span>
                 {isSelected && (
-                  <span className="ml-auto text-emerald-600">&#10003;</span>
+                  <span className="ml-auto text-[var(--ev-blue)]">&#10003;</span>
                 )}
               </button>
             );
@@ -266,7 +266,7 @@ export function AvailabilityGrid({
                         className={cn(
                           "h-6 w-full cursor-pointer rounded-sm border transition-colors",
                           isSelected
-                            ? "border-emerald-400 bg-emerald-500"
+                            ? "border-[var(--ev-green)] bg-[var(--ev-green)]"
                             : "border-slate-200 bg-slate-50 hover:bg-slate-100"
                         )}
                       />
@@ -287,7 +287,7 @@ export function AvailabilityGrid({
         <Button
           onClick={handleSave}
           disabled={isPending || !hasChanges}
-          className="bg-emerald-600 hover:bg-emerald-700"
+          className="bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]"
         >
           {isPending ? t("savingAvailability") : t("saveAvailability")}
         </Button>

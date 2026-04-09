@@ -65,9 +65,9 @@ export function PayoutStep({ onSaved }: PayoutStepProps) {
         <p className="text-sm text-slate-500">{t("payoutDesc")}</p>
       </div>
 
-      <div className="flex items-center gap-3 rounded-lg bg-emerald-50 p-4">
-        <Wallet className="size-8 text-emerald-600" />
-        <p className="text-sm text-emerald-700">
+      <div className="flex items-center gap-3 rounded-lg bg-[var(--ev-green-50)] p-4">
+        <Wallet className="size-8 text-[var(--ev-blue)]" />
+        <p className="text-sm text-[var(--ev-blue)]">
           Vous recevrez vos paiements chaque semaine sur ce num&eacute;ro
         </p>
       </div>
@@ -104,7 +104,7 @@ export function PayoutStep({ onSaved }: PayoutStepProps) {
       <Button
         onClick={save}
         disabled={saving || !provider || !phone.trim()}
-        className="w-full bg-emerald-600 text-white hover:bg-emerald-700"
+        className="w-full bg-[var(--ev-blue)] text-white hover:bg-[var(--ev-blue-light)]"
       >
         {saving && <Loader2 className="mr-2 size-4 animate-spin" />}
         Enregistrer et continuer

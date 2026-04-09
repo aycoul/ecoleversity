@@ -76,7 +76,7 @@ export function PendingPayments({ transactions }: PendingPaymentsProps) {
             key={tx.id}
             className={`rounded-xl border p-4 transition-colors ${
               isConfirmed
-                ? "border-emerald-200 bg-emerald-50"
+                ? "border-[var(--ev-green)]/20 bg-[var(--ev-green-50)]"
                 : "border-slate-200 bg-white"
             }`}
           >
@@ -97,14 +97,14 @@ export function PendingPayments({ transactions }: PendingPaymentsProps) {
                   </span>
                   <span>{formatDate(tx.createdAt)}</span>
                 </div>
-                <p className="mt-1 text-sm font-bold text-emerald-700">
+                <p className="mt-1 text-sm font-bold text-[var(--ev-blue)]">
                   {tx.amountXof.toLocaleString("fr-CI")} FCFA
                 </p>
               </div>
 
               <div className="shrink-0">
                 {isConfirmed ? (
-                  <span className="flex items-center gap-1 text-xs font-medium text-emerald-600">
+                  <span className="flex items-center gap-1 text-xs font-medium text-[var(--ev-blue)]">
                     <CheckCircle2 className="size-4" />
                     {t("confirmed")}
                   </span>
@@ -113,7 +113,7 @@ export function PendingPayments({ transactions }: PendingPaymentsProps) {
                     size="sm"
                     onClick={() => handleConfirm(tx.id)}
                     disabled={isConfirming}
-                    className="bg-emerald-600 hover:bg-emerald-700"
+                    className="bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]"
                   >
                     {isConfirming && (
                       <Loader2 className="mr-1 size-3 animate-spin" />

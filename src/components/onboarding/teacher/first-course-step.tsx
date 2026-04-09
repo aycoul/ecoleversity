@@ -8,22 +8,22 @@ export function FirstCourseStep() {
 
   const tips = [
     {
-      icon: <Monitor className="size-5 text-emerald-600" />,
+      icon: <Monitor className="size-5 text-[var(--ev-blue)]" />,
       title: "Bonne qualit\u00e9 vid\u00e9o",
       desc: "Utilisez un endroit bien \u00e9clair\u00e9, face \u00e0 une source de lumi\u00e8re naturelle",
     },
     {
-      icon: <Clock className="size-5 text-emerald-600" />,
+      icon: <Clock className="size-5 text-[var(--ev-blue)]" />,
       title: "Dur\u00e9e recommand\u00e9e",
       desc: "Entre 30 et 60 minutes par session. Les \u00e9l\u00e8ves restent concentr\u00e9s.",
     },
     {
-      icon: <Lightbulb className="size-5 text-emerald-600" />,
+      icon: <Lightbulb className="size-5 text-[var(--ev-blue)]" />,
       title: "\u00c9quipement",
       desc: "Un t\u00e9l\u00e9phone avec cam\u00e9ra et micro suffit. Un casque am\u00e9liore la qualit\u00e9 audio.",
     },
     {
-      icon: <BookOpen className="size-5 text-emerald-600" />,
+      icon: <BookOpen className="size-5 text-[var(--ev-blue)]" />,
       title: "Pr\u00e9paration",
       desc: "Pr\u00e9parez un plan de cours simple. Les parents appr\u00e9cient la structure.",
     },
@@ -42,7 +42,7 @@ export function FirstCourseStep() {
             key={i}
             className="flex items-start gap-3 rounded-lg border border-slate-100 bg-white p-4"
           >
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-emerald-50">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--ev-green-50)]">
               {tip.icon}
             </div>
             <div>
@@ -53,7 +53,7 @@ export function FirstCourseStep() {
         ))}
       </div>
 
-      <div className="rounded-lg bg-emerald-50 p-4 text-center text-sm text-emerald-700">
+      <div className="rounded-lg bg-[var(--ev-green-50)] p-4 text-center text-sm text-[var(--ev-blue)]">
         La cr\u00e9ation de cours sera disponible apr\u00e8s la validation de votre profil.
       </div>
     </div>

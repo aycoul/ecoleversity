@@ -144,10 +144,10 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
         <CardContent className="grid gap-3">
           <button
             onClick={() => selectRole("parent")}
-            className="flex items-center gap-4 rounded-xl border border-slate-200 p-4 text-left transition-all hover:border-emerald-300 hover:bg-emerald-50"
+            className="flex items-center gap-4 rounded-xl border border-slate-200 p-4 text-left transition-all hover:border-[var(--ev-green)]/30 hover:bg-[var(--ev-green-50)]"
           >
-            <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-emerald-100">
-              <Users className="size-6 text-emerald-600" />
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-[var(--ev-green)]/10">
+              <Users className="size-6 text-[var(--ev-blue)]" />
             </div>
             <div>
               <p className="font-medium text-slate-900">
@@ -162,10 +162,10 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
           </button>
           <button
             onClick={() => selectRole("teacher")}
-            className="flex items-center gap-4 rounded-xl border border-slate-200 p-4 text-left transition-all hover:border-emerald-300 hover:bg-emerald-50"
+            className="flex items-center gap-4 rounded-xl border border-slate-200 p-4 text-left transition-all hover:border-[var(--ev-green)]/30 hover:bg-[var(--ev-green-50)]"
           >
-            <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-emerald-100">
-              <GraduationCap className="size-6 text-emerald-600" />
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-[var(--ev-green)]/10">
+              <GraduationCap className="size-6 text-[var(--ev-blue)]" />
             </div>
             <div>
               <p className="font-medium text-slate-900">
@@ -182,7 +182,7 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
             {t("hasAccount")}{" "}
             <Link
               href="/login"
-              className="font-medium text-emerald-600 hover:text-emerald-700"
+              className="font-medium text-[var(--ev-blue)] hover:text-[var(--ev-blue)]"
             >
               {tc("login")}
             </Link>
@@ -251,7 +251,7 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
 
           <Button
             type="submit"
-            className="w-full bg-emerald-600 text-white hover:bg-emerald-700"
+            className="w-full bg-[var(--ev-blue)] text-white hover:bg-[var(--ev-blue-light)]"
             disabled={loading}
           >
             {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
@@ -285,7 +285,7 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
           {t("hasAccount")}{" "}
           <Link
             href="/login"
-            className="font-medium text-emerald-600 hover:text-emerald-700"
+            className="font-medium text-[var(--ev-blue)] hover:text-[var(--ev-blue)]"
           >
             {tc("login")}
           </Link>

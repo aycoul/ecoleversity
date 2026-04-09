@@ -79,8 +79,8 @@ export function GroupClassForm({ subjects, gradeLevels }: GroupClassFormProps) {
   if (success) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
-        <CheckCircle className="mb-4 size-12 text-emerald-500" />
-        <p className="text-lg font-semibold text-emerald-700">{t("created")}</p>
+        <CheckCircle className="mb-4 size-12 text-[var(--ev-green)]" />
+        <p className="text-lg font-semibold text-[var(--ev-blue)]">{t("created")}</p>
         {recurrence === "weekly" && (
           <p className="mt-2 text-sm text-slate-500">
             {t("weeklySessions")}
@@ -208,7 +208,7 @@ export function GroupClassForm({ subjects, gradeLevels }: GroupClassFormProps) {
               onClick={() => setDurationMinutes(d)}
               className={`flex-1 rounded-lg border-2 px-4 py-2.5 text-center text-sm font-medium transition-all ${
                 durationMinutes === d
-                  ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                  ? "border-[var(--ev-green)] bg-[var(--ev-green-50)] text-[var(--ev-blue)]"
                   : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
               }`}
             >
@@ -229,7 +229,7 @@ export function GroupClassForm({ subjects, gradeLevels }: GroupClassFormProps) {
               onClick={() => setRecurrence(r)}
               className={`flex-1 rounded-lg border-2 px-4 py-2.5 text-center text-sm font-medium transition-all ${
                 recurrence === r
-                  ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                  ? "border-[var(--ev-green)] bg-[var(--ev-green-50)] text-[var(--ev-blue)]"
                   : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
               }`}
             >
@@ -251,7 +251,7 @@ export function GroupClassForm({ subjects, gradeLevels }: GroupClassFormProps) {
       <Button
         type="submit"
         disabled={isSubmitting}
-        className="w-full bg-emerald-600 hover:bg-emerald-700"
+        className="w-full bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]"
       >
         {isSubmitting ? (
           <Loader2 className="mr-2 size-4 animate-spin" />

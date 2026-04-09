@@ -53,7 +53,7 @@ export function EnrollButton({
   if (!isLoggedIn) {
     return (
       <Link href="/register" className="block">
-        <Button className="w-full bg-emerald-600 hover:bg-emerald-700">
+        <Button className="w-full bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]">
           {t("enrollNow", { price: priceXof.toLocaleString("fr-CI") })}
         </Button>
       </Link>
@@ -69,7 +69,7 @@ export function EnrollButton({
       <Link href={`/courses/${courseId}`} className="block">
         <Button
           variant="outline"
-          className="w-full border-emerald-200 text-emerald-700"
+          className="w-full border-[var(--ev-green)]/20 text-[var(--ev-blue)]"
         >
           <CheckCircle className="mr-2 size-4" />
           {t("alreadyEnrolled")}
@@ -127,7 +127,7 @@ export function EnrollButton({
     return (
       <Button
         onClick={() => setShowSelector(true)}
-        className="w-full bg-emerald-600 hover:bg-emerald-700"
+        className="w-full bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]"
       >
         {t("enrollNow", { price: priceXof.toLocaleString("fr-CI") })}
       </Button>
@@ -171,7 +171,7 @@ export function EnrollButton({
       <Button
         onClick={handleEnroll}
         disabled={isSubmitting || isSelectedEnrolled}
-        className="w-full bg-emerald-600 hover:bg-emerald-700"
+        className="w-full bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]"
       >
         {isSubmitting ? (
           <Loader2 className="mr-2 size-4 animate-spin" />

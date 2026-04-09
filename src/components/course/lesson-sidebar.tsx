@@ -45,7 +45,7 @@ export function LessonSidebar({
         </div>
         <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
           <div
-            className="h-full rounded-full bg-emerald-500 transition-all duration-500"
+            className="h-full rounded-full bg-[var(--ev-green)] transition-all duration-500"
             style={{ width: `${progressPct}%` }}
           />
         </div>
@@ -71,19 +71,19 @@ export function LessonSidebar({
                   href={`/course/${courseId}/lesson/${lesson.id}`}
                   className={`flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors ${
                     isCurrent
-                      ? "bg-emerald-50 text-emerald-800"
+                      ? "bg-[var(--ev-green-50)] text-[var(--ev-blue)]"
                       : "text-slate-600 hover:bg-slate-50"
                   }`}
                 >
                   {/* Number or checkmark */}
                   <div className="flex size-7 shrink-0 items-center justify-center">
                     {isCompleted ? (
-                      <CheckCircle className="size-5 text-emerald-500" />
+                      <CheckCircle className="size-5 text-[var(--ev-green)]" />
                     ) : (
                       <span
                         className={`flex size-6 items-center justify-center rounded-full text-xs font-bold ${
                           isCurrent
-                            ? "bg-emerald-600 text-white"
+                            ? "bg-[var(--ev-blue)] text-white"
                             : "bg-slate-200 text-slate-500"
                         }`}
                       >
@@ -116,12 +116,12 @@ export function LessonSidebar({
       {/* Certificate button when 100% */}
       {progressPct >= 100 && (
         <div className="border-t border-slate-200 p-4">
-          <div className="mb-2 text-center text-sm font-medium text-emerald-700">
+          <div className="mb-2 text-center text-sm font-medium text-[var(--ev-blue)]">
             {t("courseCompleted")}
           </div>
           <button
             disabled
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-50 px-4 py-2.5 text-sm font-medium text-emerald-700 opacity-60"
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--ev-green-50)] px-4 py-2.5 text-sm font-medium text-[var(--ev-blue)] opacity-60"
           >
             <Award className="size-4" />
             {t("getCertificate")}

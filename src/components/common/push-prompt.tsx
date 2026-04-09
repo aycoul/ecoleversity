@@ -83,8 +83,8 @@ export function PushPrompt() {
 
   if (success) {
     return (
-      <div className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-md rounded-xl bg-emerald-50 border border-emerald-200 p-4 shadow-lg">
-        <p className="text-sm font-medium text-emerald-700 text-center">
+      <div className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-md rounded-xl bg-[var(--ev-green-50)] border border-[var(--ev-green)]/20 p-4 shadow-lg">
+        <p className="text-sm font-medium text-[var(--ev-blue)] text-center">
           Notifications activees !
         </p>
       </div>
@@ -94,8 +94,8 @@ export function PushPrompt() {
   return (
     <div className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-md rounded-xl bg-white border border-gray-200 p-4 shadow-lg">
       <div className="flex items-start gap-3">
-        <div className="flex-shrink-0 rounded-full bg-emerald-100 p-2">
-          <Bell className="h-5 w-5 text-emerald-600" />
+        <div className="flex-shrink-0 rounded-full bg-[var(--ev-green)]/10 p-2">
+          <Bell className="h-5 w-5 text-[var(--ev-blue)]" />
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-gray-900">
@@ -105,7 +105,7 @@ export function PushPrompt() {
             <button
               onClick={handleEnable}
               disabled={loading}
-              className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+              className="rounded-lg bg-[var(--ev-blue)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--ev-blue-light)] disabled:opacity-50 transition-colors"
             >
               {loading ? 'Activation...' : 'Activer'}
             </button>

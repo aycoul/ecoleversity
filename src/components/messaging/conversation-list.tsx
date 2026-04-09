@@ -102,7 +102,7 @@ export function ConversationList({ activeId, onSelect }: ConversationListProps) 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="size-6 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
+        <div className="size-6 animate-spin rounded-full border-2 border-[var(--ev-blue)] border-t-transparent" />
       </div>
     );
   }
@@ -123,12 +123,12 @@ export function ConversationList({ activeId, onSelect }: ConversationListProps) 
           onClick={() => onSelect(conv)}
           className={cn(
             "flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50",
-            activeId === conv.id && "bg-emerald-50 hover:bg-emerald-50"
+            activeId === conv.id && "bg-[var(--ev-green-50)] hover:bg-[var(--ev-green-50)]"
           )}
         >
           <Avatar className="size-10 shrink-0">
             <AvatarImage src={conv.other.avatar_url ?? undefined} />
-            <AvatarFallback className="bg-emerald-100 text-xs font-medium text-emerald-700">
+            <AvatarFallback className="bg-[var(--ev-green)]/10 text-xs font-medium text-[var(--ev-blue)]">
               {getInitials(conv.other.display_name)}
             </AvatarFallback>
           </Avatar>
@@ -149,7 +149,7 @@ export function ConversationList({ activeId, onSelect }: ConversationListProps) 
                 {conv.lastMessage?.content ?? "..."}
               </p>
               {conv.unreadCount > 0 && (
-                <Badge className="shrink-0 bg-emerald-600 px-1.5 text-[10px]">
+                <Badge className="shrink-0 bg-[var(--ev-blue)] px-1.5 text-[10px]">
                   {conv.unreadCount}
                 </Badge>
               )}

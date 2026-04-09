@@ -104,12 +104,12 @@ export function VerificationStep({ onSaved }: VerificationStepProps) {
         htmlFor={id}
         className={`flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed p-6 text-center transition-colors ${
           status === "done"
-            ? "border-emerald-300 bg-emerald-50"
+            ? "border-[var(--ev-green)]/30 bg-[var(--ev-green-50)]"
             : status === "error"
             ? "border-red-300 bg-red-50"
             : status === "uploading"
             ? "border-slate-300 bg-slate-50"
-            : "border-slate-300 bg-white hover:border-emerald-400 hover:bg-emerald-50/50"
+            : "border-slate-300 bg-white hover:border-[var(--ev-green)] hover:bg-[var(--ev-green-50)]/50"
         }`}
       >
         {status === "uploading" && (
@@ -120,8 +120,8 @@ export function VerificationStep({ onSaved }: VerificationStepProps) {
         )}
         {status === "done" && (
           <>
-            <CheckCircle2 className="size-8 text-emerald-500" />
-            <p className="text-sm font-medium text-emerald-700">{fileName}</p>
+            <CheckCircle2 className="size-8 text-[var(--ev-green)]" />
+            <p className="text-sm font-medium text-[var(--ev-blue)]">{fileName}</p>
           </>
         )}
         {status === "error" && (
@@ -203,7 +203,7 @@ export function VerificationStep({ onSaved }: VerificationStepProps) {
       {allDone && (
         <Button
           onClick={onSaved}
-          className="w-full bg-emerald-600 text-white hover:bg-emerald-700"
+          className="w-full bg-[var(--ev-blue)] text-white hover:bg-[var(--ev-blue-light)]"
         >
           Continuer
         </Button>

@@ -358,7 +358,7 @@ export function LessonManager({ courseId, initialLessons }: LessonManagerProps) 
       {showForm && (
         <form
           onSubmit={handleSubmitLesson}
-          className="space-y-4 rounded-xl border border-emerald-200 bg-emerald-50/50 p-4"
+          className="space-y-4 rounded-xl border border-[var(--ev-green)]/20 bg-[var(--ev-green-50)]/50 p-4"
         >
           <h3 className="font-medium text-slate-800">
             {editingId ? t("editLesson") : t("addLesson")}
@@ -427,7 +427,7 @@ export function LessonManager({ courseId, initialLessons }: LessonManagerProps) 
               id="isPreview"
               checked={formIsPreview}
               onChange={(e) => setFormIsPreview(e.target.checked)}
-              className="size-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+              className="size-4 rounded border-slate-300 text-[var(--ev-blue)] focus:ring-[var(--ev-green)]"
             />
             <Label htmlFor="isPreview" className="cursor-pointer">
               {t("isPreview")}
@@ -453,7 +453,7 @@ export function LessonManager({ courseId, initialLessons }: LessonManagerProps) 
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="bg-emerald-600 hover:bg-emerald-700"
+              className="bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]"
             >
               {isSubmitting ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
               {t("saveLesson")}

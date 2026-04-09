@@ -33,7 +33,7 @@ export function StepWizard({
     <div className="flex flex-col gap-6">
       {/* Progress header */}
       <div className="space-y-2">
-        <Progress value={percentage} className="[&_[data-slot=progress-indicator]]:bg-emerald-500 [&_[data-slot=progress-track]]:h-2">
+        <Progress value={percentage} className="[&_[data-slot=progress-indicator]]:bg-[var(--ev-green)] [&_[data-slot=progress-track]]:h-2">
           <ProgressLabel className="text-sm font-medium text-slate-700">
             {stepLabel}
           </ProgressLabel>
@@ -59,7 +59,7 @@ export function StepWizard({
         <Button
           onClick={onNext}
           disabled={!canGoNext}
-          className="bg-emerald-600 text-white hover:bg-emerald-700"
+          className="bg-[var(--ev-blue)] text-white hover:bg-[var(--ev-blue-light)]"
         >
           {isLastStep ? (
             <>

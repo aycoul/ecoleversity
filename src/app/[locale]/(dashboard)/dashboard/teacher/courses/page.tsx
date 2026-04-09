@@ -48,7 +48,7 @@ export default async function TeacherCoursesPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-slate-900">{t("title")}</h1>
         <Link href="/dashboard/teacher/courses/new">
-          <Button className="bg-emerald-600 hover:bg-emerald-700">
+          <Button className="bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]">
             <Plus className="mr-2 size-4" />
             {t("createCourse")}
           </Button>
@@ -67,7 +67,7 @@ export default async function TeacherCoursesPage() {
           title={t("published")}
           courses={published}
           lessonCounts={lessonCounts}
-          badgeColor="emerald"
+          badgeColor="brand"
           t={t}
         />
       )}
@@ -123,7 +123,7 @@ function CourseSection({
   t: ReturnType<typeof import("next-intl").useTranslations>;
 }) {
   const colorMap: Record<string, string> = {
-    emerald: "bg-emerald-50 text-emerald-700",
+    brand: "bg-[var(--ev-green-50)] text-[var(--ev-blue)]",
     amber: "bg-amber-50 text-amber-700",
     slate: "bg-slate-100 text-slate-500",
   };
@@ -159,7 +159,7 @@ function CourseSection({
                     {course.title}
                   </h3>
                   <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                    <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                    <span className="inline-flex items-center rounded-full bg-[var(--ev-green-50)] px-2 py-0.5 text-xs font-medium text-[var(--ev-blue)]">
                       {SUBJECT_LABELS[course.subject as Subject] ?? course.subject}
                     </span>
                     <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">

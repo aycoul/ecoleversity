@@ -13,7 +13,7 @@ function formatDate(isoString: string): string {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  confirmed: "bg-emerald-100 text-emerald-700",
+  confirmed: "bg-[var(--ev-green)]/10 text-[var(--ev-blue)]",
   pending: "bg-amber-100 text-amber-700",
   failed: "bg-red-100 text-red-700",
   refunded: "bg-slate-100 text-slate-600",
@@ -78,7 +78,7 @@ export default async function TeacherTransactionsPage() {
   return (
     <div className="pb-20 md:pb-0">
       <div className="mb-8 flex items-center gap-3">
-        <Receipt className="size-7 text-emerald-600" />
+        <Receipt className="size-7 text-[var(--ev-blue)]" />
         <h1 className="text-2xl font-bold text-slate-900">{t("title")}</h1>
       </div>
 
@@ -108,7 +108,7 @@ export default async function TeacherTransactionsPage() {
                   <td className="px-3 py-3 font-medium text-slate-800">
                     {tx.parentName}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3 text-right font-semibold text-emerald-700">
+                  <td className="whitespace-nowrap px-3 py-3 text-right font-semibold text-[var(--ev-blue)]">
                     {formatCurrency(tx.teacher_amount)}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3 text-right text-slate-500">

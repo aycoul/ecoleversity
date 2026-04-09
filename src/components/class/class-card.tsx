@@ -68,7 +68,7 @@ export function ClassCard({ cls }: { cls: ClassCardData }) {
 
         {/* Badges */}
         <div className="flex flex-wrap gap-1.5">
-          <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+          <span className="inline-flex items-center rounded-full bg-[var(--ev-green-50)] px-2 py-0.5 text-xs font-medium text-[var(--ev-blue)]">
             {SUBJECT_LABELS[cls.subject as Subject] ?? cls.subject}
           </span>
           <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
@@ -116,7 +116,7 @@ export function ClassCard({ cls }: { cls: ClassCardData }) {
           <div className="h-1.5 w-full rounded-full bg-slate-100">
             <div
               className={`h-full rounded-full transition-all ${
-                isFull ? "bg-red-400" : "bg-emerald-500"
+                isFull ? "bg-red-400" : "bg-[var(--ev-green)]"
               }`}
               style={{ width: `${fillPercent}%` }}
             />
@@ -131,7 +131,7 @@ export function ClassCard({ cls }: { cls: ClassCardData }) {
             className={`w-full ${
               isFull
                 ? "bg-amber-500 hover:bg-amber-600"
-                : "bg-emerald-600 hover:bg-emerald-700"
+                : "bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]"
             }`}
           >
             {isFull ? t("joinWaitlist") : t("enroll")}

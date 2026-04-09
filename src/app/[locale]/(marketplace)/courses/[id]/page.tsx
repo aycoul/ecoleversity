@@ -153,7 +153,7 @@ export default async function CourseDetailPage({
               />
             </div>
           ) : (
-            <div className="flex h-56 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 sm:h-72">
+            <div className="flex h-56 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--ev-green)] to-[var(--ev-blue)] sm:h-72">
               <BookOpen className="size-16 text-white/80" />
             </div>
           )}
@@ -178,7 +178,7 @@ export default async function CourseDetailPage({
             <div>
               <Link
                 href={`/teachers/${course.teacher_id}`}
-                className="font-medium text-slate-800 hover:text-emerald-600"
+                className="font-medium text-slate-800 hover:text-[var(--ev-blue)]"
               >
                 {teacherProfile?.display_name ?? "Enseignant"}
               </Link>
@@ -262,7 +262,7 @@ export default async function CourseDetailPage({
       {/* Syllabus */}
       <div className="mb-8">
         <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-slate-800">
-          <GraduationCap className="size-5 text-emerald-600" />
+          <GraduationCap className="size-5 text-[var(--ev-blue)]" />
           {t("syllabus")}
         </h2>
         {lessonList.length === 0 ? (
@@ -279,7 +279,7 @@ export default async function CourseDetailPage({
                   className="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50 px-4 py-3"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="flex size-7 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-700">
+                    <span className="flex size-7 items-center justify-center rounded-full bg-[var(--ev-green)]/10 text-xs font-bold text-[var(--ev-blue)]">
                       {index + 1}
                     </span>
                     <div>
@@ -303,7 +303,7 @@ export default async function CourseDetailPage({
                       href={lesson.video_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1 rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-100"
+                      className="flex items-center gap-1 rounded-lg bg-[var(--ev-green-50)] px-3 py-1.5 text-xs font-medium text-[var(--ev-blue)] transition-colors hover:bg-[var(--ev-green)]/10"
                     >
                       <Play className="size-3" />
                       {t("preview")}
@@ -350,7 +350,7 @@ export default async function CourseDetailPage({
             </div>
             <Link
               href={`/teachers/${course.teacher_id}`}
-              className="shrink-0 rounded-lg border border-emerald-200 px-3 py-1.5 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-50"
+              className="shrink-0 rounded-lg border border-[var(--ev-green)]/20 px-3 py-1.5 text-sm font-medium text-[var(--ev-blue)] transition-colors hover:bg-[var(--ev-green-50)]"
             >
               {t("teacherProfile")}
             </Link>

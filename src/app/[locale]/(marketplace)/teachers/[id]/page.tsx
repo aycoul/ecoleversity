@@ -182,7 +182,7 @@ export default async function TeacherProfilePage({
           href={`/teachers/${id}/book`}
           className={buttonVariants({
             size: "lg",
-            className: "w-full bg-emerald-600 hover:bg-emerald-700 sm:w-auto",
+            className: "w-full bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)] sm:w-auto",
           })}
         >
           {t("bookSession")}

@@ -132,8 +132,8 @@ export function CourseForm({ subjects, gradeLevels, courseId, initialData }: Cou
   if (success && !isEdit) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
-        <CheckCircle className="mb-4 size-12 text-emerald-500" />
-        <p className="text-lg font-semibold text-emerald-700">{t("created")}</p>
+        <CheckCircle className="mb-4 size-12 text-[var(--ev-green)]" />
+        <p className="text-lg font-semibold text-[var(--ev-blue)]">{t("created")}</p>
       </div>
     );
   }
@@ -146,7 +146,7 @@ export function CourseForm({ subjects, gradeLevels, courseId, initialData }: Cou
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       {success && (
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+        <div className="rounded-lg border border-[var(--ev-green)]/20 bg-[var(--ev-green-50)] px-4 py-3 text-sm text-[var(--ev-blue)]">
           {t("updated")}
         </div>
       )}
@@ -305,7 +305,7 @@ export function CourseForm({ subjects, gradeLevels, courseId, initialData }: Cou
       <Button
         type="submit"
         disabled={isSubmitting || isUploading}
-        className="w-full bg-emerald-600 hover:bg-emerald-700"
+        className="w-full bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]"
       >
         {isSubmitting ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
         {isEdit ? tCommon("save") : t("saveDraft")}

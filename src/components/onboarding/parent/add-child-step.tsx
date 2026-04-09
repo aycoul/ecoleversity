@@ -116,15 +116,15 @@ export function AddChildStep({ children, onChildAdded, onChildRemoved }: AddChil
           {children.map((child) => (
             <div
               key={child.id}
-              className="flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50 p-3"
+              className="flex items-center justify-between rounded-lg border border-[var(--ev-green)]/20 bg-[var(--ev-green-50)] p-3"
             >
               <div className="flex items-center gap-3">
-                <div className="flex size-8 items-center justify-center rounded-full bg-emerald-200 text-sm font-bold text-emerald-700">
+                <div className="flex size-8 items-center justify-center rounded-full bg-[var(--ev-green)]/20 text-sm font-bold text-[var(--ev-blue)]">
                   {child.first_name[0].toUpperCase()}
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-emerald-900">{child.first_name}</p>
-                  <p className="text-xs text-emerald-600">
+                  <p className="text-sm font-medium text-[var(--ev-blue-dark)]">{child.first_name}</p>
+                  <p className="text-xs text-[var(--ev-blue)]">
                     {GRADE_LEVEL_LABELS[child.grade_level]}
                     {child.target_exam && ` — ${TARGET_EXAM_LABELS[child.target_exam]}`}
                   </p>
@@ -201,7 +201,7 @@ export function AddChildStep({ children, onChildAdded, onChildRemoved }: AddChil
         <Button
           onClick={addChild}
           disabled={!canAdd || saving}
-          className="w-full bg-emerald-600 text-white hover:bg-emerald-700"
+          className="w-full bg-[var(--ev-blue)] text-white hover:bg-[var(--ev-blue-light)]"
         >
           {saving ? (
             <Loader2 className="mr-2 size-4 animate-spin" />

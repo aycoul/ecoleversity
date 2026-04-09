@@ -47,7 +47,7 @@ export function SendMessageButton({ teacherId }: SendMessageButtonProps) {
       onClick={handleClick}
       disabled={loading}
       variant="outline"
-      className="gap-2 border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+      className="gap-2 border-[var(--ev-green)]/20 text-[var(--ev-blue)] hover:bg-[var(--ev-green-50)]"
     >
       <MessageSquare className="size-4" />
       {t("startConversation")}

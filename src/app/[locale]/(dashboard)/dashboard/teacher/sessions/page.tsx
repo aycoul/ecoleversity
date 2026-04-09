@@ -103,7 +103,7 @@ export default async function TeacherSessionsPage() {
                   href={`/session/${session.id}`}
                   className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold transition-colors ${
                     isJoinable
-                      ? "bg-emerald-600 text-white shadow-sm hover:bg-emerald-700"
+                      ? "bg-[var(--ev-blue)] text-white shadow-sm hover:bg-[var(--ev-blue-light)]"
                       : "bg-slate-100 text-slate-400"
                   }`}
                 >

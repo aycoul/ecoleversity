@@ -124,7 +124,7 @@ export function TeacherVerificationCard({
       >
         <CardHeader>
           <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-700">
+            <div className="flex size-10 items-center justify-center rounded-full bg-[var(--ev-green)]/10 text-sm font-bold text-[var(--ev-blue)]">
               {avatarUrl ? (
                 <img
                   src={avatarUrl}
@@ -208,7 +208,7 @@ export function TeacherVerificationCard({
           <Button
             onClick={() => handleAction("approve")}
             disabled={isPending}
-            className="flex-1 bg-emerald-600 text-white hover:bg-emerald-700"
+            className="flex-1 bg-[var(--ev-blue)] text-white hover:bg-[var(--ev-blue-light)]"
           >
             <CheckCircle2 className="size-4" />
             {t("approveTeacher")}

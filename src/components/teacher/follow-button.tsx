@@ -79,8 +79,8 @@ export function FollowButton({
         onClick={handleToggle}
         className={cn(
           isFollowing
-            ? "border-emerald-200 text-emerald-700 hover:bg-red-50 hover:text-red-600 hover:border-red-200"
-            : "bg-emerald-600 hover:bg-emerald-700"
+            ? "border-[var(--ev-green)]/20 text-[var(--ev-blue)] hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+            : "bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]"
         )}
       >
         <Heart

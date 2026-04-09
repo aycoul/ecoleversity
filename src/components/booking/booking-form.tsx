@@ -217,7 +217,7 @@ export function BookingForm({
           <div
             key={s}
             className={`h-1.5 flex-1 rounded-full transition-colors ${
-              s <= step ? "bg-emerald-500" : "bg-slate-200"
+              s <= step ? "bg-[var(--ev-green)]" : "bg-slate-200"
             }`}
           />
         ))}
@@ -227,7 +227,7 @@ export function BookingForm({
       {step === 1 && (
         <div className="space-y-6">
           <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-800">
-            <CalendarDays className="size-5 text-emerald-600" />
+            <CalendarDays className="size-5 text-[var(--ev-blue)]" />
             {t("selectDate")}
           </h2>
 
@@ -245,7 +245,7 @@ export function BookingForm({
                   }}
                   className={`flex min-w-[5rem] flex-col items-center rounded-xl border-2 px-3 py-2.5 text-sm font-medium transition-all ${
                     isSelected
-                      ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                      ? "border-[var(--ev-green)] bg-[var(--ev-green-50)] text-[var(--ev-blue)]"
                       : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
                   }`}
                 >
@@ -265,7 +265,7 @@ export function BookingForm({
           {selectedDate && (
             <div>
               <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700">
-                <Clock className="size-4 text-emerald-600" />
+                <Clock className="size-4 text-[var(--ev-blue)]" />
                 {t("selectTime")}
               </h3>
 
@@ -285,7 +285,7 @@ export function BookingForm({
                         onClick={() => setSelectedSlot(slot)}
                         className={`rounded-lg border-2 px-3 py-2 text-sm font-medium transition-all ${
                           isSelected
-                            ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                            ? "border-[var(--ev-green)] bg-[var(--ev-green-50)] text-[var(--ev-blue)]"
                             : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
                         }`}
                       >
@@ -302,7 +302,7 @@ export function BookingForm({
             <Button
               disabled={!selectedDate || !selectedSlot}
               onClick={() => setStep(2)}
-              className="bg-emerald-600 hover:bg-emerald-700"
+              className="bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]"
             >
               {tCommon("next")}
               <ChevronRight className="ml-1 size-4" />
@@ -315,7 +315,7 @@ export function BookingForm({
       {step === 2 && (
         <div className="space-y-6">
           <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-800">
-            <BookOpen className="size-5 text-emerald-600" />
+            <BookOpen className="size-5 text-[var(--ev-blue)]" />
             {t("sessionDetails")}
           </h2>
 
@@ -372,7 +372,7 @@ export function BookingForm({
                   onClick={() => setDurationMinutes(d)}
                   className={`flex-1 rounded-lg border-2 px-4 py-3 text-center text-sm font-medium transition-all ${
                     durationMinutes === d
-                      ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                      ? "border-[var(--ev-green)] bg-[var(--ev-green-50)] text-[var(--ev-blue)]"
                       : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
                   }`}
                 >
@@ -409,7 +409,7 @@ export function BookingForm({
             <Button
               disabled={!selectedSubject || !selectedLearner}
               onClick={() => setStep(3)}
-              className="bg-emerald-600 hover:bg-emerald-700"
+              className="bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]"
             >
               {tCommon("next")}
               <ChevronRight className="ml-1 size-4" />
@@ -422,7 +422,7 @@ export function BookingForm({
       {step === 3 && (
         <div className="space-y-6">
           <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-800">
-            <Check className="size-5 text-emerald-600" />
+            <Check className="size-5 text-[var(--ev-blue)]" />
             {t("summary")}
           </h2>
 
@@ -489,7 +489,7 @@ export function BookingForm({
             <Button
               onClick={handleConfirm}
               disabled={isSubmitting}
-              className="bg-emerald-600 hover:bg-emerald-700"
+              className="bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]"
             >
               {isSubmitting ? (
                 <Loader2 className="mr-2 size-4 animate-spin" />
@@ -518,7 +518,7 @@ function SummaryRow({
       <span
         className={
           bold
-            ? "text-base font-bold text-emerald-700"
+            ? "text-base font-bold text-[var(--ev-blue)]"
             : "font-medium text-slate-800"
         }
       >

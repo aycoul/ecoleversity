@@ -212,7 +212,7 @@ export function TeacherCatalog({ teachers, initialFilters }: TeacherCatalogProps
                 <SlidersHorizontal className="size-4" />
                 {t("filters")}
                 {hasActiveFilters && (
-                  <span className="ml-1 flex size-5 items-center justify-center rounded-full bg-emerald-100 text-xs font-medium text-emerald-700">
+                  <span className="ml-1 flex size-5 items-center justify-center rounded-full bg-[var(--ev-green)]/10 text-xs font-medium text-[var(--ev-blue)]">
                     !
                   </span>
                 )}

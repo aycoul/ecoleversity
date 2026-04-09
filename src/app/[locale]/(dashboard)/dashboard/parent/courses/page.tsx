@@ -105,7 +105,7 @@ export default async function ParentCoursesPage() {
                   className="h-36 w-full object-cover"
                 />
               ) : (
-                <div className="flex h-36 items-center justify-center bg-gradient-to-br from-emerald-400 to-emerald-600">
+                <div className="flex h-36 items-center justify-center bg-gradient-to-br from-[var(--ev-green)] to-[var(--ev-blue)]">
                   <BookOpen className="size-10 text-white/80" />
                 </div>
               )}
@@ -131,13 +131,13 @@ export default async function ParentCoursesPage() {
                       {t("progress", { percent: progress })}
                     </span>
                     {isCompleted && (
-                      <CheckCircle className="size-3.5 text-emerald-500" />
+                      <CheckCircle className="size-3.5 text-[var(--ev-green)]" />
                     )}
                   </div>
                   <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
                     <div
                       className={`h-full rounded-full transition-all ${
-                        isCompleted ? "bg-emerald-500" : "bg-emerald-400"
+                        isCompleted ? "bg-[var(--ev-green)]" : "bg-[var(--ev-green)]"
                       }`}
                       style={{ width: `${progress}%` }}
                     />
@@ -147,7 +147,7 @@ export default async function ParentCoursesPage() {
                 <Link href={`/course/${course.id}`}>
                   <Button
                     size="sm"
-                    className="w-full bg-emerald-600 hover:bg-emerald-700"
+                    className="w-full bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]"
                   >
                     <Play className="mr-1.5 size-3.5" />
                     {isCompleted ? t("resumeWatching") : t("continueCourse")}

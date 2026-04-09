@@ -31,12 +31,12 @@ export function JitsiTestStep() {
       </div>
 
       <div className="flex flex-col items-center gap-4 rounded-xl border border-slate-100 bg-white p-6">
-        <div className="flex size-16 items-center justify-center rounded-full bg-emerald-100">
-          <Video className="size-8 text-emerald-600" />
+        <div className="flex size-16 items-center justify-center rounded-full bg-[var(--ev-green)]/10">
+          <Video className="size-8 text-[var(--ev-blue)]" />
         </div>
         <Button
           onClick={openTestRoom}
-          className="bg-emerald-600 text-white hover:bg-emerald-700"
+          className="bg-[var(--ev-blue)] text-white hover:bg-[var(--ev-blue-light)]"
           size="lg"
         >
           Tester ma cam&eacute;ra et mon micro
@@ -56,7 +56,7 @@ export function JitsiTestStep() {
             key={i}
             className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${
               check.checked
-                ? "border-emerald-500 bg-emerald-50"
+                ? "border-[var(--ev-green)] bg-[var(--ev-green-50)]"
                 : "border-slate-200 bg-white hover:border-slate-300"
             }`}
           >
@@ -69,7 +69,7 @@ export function JitsiTestStep() {
             <span
               className={`flex size-5 shrink-0 items-center justify-center rounded border ${
                 check.checked
-                  ? "border-emerald-500 bg-emerald-500 text-white"
+                  ? "border-[var(--ev-green)] bg-[var(--ev-green)] text-white"
                   : "border-slate-300"
               }`}
             >
@@ -79,7 +79,7 @@ export function JitsiTestStep() {
                 </svg>
               )}
             </span>
-            <span className={`flex items-center gap-2 text-sm ${check.checked ? "text-emerald-700" : "text-slate-700"}`}>
+            <span className={`flex items-center gap-2 text-sm ${check.checked ? "text-[var(--ev-blue)]" : "text-slate-700"}`}>
               {check.icon}
               {check.label}
             </span>

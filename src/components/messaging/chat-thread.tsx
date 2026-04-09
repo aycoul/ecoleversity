@@ -138,7 +138,7 @@ export function ChatThread({
   if (loading) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <div className="size-6 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
+        <div className="size-6 animate-spin rounded-full border-2 border-[var(--ev-blue)] border-t-transparent" />
       </div>
     );
   }
@@ -184,7 +184,7 @@ export function ChatThread({
                     className={cn(
                       "max-w-[75%] rounded-2xl px-4 py-2",
                       isMine
-                        ? "rounded-br-md bg-emerald-600 text-white"
+                        ? "rounded-br-md bg-[var(--ev-blue)] text-white"
                         : "rounded-bl-md bg-slate-100 text-slate-900"
                     )}
                   >
@@ -194,7 +194,7 @@ export function ChatThread({
                         className={cn(
                           "mb-1 flex items-center gap-1 text-xs",
                           isMine
-                            ? "text-emerald-200"
+                            ? "text-[var(--ev-green)]/20"
                             : "text-amber-600"
                         )}
                       >
@@ -233,7 +233,7 @@ export function ChatThread({
                               className={cn(
                                 "flex items-center gap-2 rounded-md px-2 py-1 text-xs transition-colors",
                                 isMine
-                                  ? "bg-emerald-700/50 text-emerald-100 hover:bg-emerald-700"
+                                  ? "bg-[var(--ev-blue-light)]/50 text-[var(--ev-green)] hover:bg-[var(--ev-blue-light)]"
                                   : "bg-slate-200 text-slate-600 hover:bg-slate-300"
                               )}
                             >
@@ -252,7 +252,7 @@ export function ChatThread({
                     <p
                       className={cn(
                         "mt-1 text-right text-[10px]",
-                        isMine ? "text-emerald-200" : "text-slate-400"
+                        isMine ? "text-[var(--ev-green)]/20" : "text-slate-400"
                       )}
                     >
                       {formatTime(msg.created_at)}

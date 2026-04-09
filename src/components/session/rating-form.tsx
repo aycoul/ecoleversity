@@ -77,7 +77,7 @@ export function RatingForm({ liveClassId, teacherName }: RatingFormProps) {
               onClick={() => setRating(star)}
               onMouseEnter={() => setHovered(star)}
               onMouseLeave={() => setHovered(0)}
-              className="rounded-md p-1 transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+              className="rounded-md p-1 transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[var(--ev-green)] focus:ring-offset-2"
               aria-label={t("stars", { count: String(star) })}
             >
               <Star
@@ -114,7 +114,7 @@ export function RatingForm({ liveClassId, teacherName }: RatingFormProps) {
       <Button
         onClick={handleSubmit}
         disabled={rating === 0 || submitting}
-        className="w-full bg-emerald-600 hover:bg-emerald-700"
+        className="w-full bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]"
         size="lg"
       >
         {submitting ? (

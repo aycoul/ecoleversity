@@ -79,7 +79,7 @@ export function AvailabilityDisplay({ slots }: AvailabilityDisplayProps) {
                 {ranges.map((range) => (
                   <span
                     key={`${range.start}-${range.end}`}
-                    className="rounded-md bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700"
+                    className="rounded-md bg-[var(--ev-green)]/10 px-2 py-0.5 text-xs font-medium text-[var(--ev-blue)]"
                   >
                     {range.start} - {range.end}
                   </span>

@@ -106,9 +106,9 @@ export function LoginForm() {
   };
 
   return (
-    <Card>
+    <Card className="border-slate-100 shadow-lg shadow-[var(--ev-blue)]/5">
       <CardHeader className="text-center">
-        <CardTitle className="text-xl">{t("loginTitle")}</CardTitle>
+        <CardTitle className="text-xl text-[var(--ev-blue)]">{t("loginTitle")}</CardTitle>
         <CardDescription>
           {locale === "fr"
             ? "Accédez à votre espace"
@@ -138,7 +138,7 @@ export function LoginForm() {
               <Label htmlFor="login-password">{t("password")}</Label>
               <Link
                 href="/login"
-                className="text-xs text-emerald-600 hover:text-emerald-700"
+                className="text-xs text-[var(--ev-blue)] hover:text-[var(--ev-blue)]"
               >
                 {t("forgotPassword")}
               </Link>
@@ -158,7 +158,7 @@ export function LoginForm() {
 
           <Button
             type="submit"
-            className="w-full bg-emerald-600 text-white hover:bg-emerald-700"
+            className="w-full bg-[var(--ev-blue)] text-white hover:bg-[var(--ev-blue-light)]"
             disabled={loading}
           >
             {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
@@ -192,7 +192,7 @@ export function LoginForm() {
           {t("noAccount")}{" "}
           <Link
             href="/register"
-            className="font-medium text-emerald-600 hover:text-emerald-700"
+            className="font-medium text-[var(--ev-blue)] hover:text-[var(--ev-blue)]"
           >
             {tc("register")}
           </Link>

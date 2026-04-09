@@ -28,7 +28,7 @@ export default async function TeacherAvailabilityPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <div className="flex items-center gap-3">
-        <Calendar className="size-6 text-emerald-600" />
+        <Calendar className="size-6 text-[var(--ev-blue)]" />
         <div>
           <h1 className="text-xl font-bold text-slate-900">
             {t("availability")}

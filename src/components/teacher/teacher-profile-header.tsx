@@ -32,9 +32,9 @@ export function TeacherProfileHeader({
 
   return (
     <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
-      <Avatar className="size-20 border-2 border-emerald-100 sm:size-24">
+      <Avatar className="size-20 border-2 border-[var(--ev-green)]/10 sm:size-24">
         <AvatarImage src={teacher.avatar_url ?? undefined} alt={teacher.display_name} />
-        <AvatarFallback className="bg-emerald-100 text-2xl font-bold text-emerald-700">
+        <AvatarFallback className="bg-[var(--ev-green)]/10 text-2xl font-bold text-[var(--ev-blue)]">
           {teacher.display_name.charAt(0).toUpperCase()}
         </AvatarFallback>
       </Avatar>
@@ -47,7 +47,7 @@ export function TeacherProfileHeader({
           {isVerified && (
             <Badge
               variant="secondary"
-              className="gap-1 bg-emerald-100 text-emerald-700"
+              className="gap-1 bg-[var(--ev-green)]/10 text-[var(--ev-blue)]"
             >
               <ShieldCheck className="size-3" />
               {t("verified")}

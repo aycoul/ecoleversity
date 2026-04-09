@@ -83,7 +83,7 @@ export default async function ParentSessionsPage() {
               >
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2 text-sm font-medium text-slate-900">
-                    <User className="size-4 text-emerald-600" />
+                    <User className="size-4 text-[var(--ev-blue)]" />
                     {t("sessionWith", { teacher: teacherName })}
                   </div>
                   <div className="flex items-center gap-2 text-xs text-slate-500">
@@ -113,7 +113,7 @@ export default async function ParentSessionsPage() {
                   href={`/session/${session.id}`}
                   className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold transition-colors ${
                     isJoinable
-                      ? "bg-emerald-600 text-white shadow-sm hover:bg-emerald-700"
+                      ? "bg-[var(--ev-blue)] text-white shadow-sm hover:bg-[var(--ev-blue-light)]"
                       : "bg-slate-100 text-slate-400"
                   }`}
                 >

@@ -31,7 +31,7 @@ function formatDate(isoString: string): string {
 
 function StatusBadge({ status }: { status: string }) {
   const colors: Record<string, string> = {
-    confirmed: "bg-emerald-100 text-emerald-700",
+    confirmed: "bg-[var(--ev-green)]/10 text-[var(--ev-blue)]",
     pending: "bg-amber-100 text-amber-700",
     failed: "bg-red-100 text-red-700",
     refunded: "bg-slate-100 text-slate-600",
@@ -69,7 +69,7 @@ export function EarningsDashboard({
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center gap-2 text-sm text-slate-500">
-            <Wallet className="size-4 text-emerald-600" />
+            <Wallet className="size-4 text-[var(--ev-blue)]" />
             {t("totalEarned")}
           </div>
           <p className="mt-2 text-2xl font-bold text-slate-900">
@@ -137,7 +137,7 @@ export function EarningsDashboard({
                       {tx.parentName}
                     </td>
                     <td className="px-3 py-3 text-slate-600">{tx.subject}</td>
-                    <td className="whitespace-nowrap px-3 py-3 text-right font-semibold text-emerald-700">
+                    <td className="whitespace-nowrap px-3 py-3 text-right font-semibold text-[var(--ev-blue)]">
                       {formatCurrency(tx.teacherAmount)}
                     </td>
                     <td className="px-3 py-3 text-center">

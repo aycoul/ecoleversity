@@ -92,7 +92,7 @@ export function CourseActions({
       </p>
 
       {success && (
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+        <div className="rounded-lg border border-[var(--ev-green)]/20 bg-[var(--ev-green-50)] px-4 py-3 text-sm text-[var(--ev-blue)]">
           {success}
         </div>
       )}
@@ -108,7 +108,7 @@ export function CourseActions({
           <Button
             onClick={() => updateStatus("published")}
             disabled={isPublishing || !hasLessonsWithVideo}
-            className="gap-2 bg-emerald-600 hover:bg-emerald-700"
+            className="gap-2 bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]"
           >
             {isPublishing ? (
               <Loader2 className="size-4 animate-spin" />
@@ -143,7 +143,7 @@ export function CourseActions({
           <Button
             onClick={() => updateStatus("published")}
             disabled={isPublishing}
-            className="gap-2 bg-emerald-600 hover:bg-emerald-700"
+            className="gap-2 bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]"
           >
             {isPublishing ? (
               <Loader2 className="size-4 animate-spin" />

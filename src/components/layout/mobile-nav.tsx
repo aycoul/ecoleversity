@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { LocaleSwitcher } from "./locale-switcher";
-import { GraduationCap } from "lucide-react";
+import Image from "next/image";
 
 type MobileNavProps = {
   open: boolean;
@@ -37,15 +37,8 @@ export function MobileNav({ open, onOpenChange }: MobileNavProps) {
       <SheetContent side="left" className="flex flex-col">
         <SheetHeader className="pb-0">
           <SheetTitle>
-            <Link
-              href="/"
-              onClick={() => onOpenChange(false)}
-              className="flex items-center gap-2"
-            >
-              <GraduationCap className="size-6 text-emerald-600" />
-              <span className="bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-lg font-bold text-transparent">
-                {tc("appName")}
-              </span>
+            <Link href="/" onClick={() => onOpenChange(false)}>
+              <Image src="/logo.png" alt="écoleVersity" width={140} height={35} className="h-8 w-auto" />
             </Link>
           </SheetTitle>
         </SheetHeader>
@@ -58,7 +51,7 @@ export function MobileNav({ open, onOpenChange }: MobileNavProps) {
               <Link
                 href={link.href}
                 onClick={() => onOpenChange(false)}
-                className="flex rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700"
+                className="flex rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-[var(--ev-green-50)] hover:text-[var(--ev-blue)]"
               >
                 {t(link.key)}
               </Link>
@@ -78,7 +71,7 @@ export function MobileNav({ open, onOpenChange }: MobileNavProps) {
             </Button>
           </Link>
           <Link href="/register" onClick={() => onOpenChange(false)}>
-            <Button className="w-full bg-emerald-600 text-white hover:bg-emerald-700">
+            <Button className="w-full bg-[var(--ev-blue)] text-white hover:bg-[var(--ev-blue-light)]">
               {tc("register")}
             </Button>
           </Link>

@@ -89,7 +89,7 @@ export function PayoutProcessor({ teachers }: PayoutProcessorProps) {
             key={teacher.teacherId}
             className={`rounded-xl border p-5 transition-colors ${
               isPaid
-                ? "border-emerald-200 bg-emerald-50"
+                ? "border-[var(--ev-green)]/20 bg-[var(--ev-green-50)]"
                 : "border-slate-200 bg-white"
             }`}
           >
@@ -108,14 +108,14 @@ export function PayoutProcessor({ teachers }: PayoutProcessorProps) {
                     {t("provider")}: {providerLabel}
                   </span>
                 </div>
-                <p className="text-lg font-bold text-emerald-700">
+                <p className="text-lg font-bold text-[var(--ev-blue)]">
                   {formatCurrency(teacher.pendingAmount)}
                 </p>
               </div>
 
               <div className="shrink-0">
                 {isPaid ? (
-                  <span className="flex items-center gap-1 text-xs font-medium text-emerald-600">
+                  <span className="flex items-center gap-1 text-xs font-medium text-[var(--ev-blue)]">
                     <CheckCircle2 className="size-4" />
                     {t("paid")}
                   </span>
@@ -124,7 +124,7 @@ export function PayoutProcessor({ teachers }: PayoutProcessorProps) {
                     size="sm"
                     onClick={() => handleMarkPaid(teacher)}
                     disabled={isProcessing}
-                    className="bg-emerald-600 hover:bg-emerald-700"
+                    className="bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]"
                   >
                     {isProcessing && (
                       <Loader2 className="mr-1 size-3 animate-spin" />

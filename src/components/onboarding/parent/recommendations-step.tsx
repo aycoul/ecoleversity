@@ -41,7 +41,7 @@ export function RecommendationsStep({ children }: RecommendationsStepProps) {
         return (
           <div key={child.id} className="space-y-3">
             <div className="flex items-center gap-2">
-              <Sparkles className="size-4 text-emerald-500" />
+              <Sparkles className="size-4 text-[var(--ev-green)]" />
               <h3 className="text-sm font-semibold text-slate-700">
                 {t("subjectsFor", {
                   childName: child.first_name,
@@ -56,7 +56,7 @@ export function RecommendationsStep({ children }: RecommendationsStepProps) {
                   key={subject}
                   className="flex items-center gap-2 rounded-lg border border-slate-100 bg-white p-3"
                 >
-                  <BookOpen className="size-4 shrink-0 text-emerald-500" />
+                  <BookOpen className="size-4 shrink-0 text-[var(--ev-green)]" />
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium text-slate-800">
                       {SUBJECT_LABELS[subject]}

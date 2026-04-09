@@ -53,8 +53,8 @@ export function CourseCard({ course }: { course: CourseCardData }) {
   const minutes = course.total_duration_minutes % 60;
 
   const subjectColor = SUBJECT_COLORS[course.subject] ?? {
-    bg: "bg-emerald-50",
-    text: "text-emerald-700",
+    bg: "bg-[var(--ev-green-50)]",
+    text: "text-[var(--ev-blue)]",
   };
 
   return (
@@ -153,7 +153,7 @@ export function CourseCard({ course }: { course: CourseCardData }) {
       {/* Action */}
       <div className="border-t border-slate-100 p-3">
         <Link href={`/courses/${course.id}`} className="block">
-          <Button className="w-full bg-emerald-600 hover:bg-emerald-700">
+          <Button className="w-full bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]">
             {t("viewCourse")}
           </Button>
         </Link>

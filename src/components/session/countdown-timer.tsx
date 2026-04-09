@@ -43,7 +43,7 @@ export function CountdownTimer({ targetDate, onReady }: CountdownTimerProps) {
   }, [targetDate, onReady]);
 
   return (
-    <span className="tabular-nums font-semibold text-emerald-700">
+    <span className="tabular-nums font-semibold text-[var(--ev-blue)]">
       {formatTimeLeft(timeLeft)}
     </span>
   );

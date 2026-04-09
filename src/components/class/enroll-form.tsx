@@ -43,7 +43,7 @@ export function EnrollForm({
 
   if (availableLearners.length === 0) {
     return (
-      <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+      <div className="flex items-center gap-2 rounded-lg bg-[var(--ev-green-50)] px-4 py-3 text-sm text-[var(--ev-blue)]">
         <CheckCircle className="size-4" />
         {t("alreadyEnrolled")}
       </div>
@@ -114,7 +114,7 @@ export function EnrollForm({
       <Button
         onClick={handleEnroll}
         disabled={isSubmitting || !selectedLearner}
-        className="w-full bg-emerald-600 hover:bg-emerald-700"
+        className="w-full bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]"
       >
         {isSubmitting ? (
           <Loader2 className="mr-2 size-4 animate-spin" />

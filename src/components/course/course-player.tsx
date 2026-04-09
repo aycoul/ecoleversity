@@ -178,8 +178,8 @@ export function CoursePlayer({
                   variant={isCurrentCompleted ? "outline" : "default"}
                   className={
                     isCurrentCompleted
-                      ? "border-emerald-200 text-emerald-700"
-                      : "bg-emerald-600 hover:bg-emerald-700"
+                      ? "border-[var(--ev-green)]/20 text-[var(--ev-blue)]"
+                      : "bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]"
                   }
                 >
                   {isMarking ? (
@@ -231,13 +231,13 @@ export function CoursePlayer({
                       `/course/${courseId}/lesson/${nextLesson.id}`
                     )
                   }
-                  className="bg-emerald-600 hover:bg-emerald-700"
+                  className="bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]"
                 >
                   {t("nextLesson")}
                   <ChevronRight className="ml-1 size-4" />
                 </Button>
               ) : progressPct >= 100 ? (
-                <div className="text-sm font-medium text-emerald-700">
+                <div className="text-sm font-medium text-[var(--ev-blue)]">
                   {t("courseCompleted")}
                 </div>
               ) : (

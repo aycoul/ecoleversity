@@ -129,7 +129,7 @@ export function ProfileStep({ onSaved }: ProfileStepProps) {
       <div className="flex items-center gap-4">
         <label
           htmlFor="avatar-upload"
-          className="flex size-16 cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-dashed border-slate-300 bg-slate-50 transition-colors hover:border-emerald-400"
+          className="flex size-16 cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-dashed border-slate-300 bg-slate-50 transition-colors hover:border-[var(--ev-green)]"
         >
           {avatarPreview ? (
             <img src={avatarPreview} alt="Avatar" className="size-full object-cover" />
@@ -185,7 +185,7 @@ export function ProfileStep({ onSaved }: ProfileStepProps) {
               key={subject}
               className={`flex cursor-pointer items-center gap-2 rounded-lg border p-2.5 text-sm transition-colors ${
                 selectedSubjects.includes(subject)
-                  ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                  ? "border-[var(--ev-green)] bg-[var(--ev-green-50)] text-[var(--ev-blue)]"
                   : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
               }`}
             >
@@ -198,7 +198,7 @@ export function ProfileStep({ onSaved }: ProfileStepProps) {
               <span
                 className={`flex size-4 shrink-0 items-center justify-center rounded border ${
                   selectedSubjects.includes(subject)
-                    ? "border-emerald-500 bg-emerald-500 text-white"
+                    ? "border-[var(--ev-green)] bg-[var(--ev-green)] text-white"
                     : "border-slate-300"
                 }`}
               >
@@ -229,7 +229,7 @@ export function ProfileStep({ onSaved }: ProfileStepProps) {
                     key={grade}
                     className={`flex cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition-colors ${
                       selectedGrades.includes(grade)
-                        ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                        ? "border-[var(--ev-green)] bg-[var(--ev-green-50)] text-[var(--ev-blue)]"
                         : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
                     }`}
                   >
@@ -252,7 +252,7 @@ export function ProfileStep({ onSaved }: ProfileStepProps) {
       <Button
         onClick={save}
         disabled={saving || !bio.trim() || !city || selectedSubjects.length === 0 || selectedGrades.length === 0}
-        className="w-full bg-emerald-600 text-white hover:bg-emerald-700"
+        className="w-full bg-[var(--ev-blue)] text-white hover:bg-[var(--ev-blue-light)]"
       >
         {saving && <Loader2 className="mr-2 size-4 animate-spin" />}
         Enregistrer et continuer

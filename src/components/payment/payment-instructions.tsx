@@ -76,8 +76,8 @@ function CopyButton({ text, label }: { text: string; label: string }) {
     >
       {copied ? (
         <>
-          <Check className="size-3 text-emerald-600" />
-          <span className="text-emerald-600">{t("copied")}</span>
+          <Check className="size-3 text-[var(--ev-blue)]" />
+          <span className="text-[var(--ev-blue)]">{t("copied")}</span>
         </>
       ) : (
         <>
@@ -190,17 +190,17 @@ export function PaymentInstructions({
   if (status === "confirmed") {
     return (
       <div className="mx-auto max-w-md space-y-6 px-4 py-8">
-        <div className="flex flex-col items-center rounded-2xl border border-emerald-200 bg-emerald-50 p-8 text-center">
-          <CheckCircle2 className="mb-4 size-16 text-emerald-500" />
-          <h2 className="text-xl font-bold text-emerald-800">
+        <div className="flex flex-col items-center rounded-2xl border border-[var(--ev-green)]/20 bg-[var(--ev-green-50)] p-8 text-center">
+          <CheckCircle2 className="mb-4 size-16 text-[var(--ev-green)]" />
+          <h2 className="text-xl font-bold text-[var(--ev-blue)]">
             {t("confirmed")}
           </h2>
-          <p className="mt-2 text-sm text-emerald-700">
+          <p className="mt-2 text-sm text-[var(--ev-blue)]">
             {t("confirmedMessage")}
           </p>
           <Button
             onClick={() => router.push("/dashboard")}
-            className="mt-6 bg-emerald-600 hover:bg-emerald-700"
+            className="mt-6 bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]"
           >
             {t("goToSession")}
           </Button>
@@ -248,7 +248,7 @@ export function PaymentInstructions({
         <p className="mt-1 text-sm text-slate-500">
           {sessionTime} - {endTime}
         </p>
-        <p className="mt-2 text-lg font-bold text-emerald-700">
+        <p className="mt-2 text-lg font-bold text-[var(--ev-blue)]">
           {formattedAmount} FCFA
         </p>
       </div>

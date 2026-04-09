@@ -72,7 +72,7 @@ export default async function AdminPaymentsPage() {
   return (
     <div className="pb-20 md:pb-0">
       <div className="mb-8 flex items-center gap-3">
-        <Wallet className="size-7 text-emerald-600" />
+        <Wallet className="size-7 text-[var(--ev-blue)]" />
         <div>
           <h1 className="text-2xl font-bold text-slate-900">
             {t("pendingPayments")}

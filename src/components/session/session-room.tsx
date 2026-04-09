@@ -127,21 +127,21 @@ export function SessionRoom({
       </h2>
       <div className="space-y-3">
         <div className="flex items-center gap-3 text-sm text-slate-600">
-          <User className="size-4 text-emerald-600" />
+          <User className="size-4 text-[var(--ev-blue)]" />
           <span>{t("sessionWith", { teacher: teacherName })}</span>
         </div>
         <div className="flex items-center gap-3 text-sm text-slate-600">
-          <BookOpen className="size-4 text-emerald-600" />
+          <BookOpen className="size-4 text-[var(--ev-blue)]" />
           <span>{t("subject", { subject: subjectLabel })}</span>
         </div>
         <div className="flex items-center gap-3 text-sm text-slate-600">
-          <Calendar className="size-4 text-emerald-600" />
+          <Calendar className="size-4 text-[var(--ev-blue)]" />
           <span>
             {t("dateTime", { date: formattedDate, time: formattedTime })}
           </span>
         </div>
         <div className="flex items-center gap-3 text-sm text-slate-600">
-          <Clock className="size-4 text-emerald-600" />
+          <Clock className="size-4 text-[var(--ev-blue)]" />
           <span>{t("duration", { duration: String(durationMinutes) })}</span>
         </div>
       </div>
@@ -154,8 +154,8 @@ export function SessionRoom({
       <div className="mx-auto max-w-lg space-y-6">
         {sessionInfoCard}
 
-        <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-6 text-center">
-          <p className="mb-2 text-sm text-emerald-700">{t("waiting")}</p>
+        <div className="rounded-xl border border-[var(--ev-green)]/10 bg-[var(--ev-green-50)] p-6 text-center">
+          <p className="mb-2 text-sm text-[var(--ev-blue)]">{t("waiting")}</p>
           <div className="text-3xl">
             <CountdownTimer
               targetDate={
@@ -187,13 +187,13 @@ export function SessionRoom({
       <div className="mx-auto max-w-lg space-y-6">
         {sessionInfoCard}
 
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-6 text-center">
-          <p className="text-sm font-medium text-emerald-700">{t("ready")}</p>
+        <div className="rounded-xl border border-[var(--ev-green)]/20 bg-[var(--ev-green-50)] p-6 text-center">
+          <p className="text-sm font-medium text-[var(--ev-blue)]">{t("ready")}</p>
         </div>
 
         <button
           onClick={handleJoinClick}
-          className="flex w-full animate-pulse items-center justify-center gap-2 rounded-lg bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700"
+          className="flex w-full animate-pulse items-center justify-center gap-2 rounded-lg bg-[var(--ev-blue)] px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[var(--ev-blue-light)]"
         >
           <Video className="size-4" />
           {t("join")}
@@ -253,7 +253,7 @@ export function SessionRoom({
         {userRole === "parent" && (
           <Link
             href={`/dashboard/parent/sessions`}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700"
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--ev-blue)] px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[var(--ev-blue-light)]"
           >
             <Star className="size-4" />
             {t("rateTeacher")}
@@ -263,7 +263,7 @@ export function SessionRoom({
         {userRole === "teacher" && (
           <Link
             href={`/dashboard/teacher/sessions`}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700"
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--ev-blue)] px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[var(--ev-blue-light)]"
           >
             {t("upcoming")}
           </Link>

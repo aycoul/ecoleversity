@@ -29,8 +29,8 @@ export default function VerifyPage() {
   return (
     <Card>
       <CardHeader className="text-center">
-        <div className="mx-auto mb-2 flex size-12 items-center justify-center rounded-full bg-emerald-100">
-          <ShieldCheck className="size-6 text-emerald-600" />
+        <div className="mx-auto mb-2 flex size-12 items-center justify-center rounded-full bg-[var(--ev-green)]/10">
+          <ShieldCheck className="size-6 text-[var(--ev-blue)]" />
         </div>
         <CardTitle className="text-xl">{t("otpEnter")}</CardTitle>
         <CardDescription>
@@ -58,7 +58,7 @@ export default function VerifyPage() {
           </div>
           <Button
             type="submit"
-            className="w-full bg-emerald-600 text-white hover:bg-emerald-700"
+            className="w-full bg-[var(--ev-blue)] text-white hover:bg-[var(--ev-blue-light)]"
             disabled={code.length !== 6 || loading}
           >
             {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
@@ -67,7 +67,7 @@ export default function VerifyPage() {
           <Button
             type="button"
             variant="ghost"
-            className="w-full text-emerald-600"
+            className="w-full text-[var(--ev-blue)]"
             disabled={loading}
           >
             {t("otpResend")}

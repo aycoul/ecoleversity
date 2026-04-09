@@ -49,7 +49,7 @@ export default async function TeacherClassesPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-slate-900">{t("myClasses")}</h1>
         <Link href="/dashboard/teacher/classes/new">
-          <Button className="bg-emerald-600 hover:bg-emerald-700">
+          <Button className="bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]">
             <Plus className="mr-2 size-4" />
             {t("createClass")}
           </Button>
@@ -132,7 +132,7 @@ function ClassRow({
       <h3 className="font-semibold text-slate-800">{cls.title}</h3>
       <div className="mt-2 space-y-1 text-sm text-slate-500">
         <div className="flex items-center gap-1.5">
-          <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+          <span className="inline-flex items-center rounded-full bg-[var(--ev-green-50)] px-2 py-0.5 text-xs font-medium text-[var(--ev-blue)]">
             {SUBJECT_LABELS[cls.subject as Subject] ?? cls.subject}
           </span>
           <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">

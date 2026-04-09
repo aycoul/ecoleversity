@@ -46,12 +46,12 @@ export function TeacherCard({ teacher }: TeacherCardProps) {
           href={`/teachers/${teacher.id}`}
           className="flex flex-col items-center gap-3"
         >
-          <Avatar className="size-16 border-2 border-emerald-100">
+          <Avatar className="size-16 border-2 border-[var(--ev-green)]/10">
             <AvatarImage
               src={teacher.avatar_url ?? undefined}
               alt={teacher.display_name}
             />
-            <AvatarFallback className="bg-emerald-100 text-lg font-bold text-emerald-700">
+            <AvatarFallback className="bg-[var(--ev-green)]/10 text-lg font-bold text-[var(--ev-blue)]">
               {initials}
             </AvatarFallback>
           </Avatar>
@@ -62,7 +62,7 @@ export function TeacherCard({ teacher }: TeacherCardProps) {
                 {teacher.display_name}
               </h3>
               {isVerified && (
-                <ShieldCheck className="size-4 text-emerald-600" />
+                <ShieldCheck className="size-4 text-[var(--ev-blue)]" />
               )}
             </div>
 
@@ -103,7 +103,7 @@ export function TeacherCard({ teacher }: TeacherCardProps) {
               <Badge
                 key={s}
                 variant="secondary"
-                className="bg-emerald-50 text-emerald-700 text-xs"
+                className="bg-[var(--ev-green-50)] text-[var(--ev-blue)] text-xs"
               >
                 {SUBJECT_LABELS[s] ?? s}
               </Badge>
@@ -130,7 +130,7 @@ export function TeacherCard({ teacher }: TeacherCardProps) {
             variant: "outline",
             size: "sm",
             className:
-              "mt-1 w-full border-emerald-200 text-emerald-700 hover:bg-emerald-50",
+              "mt-1 w-full border-[var(--ev-green)]/20 text-[var(--ev-blue)] hover:bg-[var(--ev-green-50)]",
           })}
         >
           {t("viewProfile")}

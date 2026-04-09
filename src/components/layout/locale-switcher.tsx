@@ -19,7 +19,7 @@ export function LocaleSwitcher() {
         onClick={() => switchLocale("fr")}
         className={`rounded-md px-2 py-0.5 text-xs font-medium transition-colors ${
           locale === "fr"
-            ? "bg-emerald-600 text-white"
+            ? "bg-[var(--ev-blue)] text-white"
             : "text-slate-500 hover:text-slate-900"
         }`}
       >
@@ -29,7 +29,7 @@ export function LocaleSwitcher() {
         onClick={() => switchLocale("en")}
         className={`rounded-md px-2 py-0.5 text-xs font-medium transition-colors ${
           locale === "en"
-            ? "bg-emerald-600 text-white"
+            ? "bg-[var(--ev-blue)] text-white"
             : "text-slate-500 hover:text-slate-900"
         }`}
       >

@@ -119,7 +119,7 @@ export default async function ClassDetailPage({
             </div>
             <Link
               href={`/teachers/${teacher.id}`}
-              className="text-sm font-medium text-emerald-600 hover:underline"
+              className="text-sm font-medium text-[var(--ev-blue)] hover:underline"
             >
               {teacher.display_name}
             </Link>
@@ -128,7 +128,7 @@ export default async function ClassDetailPage({
 
         {/* Badges */}
         <div className="mt-4 flex flex-wrap gap-2">
-          <span className="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-700">
+          <span className="inline-flex items-center rounded-full bg-[var(--ev-green-50)] px-3 py-1 text-sm font-medium text-[var(--ev-blue)]">
             {SUBJECT_LABELS[liveClass.subject as Subject] ?? liveClass.subject}
           </span>
           <span className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700">
@@ -147,18 +147,18 @@ export default async function ClassDetailPage({
         {/* Details grid */}
         <div className="mt-6 grid gap-4 rounded-lg bg-slate-50 p-4 sm:grid-cols-2">
           <div className="flex items-center gap-2 text-sm text-slate-600">
-            <Calendar className="size-4 text-emerald-600" />
+            <Calendar className="size-4 text-[var(--ev-blue)]" />
             <div>
               <div className="font-medium text-slate-800">{dateStr}</div>
               <div>{timeStr}</div>
             </div>
           </div>
           <div className="flex items-center gap-2 text-sm text-slate-600">
-            <Clock className="size-4 text-emerald-600" />
+            <Clock className="size-4 text-[var(--ev-blue)]" />
             <span>{liveClass.duration_minutes} min</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-slate-600">
-            <Users className="size-4 text-emerald-600" />
+            <Users className="size-4 text-[var(--ev-blue)]" />
             <span>
               {isFull
                 ? t("spotsFull")
@@ -167,7 +167,7 @@ export default async function ClassDetailPage({
               ({enrolled}/{liveClass.max_students})
             </span>
           </div>
-          <div className="text-lg font-bold text-emerald-700">
+          <div className="text-lg font-bold text-[var(--ev-blue)]">
             {liveClass.price_xof.toLocaleString("fr-CI")} FCFA
             <span className="text-sm font-normal text-slate-400">
               {" "}{t("perStudent")}
@@ -180,7 +180,7 @@ export default async function ClassDetailPage({
           <div className="h-2 w-full rounded-full bg-slate-100">
             <div
               className={`h-full rounded-full transition-all ${
-                isFull ? "bg-red-400" : "bg-emerald-500"
+                isFull ? "bg-red-400" : "bg-[var(--ev-green)]"
               }`}
               style={{
                 width: `${Math.min(100, Math.round((enrolled / liveClass.max_students) * 100))}%`,
@@ -193,7 +193,7 @@ export default async function ClassDetailPage({
         <div className="mt-6">
           {!user ? (
             <Link href="/login">
-              <button className="w-full rounded-lg bg-emerald-600 px-4 py-3 text-sm font-medium text-white hover:bg-emerald-700">
+              <button className="w-full rounded-lg bg-[var(--ev-blue)] px-4 py-3 text-sm font-medium text-white hover:bg-[var(--ev-blue-light)]">
                 {t("enroll")}
               </button>
             </Link>
