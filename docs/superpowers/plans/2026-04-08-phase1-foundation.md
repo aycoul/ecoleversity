@@ -1744,7 +1744,165 @@ This plan continues with Tasks 6-12 covering:
 - **Task 11:** Admin dashboard — teacher verification queue
 - **Task 12:** PWA manifest + service worker + mobile nav
 
-**Due to plan size, Tasks 6-12 will be in a Part 2 plan file.**
+---
+
+### Task 6: Root Layout + App Shell
+
+**Files:**
+- Create: `src/components/layout/header.tsx` — sticky header with logo, desktop nav, auth buttons, locale switcher, mobile hamburger
+- Create: `src/components/layout/footer.tsx` — dark footer with links, social icons, copyright
+- Create: `src/components/layout/mobile-nav.tsx` — Shadcn Sheet side panel for mobile navigation
+- Create: `src/components/layout/locale-switcher.tsx` — FR/EN toggle
+- Modify: `src/app/[locale]/layout.tsx` — add Header + Footer, min-h-screen flex layout, metadata
+
+- [ ] **Step 1:** Build header — logo (GraduationCap icon + "EcoleVersity" gradient text), desktop nav (5 links from `navigation.*` i18n), "Se connecter" / "S'inscrire" buttons, locale switcher. Sticky top, white bg, border-b. Hide desktop nav on mobile, show hamburger.
+
+- [ ] **Step 2:** Build mobile nav — Shadcn Sheet (side=left), logo at top, nav links, locale switcher, auth buttons at bottom. Close on link click.
+
+- [ ] **Step 3:** Build locale switcher — FR/EN toggle, emerald highlight on active. Uses `useRouter`/`usePathname` from `@/i18n/routing`.
+
+- [ ] **Step 4:** Build footer — slate-900 bg, brand section, link columns (about, help, terms, privacy), social placeholders (Facebook, Instagram, WhatsApp). Stack vertically on mobile.
+
+- [ ] **Step 5:** Update root layout — Header + `<main className="flex-1">` + Footer. Add metadata (title, description, viewport, theme-color #059669).
+
+- [ ] **Step 6:** Add footer i18n keys. Build, commit.
+
+---
+
+### Task 7: Landing Page
+
+**Files:**
+- Modify: `src/app/[locale]/page.tsx` — complete landing page (Server Component)
+
+- [ ] **Step 1:** Build hero section — large headline (`landing.hero.title`), subtitle, two CTA buttons (emerald filled for parents → `/register?role=parent`, outline for teachers → `/register?role=teacher`). Subtle gradient background.
+
+- [ ] **Step 2:** Build "How it works" section — 3 steps with numbered emerald circles + lucide icons (Search, Wallet, Video) + title + description from i18n.
+
+- [ ] **Step 3:** Build features section — 2x2 grid of Shadcn Cards with hover effect. Icons: ShieldCheck, Smartphone, Banknote, Lock. All text from `landing.features.*`.
+
+- [ ] **Step 4:** Build stats section — 3 big numbers (emerald text) on emerald-50 bg. Placeholder "0+" for teachers, students, sessions.
+
+- [ ] **Step 5:** Build final CTA section — emerald-600 bg, white text, heading + repeat CTA buttons.
+
+- [ ] **Step 6:** Build, commit.
+
+---
+
+### Task 8: Auth Flows
+
+**Files:**
+- Create: `src/app/[locale]/(auth)/layout.tsx` — centered card, logo, clean design
+- Create: `src/app/[locale]/(auth)/register/page.tsx`
+- Create: `src/app/[locale]/(auth)/login/page.tsx`
+- Create: `src/app/[locale]/(auth)/verify/page.tsx` — OTP verification placeholder
+- Create: `src/components/auth/register-form.tsx` — role selection + email/password + Google
+- Create: `src/components/auth/login-form.tsx` — email/password + Google
+- Create: `src/app/api/auth/callback/route.ts` — OAuth callback handler
+- Create: `src/lib/auth-redirect.ts` — post-login redirect logic
+
+- [ ] **Step 1:** Build auth layout — centered max-w-md Card, logo at top, gradient or white bg.
+
+- [ ] **Step 2:** Build register form — Step 1: role selection (two large cards: parent/teacher). Step 2: display name + email + password form + "Continuer avec Google" + link to login. Zod validation. On submit: `supabase.auth.signUp()` with role in metadata. Redirect to onboarding.
+
+- [ ] **Step 3:** Build login form — email + password + "Continuer avec Google" + forgot password link + register link. On submit: `supabase.auth.signInWithPassword()`. Query profile for role → redirect via `getAuthRedirect()`.
+
+- [ ] **Step 4:** Build auth redirect helper — checks role + verification status + children count. Routes: admin→admin dashboard, unverified teacher→teacher onboarding, verified teacher→teacher dashboard, parent no children→parent onboarding, parent with children→parent dashboard.
+
+- [ ] **Step 5:** Build OAuth callback route — exchange code for session, redirect based on role.
+
+- [ ] **Step 6:** Build, commit.
+
+---
+
+### Task 9: Teacher Onboarding Wizard (7 Steps)
+
+**Files:**
+- Create: `src/app/[locale]/(onboarding)/layout.tsx` — clean onboarding layout, no header/footer
+- Create: `src/components/onboarding/step-wizard.tsx` — reusable wizard shell with progress bar
+- Create: `src/app/[locale]/(onboarding)/teacher/page.tsx` — wizard page managing 7 steps
+- Create: `src/components/onboarding/teacher/welcome-step.tsx`
+- Create: `src/components/onboarding/teacher/profile-step.tsx` — bio, subjects, grades, city, photo
+- Create: `src/components/onboarding/teacher/verification-step.tsx` — CNI + diploma + video upload
+- Create: `src/components/onboarding/teacher/first-course-step.tsx` — informational tips
+- Create: `src/components/onboarding/teacher/jitsi-test-step.tsx` — test call + checklists
+- Create: `src/components/onboarding/teacher/payout-step.tsx` — provider + phone number
+- Create: `src/components/onboarding/teacher/ready-step.tsx` — summary + CTA to dashboard
+
+- [ ] **Step 1:** Build reusable StepWizard — progress bar (Shadcn Progress), step indicator text, content area, prev/next buttons ("Terminer" on last step).
+
+- [ ] **Step 2:** Build 7 step components. Data steps (profile, verification, payout) save to Supabase progressively. Uploads to "teacher-documents" Storage bucket. Multi-select subjects/grades as checkbox grids using domain constants.
+
+- [ ] **Step 3:** Build, commit.
+
+---
+
+### Task 10: Parent Onboarding Wizard (4 Steps)
+
+**Files:**
+- Create: `src/app/[locale]/(onboarding)/parent/page.tsx` — wizard managing 4 steps
+- Create: `src/components/onboarding/parent/welcome-step.tsx`
+- Create: `src/components/onboarding/parent/add-child-step.tsx` — add multiple children
+- Create: `src/components/onboarding/parent/recommendations-step.tsx` — subject grid per child
+- Create: `src/components/onboarding/parent/dashboard-tour-step.tsx` — preview + CTA
+
+- [ ] **Step 1:** Build 4 step components. Reuse StepWizard. Add-child step saves to `learner_profiles` (requires at least 1 child). Multi-child support with add/delete. Recommendations based on grade → SUBJECTS_BY_LEVEL.
+
+- [ ] **Step 2:** Build, commit.
+
+---
+
+### Task 11: Admin Teacher Verification Dashboard
+
+**Files:**
+- Create: `src/app/[locale]/(dashboard)/layout.tsx` — dashboard layout with role-based sidebar
+- Create: `src/components/admin/dashboard-shell.tsx` — sidebar (desktop) + bottom tabs (mobile)
+- Create: `src/app/[locale]/(dashboard)/dashboard/admin/verification/page.tsx`
+- Create: `src/components/admin/teacher-verification-card.tsx` — view docs + approve/reject
+- Create: `src/app/api/admin/verify-teacher/route.ts`
+- Create: `src/app/[locale]/(dashboard)/dashboard/admin/page.tsx` — redirect to verification
+- Create: `src/app/[locale]/(dashboard)/dashboard/teacher/page.tsx` — placeholder
+- Create: `src/app/[locale]/(dashboard)/dashboard/parent/page.tsx` — placeholder
+
+- [ ] **Step 1:** Build dashboard layout — server component fetches user profile for role. Renders DashboardShell with role-appropriate nav links.
+
+- [ ] **Step 2:** Build dashboard shell — desktop sidebar (slate-50, emerald active), mobile bottom tab bar. Icons from lucide-react.
+
+- [ ] **Step 3:** Build verification page — fetch pending teachers (joined with profiles). Verification card: name, city, subjects/grades badges, document buttons (image preview in Dialog, PDF/video in new tab via signed URLs), approve (emerald) / reject (red) buttons.
+
+- [ ] **Step 4:** Build verify-teacher API — POST, admin-only, Zod validation, updates verification_status.
+
+- [ ] **Step 5:** Build, commit.
+
+---
+
+### Task 12: PWA Manifest + Mobile Polish
+
+**Files:**
+- Create: `public/manifest.json` — PWA manifest
+- Create: `public/sw.js` — service worker skeleton
+- Create: `src/components/common/sw-register.tsx` — register service worker
+- Modify: `src/app/[locale]/layout.tsx` — manifest link + mobile web app meta
+
+- [ ] **Step 1:** Create manifest.json — name "EcoleVersity", theme_color #059669, display standalone, start_url /fr, icon references (192, 512).
+
+- [ ] **Step 2:** Create minimal service worker — install/activate/fetch handlers. Pass-through fetch for now (caching strategy added later).
+
+- [ ] **Step 3:** Create SW register component — registers /sw.js on mount. Add to root layout.
+
+- [ ] **Step 4:** Add manifest link + apple-mobile-web-app meta tags to layout.
+
+- [ ] **Step 5:** Build, commit.
+
+---
+
+### Checkpoint: Phase 1 Complete
+- [ ] All builds pass
+- [ ] Teacher signup → onboarding → verified by admin
+- [ ] Parent signup → add child → dashboard
+- [ ] Landing page renders with all 5 sections
+- [ ] Mobile-first at 375px
+- [ ] PWA installable
+- [ ] Locale switching (FR/EN) works
 
 ---
 
