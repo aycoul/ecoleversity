@@ -33,9 +33,9 @@ export default async function Home() {
   ];
 
   const futures = [
-    { src: "/illustrations/future-doctor.png", labelKey: "futureDoctor" as const },
-    { src: "/illustrations/future-engineer.png", labelKey: "futureEngineer" as const },
-    { src: "/illustrations/future-entrepreneur.png", labelKey: "futureEntrepreneur" as const },
+    { src: "/illustrations/future-doctor.webp", labelKey: "futureDoctor" as const },
+    { src: "/illustrations/future-engineer.webp", labelKey: "futureEngineer" as const },
+    { src: "/illustrations/future-entrepreneur.webp", labelKey: "futureEntrepreneur" as const },
   ];
 
   return (
@@ -95,7 +95,7 @@ export default async function Home() {
 
             <div className="animate-fade-in-up animation-delay-300 lg:order-last">
               <Image
-                src="/illustrations/hero-kids.png"
+                src="/illustrations/hero-kids.webp"
                 alt=""
                 width={600}
                 height={450}
@@ -152,7 +152,7 @@ export default async function Home() {
           <AnimateOnScroll>
             <div className="mt-16 flex justify-center">
               <Image
-                src="/illustrations/parent-child.png"
+                src="/illustrations/parent-child.webp"
                 alt=""
                 width={480}
                 height={360}
@@ -210,7 +210,7 @@ export default async function Home() {
           <AnimateOnScroll delay={100}>
             <div className="mt-10 flex justify-center">
               <Image
-                src="/illustrations/dreams.png"
+                src="/illustrations/dreams.webp"
                 alt=""
                 width={800}
                 height={400}
@@ -265,7 +265,7 @@ export default async function Home() {
                 </p>
                 <div className="mt-6 flex items-center gap-3">
                   <Image
-                    src="/illustrations/teacher.png"
+                    src="/illustrations/teacher.webp"
                     alt=""
                     width={48}
                     height={48}
@@ -292,7 +292,7 @@ export default async function Home() {
                 </p>
                 <div className="mt-6 flex items-center gap-3">
                   <Image
-                    src="/illustrations/parent-child.png"
+                    src="/illustrations/parent-child.webp"
                     alt=""
                     width={48}
                     height={48}
@@ -320,7 +320,7 @@ export default async function Home() {
             <AnimateOnScroll>
               <div className="flex justify-center lg:order-first">
                 <Image
-                  src="/illustrations/graduation.png"
+                  src="/illustrations/graduation.webp"
                   alt=""
                   width={400}
                   height={400}

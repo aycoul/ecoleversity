@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { parsePaymentSms } from "@/lib/payments/bootstrap";
 import { sendNotification } from "@/lib/notifications/service";
+import crypto from "crypto";
 
 const smsConfirmSchema = z.object({
   amount: z.number().int().positive(),
@@ -10,17 +11,40 @@ const smsConfirmSchema = z.object({
   reference: z.string().min(1),
   provider: z.string().min(1),
   rawSms: z.string().min(1),
+  timestamp: z.number().int().positive(),
 });
+
+const ALLOWED_IPS = (process.env.SMS_ALLOWED_IPS ?? "72.62.237.25,127.0.0.1").split(",").map((ip) => ip.trim());
+const MAX_AGE_MS = 5 * 60 * 1000; // 5 minutes
+
+function verifyHmac(payload: string, signature: string, secret: string): boolean {
+  const expected = crypto.createHmac("sha256", secret).update(payload).digest("hex");
+  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
+}
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify SMS webhook secret
-    const secret = request.headers.get("X-SMS-Secret");
-    if (!secret || secret !== process.env.SMS_WEBHOOK_SECRET) {
+    // IP allowlist check
+    const clientIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+      ?? request.headers.get("x-real-ip")
+      ?? "unknown";
+
+    if (!ALLOWED_IPS.includes(clientIp)) {
+      console.warn(`[sms-confirm] Rejected IP: ${clientIp}`);
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await request.json();
+    // Verify HMAC signature
+    const signature = request.headers.get("X-SMS-Signature");
+    const rawBody = await request.text();
+    const secret = process.env.SMS_WEBHOOK_SECRET;
+
+    if (!secret || !signature || !verifyHmac(rawBody, signature, secret)) {
+      console.warn("[sms-confirm] Invalid HMAC signature");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = JSON.parse(rawBody);
     const parsed = smsConfirmSchema.safeParse(body);
 
     if (!parsed.success) {
@@ -30,7 +54,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { amount, reference, provider, rawSms } = parsed.data;
+    const { amount, reference, provider, rawSms, timestamp } = parsed.data;
+
+    // Reject stale requests (replay protection)
+    const age = Date.now() - timestamp;
+    if (age > MAX_AGE_MS || age < -MAX_AGE_MS) {
+      console.warn(`[sms-confirm] Stale request: age=${age}ms, ref=${reference}`);
+      return NextResponse.json({ error: "Request expired" }, { status: 400 });
+    }
 
     // Also parse the raw SMS to double-check
     const smsData = parsePaymentSms(rawSms, provider);

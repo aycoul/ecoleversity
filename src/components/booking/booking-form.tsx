@@ -168,10 +168,10 @@ export function BookingForm({
 
   function buildScheduledAt(): string {
     if (!selectedDate || !selectedSlot) return "";
-    const d = new Date(selectedDate);
-    const [h, m] = selectedSlot.start.split(":").map(Number);
-    d.setHours(h, m, 0, 0);
-    return d.toISOString();
+    // Build ISO string directly to avoid browser timezone issues
+    // Slot times are Africa/Abidjan (GMT+0 = UTC), so construct UTC directly
+    const dateStr = selectedDate.toISOString().split("T")[0];
+    return `${dateStr}T${selectedSlot.start}:00.000Z`;
   }
 
   async function handleConfirm() {

@@ -7,15 +7,7 @@ import { sendNotification } from "@/lib/notifications/service";
 const sendMessageSchema = z.object({
   conversationId: z.string().uuid(),
   content: z.string().min(1).max(5000),
-  attachments: z
-    .array(
-      z.object({
-        name: z.string(),
-        url: z.string().url(),
-        size: z.number(),
-      })
-    )
-    .default([]),
+  // No attachments allowed — spec: "No image attachments in DMs" (child safety)
 });
 
 export async function GET(request: NextRequest) {
@@ -113,7 +105,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { conversationId, content, attachments } = parsed.data;
+    const { conversationId, content } = parsed.data;
     const supabase = await createServerSupabaseClient();
     const {
       data: { user },
@@ -151,7 +143,6 @@ export async function POST(request: NextRequest) {
         sender_id: user.id,
         content: finalContent,
         content_flagged: !detection.isClean,
-        attachments,
       })
       .select("id, sender_id, content, content_flagged, attachments, created_at")
       .single();

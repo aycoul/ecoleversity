@@ -71,31 +71,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if already enrolled
-    const { data: existingEnrollment } = await supabase
-      .from("enrollments")
-      .select("id")
-      .eq("live_class_id", classId)
-      .eq("learner_id", learnerId)
-      .maybeSingle();
+    // Atomic enrollment — prevents TOCTOU race condition via DB-level lock
+    const { data: enrollResult, error: enrollRpcError } = await supabase
+      .rpc("enroll_learner_atomic", {
+        p_learner_id: learnerId,
+        p_live_class_id: classId,
+      });
 
-    if (existingEnrollment) {
+    if (enrollRpcError) {
+      console.error("Enrollment RPC error:", enrollRpcError);
+      return NextResponse.json(
+        { error: "Erreur lors de l'inscription" },
+        { status: 500 }
+      );
+    }
+
+    const result = enrollResult as { error?: string; success?: boolean; enrollment_id?: string; current_count?: number };
+
+    if (result.error === "already_enrolled") {
       return NextResponse.json(
         { error: "Deja inscrit a ce cours" },
         { status: 409 }
       );
     }
 
-    // Count current enrollments
-    const { count: enrollmentCount } = await supabase
-      .from("enrollments")
-      .select("id", { count: "exact", head: true })
-      .eq("live_class_id", classId);
-
-    const currentCount = enrollmentCount ?? 0;
+    if (result.error === "class_not_available") {
+      return NextResponse.json(
+        { error: "Ce cours n'est plus disponible" },
+        { status: 400 }
+      );
+    }
 
     // If full, add to waitlist
-    if (currentCount >= liveClass.max_students) {
+    if (result.error === "class_full") {
       // Get current max waitlist position
       const { data: maxPos } = await supabase
         .from("waitlists")
@@ -137,19 +145,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Create enrollment
-    const { error: enrollError } = await supabase.from("enrollments").insert({
-      learner_id: learnerId,
-      live_class_id: classId,
-    });
-
-    if (enrollError) {
-      console.error("Error creating enrollment:", enrollError);
-      return NextResponse.json(
-        { error: "Erreur lors de l'inscription" },
-        { status: 500 }
-      );
-    }
+    // Enrollment succeeded via RPC — now create the transaction
 
     // Get teacher commission rate
     const { data: teacherProfile } = await supabase

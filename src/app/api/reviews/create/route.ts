@@ -67,12 +67,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify parent was enrolled
+    // Verify parent's child was enrolled (enrollments has learner_id, not parent_id)
+    const { data: parentLearners } = await adminSupabase
+      .from("learner_profiles")
+      .select("id")
+      .eq("parent_id", user.id);
+
+    const learnerIds = (parentLearners ?? []).map((l) => l.id);
+
     const { count: enrollCount } = await adminSupabase
       .from("enrollments")
       .select("id", { count: "exact", head: true })
       .eq("live_class_id", liveClassId)
-      .eq("parent_id", user.id);
+      .in("learner_id", learnerIds.length > 0 ? learnerIds : ["none"]);
 
     if (!enrollCount || enrollCount === 0) {
       return NextResponse.json(

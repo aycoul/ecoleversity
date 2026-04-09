@@ -114,12 +114,16 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
 
   const handleGoogleLogin = async () => {
     setLoading(true);
+
+    // Store role in httpOnly-like cookie before OAuth redirect (prevents URL tampering)
+    document.cookie = `ev_register_role=${role};path=/;max-age=600;samesite=lax`;
+
     const supabase = createClient();
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/api/auth/callback?role=${role}`,
+        redirectTo: `${window.location.origin}/api/auth/callback`,
         queryParams: {
           access_type: "offline",
           prompt: "consent",

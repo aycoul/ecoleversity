@@ -7,13 +7,16 @@ import { getAuthRedirect } from "@/lib/auth-redirect";
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const role = searchParams.get("role");
 
   if (!code) {
     return NextResponse.redirect(`${origin}/fr/login`);
   }
 
   const cookieStore = await cookies();
+
+  // Read role from secure cookie (set by register form), not from URL query param
+  const roleCookie = cookieStore.get("ev_register_role")?.value;
+  const role = roleCookie === "parent" || roleCookie === "teacher" ? roleCookie : null;
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -38,12 +41,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/fr/login`);
   }
 
-  // If role was passed (from register flow), update user metadata
-  if (role === "parent" || role === "teacher") {
+  // If role was set during registration, update user metadata
+  if (role) {
     await supabase.auth.updateUser({
       data: { role },
     });
   }
+
+  // Clear the role cookie
+  cookieStore.set("ev_register_role", "", { path: "/", maxAge: 0 });
 
   // Determine where to redirect based on user role/status
   const { path } = await getAuthRedirect(supabase);
