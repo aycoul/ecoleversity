@@ -1,23 +1,24 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import { GraduationCap } from "lucide-react";
+import Image from "next/image";
 
 export function Footer() {
   const t = useTranslations("footer");
   const tc = useTranslations("common");
 
   return (
-    <footer className="bg-slate-900 text-slate-300">
+    <footer className="bg-[var(--ev-blue-dark)] text-slate-300">
       <div className="mx-auto max-w-7xl px-4 py-10 md:px-8">
         <div className="flex flex-col gap-8 md:flex-row md:justify-between">
           {/* Brand */}
           <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-              <GraduationCap className="size-6 text-emerald-400" />
-              <span className="text-lg font-bold text-white">
-                {tc("appName")}
-              </span>
-            </div>
+            <Image
+              src="/logo.png"
+              alt="EcoleVersity"
+              width={140}
+              height={35}
+              className="h-8 w-auto brightness-0 invert"
+            />
             <p className="max-w-xs text-sm text-slate-400">
               {tc("tagline")}
             </p>
@@ -93,7 +94,7 @@ export function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="mt-8 border-t border-slate-800 pt-6 text-center text-xs text-slate-500">
+        <div className="mt-8 border-t border-white/10 pt-6 text-center text-xs text-slate-400">
           {t("copyright")}
         </div>
       </div>
