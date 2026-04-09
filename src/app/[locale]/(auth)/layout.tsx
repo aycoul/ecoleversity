@@ -12,9 +12,9 @@ export default function AuthLayout({
         <Image
           src="/logo.png"
           alt="écoleVersity"
-          width={180}
-          height={45}
-          className="h-11 w-auto"
+          width={220}
+          height={56}
+          className="h-14 w-auto"
           priority
         />
       </Link>

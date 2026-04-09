@@ -38,7 +38,7 @@ export function MobileNav({ open, onOpenChange }: MobileNavProps) {
         <SheetHeader className="pb-0">
           <SheetTitle>
             <Link href="/" onClick={() => onOpenChange(false)}>
-              <Image src="/logo.png" alt="écoleVersity" width={140} height={35} className="h-8 w-auto" />
+              <Image src="/logo.png" alt="écoleVersity" width={180} height={48} className="h-11 w-auto" />
             </Link>
           </SheetTitle>
         </SheetHeader>

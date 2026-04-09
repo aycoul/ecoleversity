@@ -23,15 +23,15 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-100 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-8">
+      <div className="mx-auto flex h-18 max-w-7xl items-center justify-between px-4 md:px-8">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-1.5">
           <Image
             src="/logo.png"
             alt="écoleVersity"
-            width={160}
-            height={40}
-            className="h-9 w-auto"
+            width={200}
+            height={52}
+            className="h-12 w-auto sm:h-14"
             priority
           />
         </Link>

@@ -67,7 +67,7 @@ export function DashboardShell({
       {/* Desktop sidebar */}
       <aside className="hidden w-64 shrink-0 border-r border-slate-200 bg-slate-50 md:flex md:flex-col">
         <div className="border-b border-slate-200 px-4 py-4">
-          <Image src="/logo.png" alt="écoleVersity" width={140} height={35} className="h-8 w-auto" />
+          <Image src="/logo.png" alt="écoleVersity" width={180} height={48} className="h-11 w-auto" />
         </div>
 
         <nav className="flex-1 px-3 py-4">

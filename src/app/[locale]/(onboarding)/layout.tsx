@@ -14,9 +14,9 @@ export default function OnboardingLayout({
         <Image
           src="/logo.png"
           alt="écoleVersity"
-          width={180}
-          height={45}
-          className="h-11 w-auto"
+          width={220}
+          height={56}
+          className="h-14 w-auto"
         />
       </Link>
       <div className="w-full max-w-2xl">{children}</div>
