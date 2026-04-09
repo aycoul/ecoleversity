@@ -1,4 +1,4 @@
-// EcoleVersity Service Worker — Push + Offline caching skeleton
+// écoleVersity Service Worker — Push + Offline caching skeleton
 
 const CACHE_NAME = 'ecoleversity-v1';
 
@@ -19,7 +19,7 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('push', (event) => {
   const data = event.data?.json() ?? {};
   event.waitUntil(
-    self.registration.showNotification(data.title || 'EcoleVersity', {
+    self.registration.showNotification(data.title || 'écoleVersity', {
       body: data.body || '',
       icon: '/icons/icon-192.png',
       badge: '/icons/icon-192.png',

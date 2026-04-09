@@ -20,8 +20,8 @@ function getResend(): Resend | null {
 }
 
 const FROM = process.env.NOTIFICATION_FROM_EMAIL
-  ? `EcoleVersity <${process.env.NOTIFICATION_FROM_EMAIL}>`
-  : 'EcoleVersity <notifications@ecoleversity.com>';
+  ? `écoleVersity <${process.env.NOTIFICATION_FROM_EMAIL}>`
+  : 'écoleVersity <notifications@ecoleversity.com>';
 
 async function getUserEmail(userId: string): Promise<string | null> {
   const supabase = createAdminClient();
@@ -57,7 +57,7 @@ async function buildEmail(payload: NotificationPayload): Promise<EmailContent> {
         data.price ?? '',
         String(data.reference ?? ''),
       );
-      return { subject: 'Réservation confirmée — EcoleVersity', html, text };
+      return { subject: 'Réservation confirmée — écoleVersity', html, text };
     }
 
     case 'payment_confirmed': {
@@ -67,7 +67,7 @@ async function buildEmail(payload: NotificationPayload): Promise<EmailContent> {
         String(data.time ?? ''),
         data.amount ?? '',
       );
-      return { subject: 'Paiement confirmé — EcoleVersity', html, text };
+      return { subject: 'Paiement confirmé — écoleVersity', html, text };
     }
 
     case 'session_reminder_24h':
@@ -81,7 +81,7 @@ async function buildEmail(payload: NotificationPayload): Promise<EmailContent> {
         minutes,
       );
       const label = event === 'session_reminder_24h' ? 'demain' : 'dans 15 min';
-      return { subject: `Rappel : cours ${label} — EcoleVersity`, html, text };
+      return { subject: `Rappel : cours ${label} — écoleVersity`, html, text };
     }
 
     case 'new_message': {
@@ -89,19 +89,19 @@ async function buildEmail(payload: NotificationPayload): Promise<EmailContent> {
         String(data.senderName ?? ''),
         String(data.preview ?? ''),
       );
-      return { subject: `Nouveau message de ${data.senderName} — EcoleVersity`, html, text };
+      return { subject: `Nouveau message de ${data.senderName} — écoleVersity`, html, text };
     }
 
     case 'teacher_verified': {
       const name = data.teacherName ? String(data.teacherName) : await getUserName(payload.userId);
       const { html, text } = teacherVerifiedEmail(name);
-      return { subject: 'Profil vérifié — EcoleVersity', html, text };
+      return { subject: 'Profil vérifié — écoleVersity', html, text };
     }
 
     case 'teacher_rejected': {
       const name = data.teacherName ? String(data.teacherName) : await getUserName(payload.userId);
       const { html, text } = teacherRejectedEmail(name, data.reason ? String(data.reason) : undefined);
-      return { subject: 'Vérification non approuvée — EcoleVersity', html, text };
+      return { subject: 'Vérification non approuvée — écoleVersity', html, text };
     }
 
     case 'new_review': {
@@ -111,7 +111,7 @@ async function buildEmail(payload: NotificationPayload): Promise<EmailContent> {
         data.comment ? String(data.comment) : undefined,
         String(data.className ?? ''),
       );
-      return { subject: 'Nouvel avis reçu — EcoleVersity', html, text };
+      return { subject: 'Nouvel avis reçu — écoleVersity', html, text };
     }
 
     case 'payout_processed': {
@@ -119,7 +119,7 @@ async function buildEmail(payload: NotificationPayload): Promise<EmailContent> {
         data.amount ?? '',
         String(data.provider ?? ''),
       );
-      return { subject: 'Virement effectué — EcoleVersity', html, text };
+      return { subject: 'Virement effectué — écoleVersity', html, text };
     }
 
     default:

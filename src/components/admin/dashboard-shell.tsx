@@ -68,7 +68,7 @@ export function DashboardShell({
       <aside className="hidden w-64 shrink-0 border-r border-slate-200 bg-slate-50 md:flex md:flex-col">
         <div className="flex items-center gap-2 border-b border-slate-200 px-4 py-4">
           <GraduationCap className="size-6 text-emerald-600" />
-          <span className="text-lg font-bold text-emerald-600">EcoleVersity</span>
+          <span className="text-lg font-bold text-emerald-600">écoleVersity</span>
         </div>
 
         <nav className="flex-1 px-3 py-4">

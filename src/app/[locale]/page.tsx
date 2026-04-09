@@ -135,7 +135,7 @@ export default async function Home() {
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
           <div className="text-center">
             <p className="text-sm font-semibold uppercase tracking-widest text-[var(--ev-green)]">
-              Pourquoi EcoleVersity
+              Pourquoi écoleVersity
             </p>
             <h2 className="mt-2 text-3xl font-bold tracking-tight text-[var(--ev-blue)] sm:text-4xl">
               {t("features.title")}
@@ -200,7 +200,7 @@ export default async function Home() {
           <div className="flex flex-col items-center text-center">
             <Image
               src="/logo.png"
-              alt="EcoleVersity"
+              alt="écoleVersity"
               width={200}
               height={50}
               className="mb-8 h-12 w-auto brightness-0 invert"

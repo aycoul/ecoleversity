@@ -21,7 +21,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EcoleVersity — Le meilleur maître de maison en ligne",
+  title: "écoleVersity — Le meilleur maître de maison en ligne",
   description:
     "Trouvez un enseignant qualifié pour votre enfant. Cours particuliers, cours de groupe, préparation aux examens — où que vous soyez en Côte d'Ivoire.",
 };
@@ -56,7 +56,7 @@ export default async function LocaleLayout({
         <link rel="manifest" href="/manifest.json" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="EcoleVersity" />
+        <meta name="apple-mobile-web-app-title" content="écoleVersity" />
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
       <body className="flex min-h-full flex-col bg-white text-slate-900">

@@ -14,7 +14,7 @@ export default function AuthLayout({
       >
         <GraduationCap className="size-8 text-emerald-600" />
         <span className="bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-2xl font-bold text-transparent">
-          EcoleVersity
+          écoleVersity
         </span>
       </Link>
       <div className="w-full max-w-md">{children}</div>

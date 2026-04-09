@@ -14,7 +14,7 @@ export function Footer() {
           <div className="flex flex-col gap-3">
             <Image
               src="/logo.png"
-              alt="EcoleVersity"
+              alt="écoleVersity"
               width={140}
               height={35}
               className="h-8 w-auto brightness-0 invert"

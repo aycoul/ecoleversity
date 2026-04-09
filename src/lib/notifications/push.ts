@@ -118,7 +118,7 @@ function eventToNotification(payload: NotificationPayload): { title: string; bod
       };
     default:
       return {
-        title: 'EcoleVersity',
+        title: 'écoleVersity',
         body: 'Vous avez une nouvelle notification',
         url: appUrl,
       };

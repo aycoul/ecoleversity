@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "EcoleVersity",
+    "appName": "écoleVersity",
     "tagline": "Find the best home tutor online",
     "login": "Log in",
     "register": "Sign up",
@@ -34,7 +34,7 @@
       "step3Desc": "Your child joins the video class from your phone or tablet."
     },
     "features": {
-      "title": "Why EcoleVersity?",
+      "title": "Why écoleVersity?",
       "verified": "Verified teachers",
       "verifiedDesc": "Every teacher is verified: national ID, diploma, and introduction video.",
       "mobile": "100% mobile",
@@ -51,7 +51,7 @@
     },
     "cta": {
       "title": "Get started now",
-      "subtitle": "Join EcoleVersity and give your child the best academic support."
+      "subtitle": "Join écoleVersity and give your child the best academic support."
     }
   },
   "auth": {
@@ -83,7 +83,7 @@
   },
   "onboarding": {
     "teacher": {
-      "welcomeTitle": "Welcome to EcoleVersity!",
+      "welcomeTitle": "Welcome to écoleVersity!",
       "welcomeDesc": "Earn money teaching online. Thousands of parents are looking for teachers like you.",
       "profileTitle": "Complete your profile",
       "profileDesc": "Parents will discover you through this information.",
@@ -112,7 +112,7 @@
     "parent": {
       "step": "Step {current} of {total}",
       "welcomeTitle": "Welcome!",
-      "welcomeDesc": "EcoleVersity helps you find the best teachers for your children. In a few minutes, set up your child's profile and discover tailored courses.",
+      "welcomeDesc": "écoleVersity helps you find the best teachers for your children. In a few minutes, set up your child's profile and discover tailored courses.",
       "welcomeBenefit1": "Verified and qualified teachers",
       "welcomeBenefit1Desc": "Every teacher goes through a rigorous verification process",
       "welcomeBenefit2": "Courses aligned with the Ivorian curriculum",
@@ -341,7 +341,7 @@
     "totalEarned": "Total earned",
     "thisMonth": "This month",
     "pendingPayout": "Pending payout",
-    "commissionNote": "EcoleVersity retains 20%. You receive 80% of each session.",
+    "commissionNote": "écoleVersity retains 20%. You receive 80% of each session.",
     "noTransactions": "No transactions",
     "transactionHistory": "Transaction history",
     "date": "Date",
@@ -561,7 +561,7 @@
     "saveError": "Error saving preferences"
   },
   "footer": {
-    "copyright": "\u00a9 2026 EcoleVersity. All rights reserved.",
+    "copyright": "\u00a9 2026 écoleVersity. All rights reserved.",
     "about": "About",
     "help": "Help",
     "terms": "Terms of Service",

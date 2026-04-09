@@ -13,14 +13,14 @@ function layout(content: string, ctaUrl?: string, ctaLabel?: string): { html: st
 <tr><td align="center">
 <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden">
   <tr><td style="background-color:#059669;padding:24px;text-align:center">
-    <span style="color:#ffffff;font-size:24px;font-weight:700;letter-spacing:-0.5px">EcoleVersity</span>
+    <span style="color:#ffffff;font-size:24px;font-weight:700;letter-spacing:-0.5px">écoleVersity</span>
   </td></tr>
   <tr><td style="padding:32px 24px">
     ${content}
     ${ctaHtml}
   </td></tr>
   <tr><td style="padding:24px;border-top:1px solid #e5e7eb;text-align:center;color:#6b7280;font-size:13px">
-    EcoleVersity &mdash; Le meilleur ma&icirc;tre de maison en ligne<br>
+    écoleVersity &mdash; Le meilleur ma&icirc;tre de maison en ligne<br>
     <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://ecoleversity.com'}/settings/notifications" style="color:#6b7280;text-decoration:underline">G&eacute;rer mes notifications</a>
   </td></tr>
 </table>
@@ -39,8 +39,8 @@ function layout(content: string, ctaUrl?: string, ctaLabel?: string): { html: st
     .trim();
 
   const text = ctaUrl
-    ? `${textContent}\n\n${ctaLabel}: ${ctaUrl}\n\n---\nEcoleVersity — Le meilleur maitre de maison en ligne`
-    : `${textContent}\n\n---\nEcoleVersity — Le meilleur maitre de maison en ligne`;
+    ? `${textContent}\n\n${ctaLabel}: ${ctaUrl}\n\n---\nécoleVersity — Le meilleur maitre de maison en ligne`
+    : `${textContent}\n\n---\nécoleVersity — Le meilleur maitre de maison en ligne`;
 
   return { html, text };
 }

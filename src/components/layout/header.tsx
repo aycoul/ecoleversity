@@ -28,7 +28,7 @@ export function Header() {
         <Link href="/" className="flex items-center gap-1.5">
           <Image
             src="/logo.png"
-            alt="EcoleVersity"
+            alt="écoleVersity"
             width={160}
             height={40}
             className="h-9 w-auto"
