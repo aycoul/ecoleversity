@@ -704,6 +704,20 @@ The solo admin (founder) is augmented by 5 AI agents that handle routine operati
 | **Alerts** | Immediate WhatsApp for: payment failure rate >20%, 0 signups in 24h, agent error, database connection issue |
 | **Fallback** | Admin checks Supabase dashboard directly |
 
+#### Agent 6: CEO Agent ("Le Patron")
+| Aspect | Detail |
+|--------|--------|
+| **Role** | Acts as a virtual business owner — monitors the entire platform, ensures everything runs, identifies growth opportunities, and reports daily to the real founder |
+| **Trigger** | Continuous monitoring + daily report at 20:00 WAT + on-demand via WhatsApp command |
+| **Monitors** | All 5 other agents (are they running? error rate?), revenue trends (daily/weekly/monthly), user acquisition funnel (signup→onboarding→first booking), teacher supply (active teachers, avg response time, verification backlog), churn signals (parents who booked once but not again), payment health (success rate, avg confirmation time, failed payments) |
+| **Daily Report (WhatsApp)** | Structured message every evening: revenue today vs yesterday, new users, sessions completed, agent performance summary, top issue of the day, one growth recommendation |
+| **Weekly Deep Dive** | Sunday evening: week-over-week trends, teacher leaderboard, parent retention cohort, revenue forecast, competitive signals, recommended actions for next week |
+| **Auto-actions** | Restart crashed agents, escalate anomalies immediately (revenue drop >30%, agent down >5min, 0 bookings by noon), trigger re-engagement messages to churning parents (via Ama+), suggest pricing adjustments based on demand patterns |
+| **Growth Intelligence** | Tracks: which subjects have most demand but fewest teachers (supply gap), which time slots fill fastest, which teachers have highest retention, geographic demand patterns (which cities need more teachers) |
+| **Escalation** | Immediate WhatsApp for critical issues: "🚨 Alerte: Revenue en baisse de 40% aujourd'hui. Cause probable: [X]. Action recommandée: [Y]" |
+| **Founder Commands (WhatsApp)** | "status" → instant platform health summary. "revenue" → today's numbers. "agents" → all agent statuses. "growth" → current growth metrics. "problem" → top unresolved issues |
+| **Fallback** | If CEO Agent is down, Analytics Agent covers basic reporting. Founder can always check admin dashboard directly |
+
 #### Agent Dashboard (Admin)
 - Real-time view of all 5 agents: status (running/stopped/error), actions today, escalation queue
 - One-click approve/reject for all pending escalations
@@ -1502,7 +1516,8 @@ Build each phase. Test every feature before moving on. One phase at a time, but 
 
 - [ ] **Support Agent ("Ama+"):** enhanced Ama that can look up user data, resolve common issues, issue small wallet credits, close tickets autonomously
 - [ ] **Analytics Agent ("Tableau de Bord"):** daily digest via WhatsApp + admin dashboard, real-time alerts for anomalies
-- [ ] **Agent Dashboard:** admin page showing all 5 agents' status, actions, escalation queue, kill switches
+- [ ] **CEO Agent ("Le Patron"):** monitors entire business — revenue, growth, agent health, churn. Daily evening WhatsApp report + weekly deep dive. Founder can query via WhatsApp commands ("status", "revenue", "growth")
+- [ ] **Agent Dashboard:** admin page showing all 6 agents' status, actions, escalation queue, kill switches
 
 **Test:** Full trust loop — report content (Moderation Agent handles), get support from Ama+ (auto-resolves), earn referral credit, use wallet to book, get certificate. Admin receives daily digest.
 
