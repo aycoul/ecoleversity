@@ -6,7 +6,7 @@
 ## Current Status
 
 **Active Phase:** Phase 2 — Live Tutoring + Bootstrap Payments + Flutterwave CC
-**Active Step:** `/review` (Phase 2 build + test complete)
+**Active Step:** `/ship` (Phase 2 review + simplify complete)
 **Last Updated:** 2026-04-09
 
 ---
@@ -43,9 +43,9 @@ When a step completes, the NEXT step becomes active. When all 7 steps complete f
 | `/plan` | [x] Done | `docs/superpowers/plans/2026-04-08-phase2-live-tutoring-payments.md` (6 tasks) |
 | `/build` | [x] Done | 43 files functional, 3 new Flutterwave files created |
 | `/test` | [x] Done | 135 tests passing (28 new), found+fixed webhook signature bug |
-| `/review` | [ ] **NEXT** | |
-| `/code-simplify` | [ ] Pending | |
-| `/ship` | [ ] Pending | |
+| `/review` | [x] Done | 2-agent review, 8 fixes (double-spend, N+1, payout validation, etc.) |
+| `/code-simplify` | [x] Done | No new dead code — Phase 2 was lean (3 new files + fixes) |
+| `/ship` | [ ] **NEXT** | Ship Phase 2, move to Phase 3 |
 
 ### Phase 3: Group Classes + Pre-Recorded Courses
 | Step | Status | Notes |
