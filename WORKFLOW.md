@@ -6,7 +6,7 @@
 ## Current Status
 
 **Active Phase:** Phase 1 — Foundation
-**Active Step:** `/code-simplify` (review fixes applied, ready to simplify)
+**Active Step:** `/ship` (code simplified, ready to ship Phase 1)
 **Last Updated:** 2026-04-09
 
 ---
@@ -33,8 +33,8 @@ When a step completes, the NEXT step becomes active. When all 7 steps complete f
 | `/build` | [x] Done | All 12 tasks built, Supabase remote DB live, types generated |
 | `/test` | [x] Done | 92 tests passing — utils, i18n, auth, booking, SMS, domain, DB verified |
 | `/review` | [x] Done | 4-agent review (security, correctness, performance, testing) — 8 critical fixes applied |
-| `/code-simplify` | [ ] **NEXT** | |
-| `/ship` | [ ] Pending | Ship = phase complete, move to Phase 2 |
+| `/code-simplify` | [x] Done | Removed 383 LOC: dead UI components, duplicate logic, unused dep |
+| `/ship` | [ ] **NEXT** | Ship = phase complete, move to Phase 2 |
 
 ### Phase 2: Live Tutoring + Bootstrap Payments + Flutterwave CC
 | Step | Status | Notes |
