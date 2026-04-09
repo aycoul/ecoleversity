@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { CreditCard, Loader2 } from "lucide-react";
 
 type FlutterwaveCheckoutProps = {
-  transactionId: string;
   paymentReference: string;
   amountXof: number;
   customerEmail: string;

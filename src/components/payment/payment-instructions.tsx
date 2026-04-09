@@ -297,7 +297,6 @@ export function PaymentInstructions({
 
       {/* Flutterwave CC (diaspora) */}
       <FlutterwaveCheckout
-        transactionId={transactionId}
         paymentReference={paymentReference}
         amountXof={amountXof}
         customerEmail={customerEmail}
