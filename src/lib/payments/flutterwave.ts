@@ -76,8 +76,8 @@ export function verifyFlutterwaveWebhook(
 ): boolean {
   const secretHash = process.env.FLUTTERWAVE_SECRET_HASH;
   if (!secretHash || !signature) return false;
-  return crypto.timingSafeEqual(
-    Buffer.from(signature),
-    Buffer.from(secretHash),
-  );
+  const sigBuf = Buffer.from(signature);
+  const hashBuf = Buffer.from(secretHash);
+  if (sigBuf.length !== hashBuf.length) return false;
+  return crypto.timingSafeEqual(sigBuf, hashBuf);
 }
