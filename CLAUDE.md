@@ -20,8 +20,9 @@ EcoleVersity is an online tutoring platform that digitizes the "maître de maiso
 - **Backend:** Next.js API Routes + Supabase (PostgreSQL, Auth, Storage, Realtime)
 - **Hosting:** Vercel (frontend) + Supabase (backend) + Cloudflare Stream (video recordings)
 - **Video calls:** Jitsi Meet (JaaS) — core product
-- **Payments (MVP):** Bootstrap — personal Orange Money/Wave numbers + SMS scraping to confirm
-- **Payments (Month 2+):** CinetPay API (single integration, all providers)
+- **Payments (local):** Bootstrap — personal Orange Money/Wave numbers + SMS scraping to confirm
+- **Payments (international):** Flutterwave inline checkout — diaspora EUR/USD credit cards (3.8% fee, no business registration)
+- **Payments (growth):** CinetPay API (single integration, all mobile money providers)
 - **WhatsApp:** WhatsApp Business API (360dialog) — primary notifications
 - **Email:** Resend — receipts, weekly summaries
 - **i18n:** next-intl (French primary, English secondary)
@@ -58,7 +59,7 @@ npm run type-check                 # TypeScript check
 
 1. **Tutoring-first** — Live sessions are the core product. Pre-recorded courses are secondary passive income for teachers.
 2. **Mobile-first** — Every page designed for 375px Android Chrome first.
-3. **Bootstrap payments** — SMS scraping confirms Orange Money/Wave payments. Admin manual confirmation as fallback. CinetPay API when volume justifies.
+3. **Dual payment paths** — Local: SMS scraping confirms Orange Money/Wave payments. International: Flutterwave inline checkout for diaspora EUR/USD credit cards. Admin manual confirmation as fallback.
 4. **Build everything** — No MVP mindset. Full platform with all features. Bootstrap only the payment layer.
 5. **Low-bandwidth** — Pages <200KB, adaptive video quality, lazy loading everything.
 6. **Money as integers** — All FCFA amounts stored as integers, never floats.
@@ -69,8 +70,8 @@ npm run type-check                 # TypeScript check
 ### Core Transaction Loop
 
 ```
-Parent finds teacher → Books session → Sends payment (Orange Money/Wave) →
-  SMS scraping detects payment → Booking confirmed (WhatsApp + email + push) →
+Parent finds teacher → Books session → Pays (Orange Money/Wave OR Flutterwave CC) →
+  SMS scraping or Flutterwave webhook confirms → Booking confirmed (WhatsApp + email + push) →
   Student joins Jitsi call → Teacher teaches → Session recorded →
   Parent rates teacher → Teacher gets paid (manual weekly payout)
 ```

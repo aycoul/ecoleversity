@@ -4,9 +4,9 @@
 
 **Goal:** The core transaction loop: teacher sets availability → parent finds teacher → books session → pays via Orange Money/Wave → joins Jitsi call → rates teacher → teacher sees earnings → admin processes payout.
 
-**Architecture:** Teacher availability stored in dedicated table with day/time slots. Booking creates live_classes (format=one_on_one) + enrollment + pending transaction. Bootstrap payment: parent sends money to platform's personal Orange Money/Wave number, SMS scraping service auto-confirms via API. Jitsi Meet (free server) for video calls with embedded player. Rating recalculates teacher average.
+**Architecture:** Teacher availability stored in dedicated table with day/time slots. Booking creates live_classes (format=one_on_one) + enrollment + pending transaction. Two payment paths: (1) Bootstrap mobile money — parent sends money to platform's personal Orange Money/Wave number, SMS scraping auto-confirms. (2) International credit card — Flutterwave inline checkout for diaspora parents in EUR/USD. Jitsi Meet for video calls. Rating recalculates teacher average.
 
-**Tech Stack:** Supabase, Jitsi Meet External API, existing Next.js stack
+**Tech Stack:** Supabase, Jitsi Meet External API, Flutterwave (flutterwave-react-v3), existing Next.js stack
 
 **Project root:** `/mnt/c/Ecoleversity`
 **Depends on:** Phase 1 complete (auth, schema, i18n, onboarding, admin dashboard)
@@ -74,29 +74,48 @@
 
 ---
 
-### Task 10: Bootstrap Payment System
+### Task 10: Payment System (Bootstrap Mobile Money + Flutterwave CC)
 
 **Files:**
 - Create: `src/app/[locale]/(marketplace)/payment/[transactionId]/page.tsx`
 - Create: `src/components/payment/payment-instructions.tsx` — shows Orange Money/Wave numbers
+- Create: `src/components/payment/flutterwave-checkout.tsx` — inline CC checkout for diaspora
 - Create: `src/app/api/payments/status/[transactionId]/route.ts` — poll status
 - Create: `src/app/api/payments/sms-confirm/route.ts` — SMS scraping webhook
+- Create: `src/app/api/payments/flutterwave-webhook/route.ts` — Flutterwave webhook
 - Create: `src/app/api/payments/admin-confirm/route.ts` — admin manual confirm
 - Create: `src/app/[locale]/(dashboard)/dashboard/admin/payments/page.tsx`
 - Create: `src/components/admin/pending-payments.tsx`
 - Create: `src/lib/payments/bootstrap.ts` — SMS parsing for Orange Money/Wave
+- Create: `src/lib/payments/flutterwave.ts` — Flutterwave API helpers
 
-- [ ] **Step 1:** Build payment instructions page — shows amount, platform Orange Money + Wave numbers (from env), payment reference to include in transfer message. Copy-to-clipboard buttons. Auto-poll status every 15s. 2h expiry timer.
+- [ ] **Step 1:** Build payment page with TWO payment paths displayed:
+  - **Local (FCFA):** Orange Money + Wave numbers with copy-to-clipboard + reference code
+  - **International (EUR/USD):** "Payer par carte bancaire" button → Flutterwave inline checkout
+  - Auto-poll status every 15s. 2h expiry timer for bootstrap payments.
 
-- [ ] **Step 2:** Build SMS parsing — regex for Orange Money ("Vous avez recu X FCFA de 07XXX") and Wave ("Transfert recu de X F de 05XXX") formats. Extract amount, sender, reference.
+- [ ] **Step 2:** Build SMS parsing — regex for Orange Money ("Vous avez recu X FCFA de 07XXX") and Wave ("Transfert recu de X F de 05XXX"). Extract amount, sender, reference.
 
-- [ ] **Step 3:** Build SMS confirm API — POST secured with X-SMS-Secret header. Find pending transaction by reference, verify amount, update to confirmed. Return success.
+- [ ] **Step 3:** Build SMS confirm API — POST secured with X-SMS-Secret header. Match reference to pending transaction, verify amount, update to confirmed.
 
-- [ ] **Step 4:** Build admin confirm API — POST, admin-only, manually confirm pending transaction.
+- [ ] **Step 4:** Install `flutterwave-react-v3`. Build Flutterwave inline checkout component — embeds Flutterwave payment widget. Supports EUR, USD, XOF. On success callback: verify with backend. On close: return to payment page.
 
-- [ ] **Step 5:** Build admin pending payments page — list pending transactions with parent name, teacher, amount, reference, confirm button.
+- [ ] **Step 5:** Build Flutterwave webhook API — POST at `/api/payments/flutterwave-webhook`. Verify webhook signature using FLUTTERWAVE_SECRET_HASH. On success: update transaction to confirmed, convert amount to FCFA (EUR×655.957, USD at market rate), credit teacher balance, trigger notifications.
 
-- [ ] **Step 6:** Update .env.example with NEXT_PUBLIC_ORANGE_MONEY_NUMBER, NEXT_PUBLIC_WAVE_NUMBER, SMS_WEBHOOK_SECRET. Add i18n under `payment.*`. Build, commit.
+- [ ] **Step 6:** Build Flutterwave helpers — `verifyFlutterwavePayment(transactionId)` using Flutterwave verification API, `convertToXof(amount, currency)` for EUR/USD→FCFA conversion.
+
+- [ ] **Step 7:** Build admin confirm API + admin pending payments page.
+
+- [ ] **Step 8:** Update .env.example:
+  ```
+  NEXT_PUBLIC_ORANGE_MONEY_NUMBER=07XXXXXXXX
+  NEXT_PUBLIC_WAVE_NUMBER=05XXXXXXXX
+  SMS_WEBHOOK_SECRET=your-secret
+  NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY=FLWPUBK-xxxxx
+  FLUTTERWAVE_SECRET_KEY=FLWSECK-xxxxx
+  FLUTTERWAVE_SECRET_HASH=your-webhook-hash
+  ```
+  Add i18n under `payment.*` including `payment.payByCard`, `payment.internationalCard`, `payment.processingCard`. Build, commit.
 
 ---
 
@@ -153,4 +172,6 @@
 
 ### Checkpoint: Phase 2 Complete
 - [ ] All builds pass
-- [ ] Full loop testable: teacher availability → parent finds → books → pays → joins Jitsi → rates → teacher sees earnings → admin pays teacher
+- [ ] Full loop (local): teacher availability → parent finds → books → pays via Orange Money/Wave → SMS scraping confirms → joins Jitsi → rates → teacher sees earnings → admin pays teacher
+- [ ] Full loop (diaspora): parent pays via Flutterwave CC (EUR/USD) → webhook confirms → same flow
+- [ ] Both payment paths visible on payment page

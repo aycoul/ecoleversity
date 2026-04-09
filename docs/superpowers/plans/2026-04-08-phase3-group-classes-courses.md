@@ -4,7 +4,7 @@
 
 **Goal:** Teachers earn from three revenue streams: 1-on-1 tutoring (Phase 2), group classes, and pre-recorded courses. Students can watch video lessons with progress tracking.
 
-**Architecture:** Group classes reuse the `live_classes` table (format=group). Courses use `courses` + `lessons` tables. Video uploads go to Supabase Storage (Cloudflare Stream later). Lesson progress tracked in new `lesson_progress` table. Same bootstrap payment for all purchases.
+**Architecture:** Group classes reuse the `live_classes` table (format=group). Courses use `courses` + `lessons` tables. Video uploads go to Supabase Storage (Cloudflare Stream later). Lesson progress tracked in new `lesson_progress` table. Same payment system as Phase 2 for all purchases (bootstrap mobile money + Flutterwave CC for diaspora).
 
 **Tech Stack:** Supabase Storage for video, HTML5 video player, existing stack
 

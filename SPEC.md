@@ -56,7 +56,7 @@ EcoleVersity is an online tutoring platform that digitizes the "maître de maiso
 - **Launch Payments (Bootstrap):** Personal Orange Money + Wave SIM cards. Parent sends payment to platform number. SMS scraping detects incoming payments and auto-confirms bookings. Manual teacher payouts.
 - **Growth Payments:** CinetPay aggregator API (single integration, all providers) — when transaction volume justifies
 - **Scale Payments:** Direct provider APIs (Orange Money, Wave, MTN MoMo) — when fee savings matter at scale
-- **Currencies:** XOF (FCFA) only at launch. EUR/USD for diaspora later.
+- **Currencies:** XOF (FCFA) for local users. EUR/USD for diaspora via Flutterwave credit card checkout (from day one).
 - **Future:** Premium family subscription, institutional/school plans
 
 ### Bootstrap Strategy — Start Informal, Formalize When Profitable
@@ -665,7 +665,8 @@ Beyond the standard refund policy:
 | **Storage** | Supabase Storage + Cloudflare R2 | Videos on R2 (cheap bandwidth), images on Supabase |
 | **Video** | Jitsi Meet (JaaS) | Open source, low-bandwidth mode, free tier |
 | **Video Processing** | Cloudflare Stream or Mux | Adaptive bitrate, HLS, download support |
-| **Payments** | Direct APIs: Orange Money, Wave, MTN MoMo | Direct integration — lower fees than aggregators (CinetPay/Flutterwave) |
+| **Payments (local)** | Bootstrap: personal Orange Money + Wave SIM cards | SMS scraping auto-confirms. No API, no business registration |
+| **Payments (international)** | Flutterwave inline checkout | Diaspora EUR/USD credit cards. Individual signup, 3.8% fee |
 | **WhatsApp** | WhatsApp Business API (via 360dialog) | PRIMARY notifications — official API, template messages |
 | **Email** | Resend | SECONDARY notifications — simple, cheap, good deliverability |
 | **SMS** | Africa's Talking | FALLBACK only — best francophone Africa coverage |
@@ -1541,6 +1542,38 @@ Parent books session → "Payer" button → CinetPay checkout
   → CinetPay webhook → our API → auto-confirm → auto-notify
   → Teacher balance auto-credited
   → Weekly automated payouts via CinetPay disbursement
+```
+
+#### International Credit Card Payments — Flutterwave (Launch)
+**For diaspora parents paying in EUR/USD.** Available from day one alongside bootstrap mobile money.
+
+```
+Diaspora parent in France/USA books a session
+  → Payment page shows mobile money options (for CI users)
+    AND "Payer par carte bancaire (EUR/USD)" button
+  → Flutterwave inline checkout opens (embedded JS widget)
+  → Parent enters card details (Visa/Mastercard/Amex)
+  → Flutterwave processes in EUR or USD
+  → Flutterwave webhook → our API → auto-confirm → auto-notify
+  → Amount converted to FCFA internally (fixed EUR-XOF: 655.957, market rate for USD)
+  → Teacher credited in FCFA
+```
+
+**Why Flutterwave:**
+- Supports Côte d'Ivoire — individuals can sign up (no business registration needed)
+- Handles international cards (Visa, Mastercard) in EUR, USD, GBP
+- Easy inline JS checkout (3 lines of code)
+- Fees: ~3.8% for international cards (reasonable for diaspora)
+- Also handles mobile money (backup to bootstrap) — Orange Money, Wave, MTN MoMo
+- Webhook-based confirmation (same pattern as SMS scraping)
+
+**Setup:** Sign up at flutterwave.com, get API keys, embed inline checkout.
+
+```typescript
+// Flutterwave inline checkout integration
+// npm install flutterwave-react-v3
+// Uses NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY env var
+// Webhook at /api/payments/flutterwave-webhook with FLUTTERWAVE_SECRET_HASH verification
 ```
 
 #### Stage 3: Direct Provider APIs (Scale — when fee savings > engineering cost)
