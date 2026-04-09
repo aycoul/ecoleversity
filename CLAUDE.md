@@ -118,10 +118,33 @@ src/
 - Teachers can only message parent accounts, NEVER learner profiles directly
 - No image attachments in direct messages (prevents photo-based contact sharing)
 
+## Development Workflow
+
+This project follows a strict 7-command lifecycle. Always use these slash commands in order. Never skip steps.
+
+| Step | Command | Principle | When to Use |
+|------|---------|-----------|-------------|
+| 1 | `/spec` | Spec before code | Define what to build — requirements, acceptance criteria |
+| 2 | `/plan` | Small, atomic tasks | Break spec into implementable tasks with dependencies |
+| 3 | `/build` | One slice at a time | Implement one task, test it, commit, move to next |
+| 4 | `/test` | Tests are proof | Prove each feature works — unit, integration, E2E |
+| 5 | `/review` | Improve code health | Review before merge — correctness, security, performance |
+| 6 | `/code-simplify` | Clarity over cleverness | Simplify after it works — remove unnecessary complexity |
+| 7 | `/ship` | Faster is safer | Deploy with confidence — monitoring, rollback plan |
+
+**Rules:**
+- Never write code without a spec (`/spec` first)
+- Never build without a plan (`/plan` first)
+- Never merge without review (`/review` first)
+- Each command activates the right skills automatically
+- Plans live in `docs/superpowers/plans/`
+- Specs live in `SPEC.md` (single source of truth)
+
 ## Key Files
 
-- `SPEC.md` — Full product specification (vision + MVP + roadmap)
-- `supabase/migrations/` — Database schema (10 core tables)
+- `SPEC.md` — Full product specification (vision + roadmap)
+- `docs/superpowers/plans/` — Implementation plans per phase (6 phases, 38 tasks)
+- `supabase/migrations/` — Database schema
 - `src/i18n/messages/fr.json` — French translations (source of truth for UI text)
 - `src/lib/payments/bootstrap.ts` — SMS scraping payment confirmation
 - `src/lib/payments/confirm.ts` — Match payment to pending booking
