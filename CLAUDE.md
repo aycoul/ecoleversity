@@ -119,9 +119,9 @@ src/
 - Teachers can only message parent accounts, NEVER learner profiles directly
 - No image attachments in direct messages (prevents photo-based contact sharing)
 
-## Development Workflow
+## Development Workflow — MANDATORY
 
-This project follows a strict 7-command lifecycle. Always use these slash commands in order. Never skip steps.
+This project follows a strict 7-command lifecycle. **WORKFLOW.md is the single source of truth for current progress.** Read it at the start of EVERY session.
 
 | Step | Command | Principle | When to Use |
 |------|---------|-----------|-------------|
@@ -133,13 +133,21 @@ This project follows a strict 7-command lifecycle. Always use these slash comman
 | 6 | `/code-simplify` | Clarity over cleverness | Simplify after it works — remove unnecessary complexity |
 | 7 | `/ship` | Faster is safer | Deploy with confidence — monitoring, rollback plan |
 
-**Rules:**
-- Never write code without a spec (`/spec` first)
-- Never build without a plan (`/plan` first)
-- Never merge without review (`/review` first)
+### Session Start Protocol
+1. **Read `WORKFLOW.md`** — find the current phase and active step
+2. **Announce:** "We are on Phase X, step Y. The next action is /command."
+3. **Guide the user** to run the right slash command
+4. **After completing a step:** update WORKFLOW.md (mark [x], move NEXT pointer)
+5. **When a phase completes:** announce "Phase X complete! Next: Phase Y, step /build"
+
+### Rules
+- **NEVER skip a step** — the workflow catches problems early
+- **NEVER start coding without checking WORKFLOW.md** — know where you are
+- **ALWAYS update WORKFLOW.md** after completing a step
 - Each command activates the right skills automatically
 - Plans live in `docs/superpowers/plans/`
 - Specs live in `SPEC.md` (single source of truth)
+- Progress tracked in `WORKFLOW.md` (read every session)
 
 ## Key Files
 
