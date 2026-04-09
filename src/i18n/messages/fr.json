@@ -320,7 +320,13 @@
     "expired": "R\u00e9servation expir\u00e9e",
     "adminConfirm": "Confirmer le paiement",
     "pendingPayments": "Paiements en attente",
-    "noPendingPayments": "Aucun paiement en attente"
+    "noPendingPayments": "Aucun paiement en attente",
+    "payByCard": "Payer par carte bancaire",
+    "cardSubtitle": "Visa, Mastercard — pour la diaspora (EUR, USD, XOF)",
+    "payCardButton": "Payer {amount} FCFA par carte",
+    "cardDescription": "Cours avec {teacher} sur écoleVersity",
+    "cardNotAvailable": "Le paiement par carte n'est pas disponible pour le moment",
+    "cardError": "Erreur lors du chargement du paiement par carte"
   },
   "session": {
     "title": "Cours en direct",

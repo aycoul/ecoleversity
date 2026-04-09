@@ -12,6 +12,7 @@ import {
   CheckCircle2,
   AlertTriangle,
 } from "lucide-react";
+import { FlutterwaveCheckout } from "./flutterwave-checkout";
 
 type PaymentInstructionsProps = {
   transactionId: string;
@@ -21,6 +22,8 @@ type PaymentInstructionsProps = {
   scheduledAt: string;
   durationMinutes: number;
   createdAt: string;
+  customerEmail: string;
+  customerName: string;
 };
 
 const EXPIRY_HOURS = 2;
@@ -133,6 +136,8 @@ export function PaymentInstructions({
   scheduledAt,
   durationMinutes,
   createdAt,
+  customerEmail,
+  customerName,
 }: PaymentInstructionsProps) {
   const t = useTranslations("payment");
   const router = useRouter();
@@ -289,6 +294,17 @@ export function PaymentInstructions({
           <CopyButton text={waveNumber} label={t("copyNumber")} />
         </div>
       )}
+
+      {/* Flutterwave CC (diaspora) */}
+      <FlutterwaveCheckout
+        transactionId={transactionId}
+        paymentReference={paymentReference}
+        amountXof={amountXof}
+        customerEmail={customerEmail}
+        customerName={customerName}
+        teacherName={teacherName}
+        onSuccess={() => setStatus("confirmed")}
+      />
 
       {/* Reference */}
       <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">

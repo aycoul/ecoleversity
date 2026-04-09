@@ -51,6 +51,13 @@ export default async function PaymentPage({
     .eq("id", transaction.teacher_id)
     .single();
 
+  // Get parent profile for Flutterwave checkout
+  const { data: parentProfile } = await supabase
+    .from("profiles")
+    .select("display_name, email")
+    .eq("id", user.id)
+    .single();
+
   // Get the live class for schedule info — find the most recent class
   // linked to this teacher with a matching transaction amount
   const { data: liveClass } = await supabase
@@ -72,6 +79,8 @@ export default async function PaymentPage({
       scheduledAt={liveClass?.scheduled_at ?? transaction.created_at}
       durationMinutes={liveClass?.duration_minutes ?? 30}
       createdAt={transaction.created_at}
+      customerEmail={parentProfile?.email ?? user.email ?? ""}
+      customerName={parentProfile?.display_name ?? ""}
     />
   );
 }
