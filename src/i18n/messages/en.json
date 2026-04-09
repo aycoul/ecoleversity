@@ -198,7 +198,8 @@
       "dashboard": "Dashboard",
       "payouts": "Payouts",
       "comingSoon": "Coming soon",
-      "recordedCourses": "Recorded courses"
+      "recordedCourses": "Recorded courses",
+      "settings": "Settings"
     }
   },
   "navigation": {
@@ -540,6 +541,24 @@
     "enable": "Enable",
     "dismiss": "Later",
     "pushEnabled": "Notifications enabled!"
+  },
+  "settings": {
+    "title": "Settings",
+    "notifications": "Notifications",
+    "preferredChannel": "Preferred channel",
+    "channels": "Notification channels",
+    "whatsapp": "WhatsApp",
+    "email": "Email",
+    "push": "Push notifications",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "quietHours": "Quiet hours",
+    "quietHoursDesc": "No notifications between these hours (except urgent ones)",
+    "from": "From",
+    "to": "To",
+    "save": "Save preferences",
+    "saved": "Preferences saved",
+    "saveError": "Error saving preferences"
   },
   "footer": {
     "copyright": "\u00a9 2026 EcoleVersity. All rights reserved.",

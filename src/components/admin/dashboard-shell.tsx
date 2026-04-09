@@ -18,6 +18,8 @@ import {
   Video,
   Receipt,
   Banknote,
+  Settings,
+  PlayCircle,
 } from "lucide-react";
 
 type NavLink = {
@@ -47,6 +49,8 @@ const iconMap: Record<string, React.ElementType> = {
   video: Video,
   receipt: Receipt,
   banknote: Banknote,
+  settings: Settings,
+  "play-circle": PlayCircle,
 };
 
 export function DashboardShell({

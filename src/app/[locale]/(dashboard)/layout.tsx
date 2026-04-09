@@ -38,6 +38,7 @@ export default async function DashboardLayout({
       { href: "/dashboard/admin/payouts", label: t("payouts"), icon: "banknote" },
       { href: "/dashboard/admin/tickets", label: t("supportTickets"), icon: "ticket" },
       { href: "/dashboard/admin/reports", label: t("reports"), icon: "bar-chart" },
+      { href: "/dashboard/settings/notifications", label: t("settings"), icon: "settings" },
     ],
     teacher: [
       { href: "/dashboard/teacher", label: t("myProfile"), icon: "user" },
@@ -48,6 +49,7 @@ export default async function DashboardLayout({
       { href: "/dashboard/teacher/earnings", label: t("earnings"), icon: "wallet" },
       { href: "/dashboard/teacher/transactions", label: t("payments"), icon: "receipt" },
       { href: "/dashboard/teacher/messages", label: t("messages"), icon: "message-circle" },
+      { href: "/dashboard/settings/notifications", label: t("settings"), icon: "settings" },
     ],
     parent: [
       { href: "/dashboard/parent", label: t("myChildren"), icon: "users" },
@@ -56,10 +58,12 @@ export default async function DashboardLayout({
       { href: "/dashboard/parent/payments", label: t("payments"), icon: "receipt" },
       { href: "/dashboard/parent/spending", label: t("spending"), icon: "wallet" },
       { href: "/dashboard/parent/messages", label: t("messages"), icon: "message-circle" },
+      { href: "/dashboard/settings/notifications", label: t("settings"), icon: "settings" },
     ],
     school_admin: [
       { href: "/dashboard/admin/verification", label: t("verification"), icon: "shield-check" },
       { href: "/dashboard/admin/reports", label: t("reports"), icon: "bar-chart" },
+      { href: "/dashboard/settings/notifications", label: t("settings"), icon: "settings" },
     ],
   };
 
