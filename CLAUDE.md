@@ -18,7 +18,7 @@ EcoleVersity is an online tutoring platform that digitizes the "maître de maiso
 
 - **Frontend:** Next.js 14+ (App Router), TypeScript, Tailwind CSS, Shadcn/ui
 - **Backend:** Next.js API Routes + Supabase (PostgreSQL, Auth, Storage, Realtime)
-- **Hosting:** Vercel (frontend) + Supabase (backend) + Cloudflare Stream (video recordings)
+- **Hosting:** Vercel (frontend, project: `aycouls-projects/ecoleversity`) + Supabase (backend, project ID: `vhivhqfhpwhrlinjjfwa`, region: eu-west-3) + Cloudflare Stream (video recordings)
 - **Video calls:** Jitsi Meet (JaaS) — core product
 - **Payments (local):** Bootstrap — personal Orange Money/Wave numbers + SMS scraping to confirm
 - **Payments (international):** Flutterwave inline checkout — diaspora EUR/USD credit cards (3.8% fee, no business registration)
@@ -51,6 +51,12 @@ npm run test:e2e                   # Playwright E2E
 npm run build                      # Production build
 npm run lint                       # ESLint
 npm run type-check                 # TypeScript check
+vercel --prod                      # Deploy to production
+
+# Infrastructure
+# Supabase: project vhivhqfhpwhrlinjjfwa (eu-west-3 Paris)
+# Vercel: aycouls-projects/ecoleversity
+# GitHub: github.com/aycoul/ecoleversity
 ```
 
 ## Architecture
