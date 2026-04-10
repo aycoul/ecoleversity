@@ -80,19 +80,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Vous avez déjà utilisé un code de parrainage" }, { status: 409 });
     }
 
-    // Find the referrer by their code — check all profiles
-    const { data: profiles } = await adminSupabase
+    // Find the referrer by their stored referral_code
+    const { data: referrer } = await adminSupabase
       .from("profiles")
       .select("id")
-      .limit(500);
+      .eq("referral_code", code)
+      .maybeSingle();
 
-    const referrerId = (profiles ?? []).find(
-      (p) => generateReferralCode(p.id) === code
-    )?.id;
-
-    if (!referrerId) {
+    if (!referrer) {
       return NextResponse.json({ error: "Code de parrainage non trouvé" }, { status: 404 });
     }
+
+    const referrerId = referrer.id;
 
     // Create referral record (status: pending — completes on first booking)
     await adminSupabase.from("referrals").insert({

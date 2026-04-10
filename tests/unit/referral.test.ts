@@ -6,7 +6,7 @@ describe("referral system", () => {
     it("generates a code from user ID", () => {
       const code = generateReferralCode("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
       expect(code).toBeDefined();
-      expect(code.length).toBeGreaterThanOrEqual(6);
+      expect(code.length).toBe(12);
     });
 
     it("generates consistent codes for same user", () => {
@@ -27,17 +27,17 @@ describe("referral system", () => {
   });
 
   describe("isValidReferralCode", () => {
-    it("accepts valid 6+ char alphanumeric codes", () => {
-      expect(isValidReferralCode("ABC123")).toBe(true);
-      expect(isValidReferralCode("EVREF7X")).toBe(true);
+    it("accepts valid 8+ char alphanumeric codes", () => {
+      expect(isValidReferralCode("ABC12345")).toBe(true);
+      expect(isValidReferralCode("EVREF7XABC12")).toBe(true);
     });
 
     it("rejects empty strings", () => {
       expect(isValidReferralCode("")).toBe(false);
     });
 
-    it("rejects too-short codes", () => {
-      expect(isValidReferralCode("AB")).toBe(false);
+    it("rejects too-short codes (under 8 chars)", () => {
+      expect(isValidReferralCode("ABC123")).toBe(false);
     });
 
     it("rejects codes with special characters", () => {

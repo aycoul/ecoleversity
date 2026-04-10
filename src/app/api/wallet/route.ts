@@ -73,38 +73,30 @@ export async function POST(request: NextRequest) {
     const { amount, description } = parsed.data;
     const adminSupabase = createAdminClient();
 
-    // Get wallet
-    const { data: wallet } = await adminSupabase
-      .from("wallets")
-      .select("id, balance_xof")
-      .eq("user_id", user.id)
-      .single();
-
-    if (!wallet || wallet.balance_xof < amount) {
-      return NextResponse.json({ error: "Solde insuffisant" }, { status: 400 });
-    }
-
-    // Debit atomically
-    const { error: updateError } = await adminSupabase
-      .from("wallets")
-      .update({ balance_xof: wallet.balance_xof - amount })
-      .eq("id", wallet.id)
-      .gte("balance_xof", amount); // Prevent negative balance
+    // Atomic debit: update only if sufficient balance, return updated row
+    const { data: updated, error: updateError } = await adminSupabase
+      .rpc("debit_wallet", {
+        p_user_id: user.id,
+        p_amount: amount,
+        p_description: description,
+      });
 
     if (updateError) {
+      console.error("[wallet] Debit RPC error:", updateError);
+      // Fallback: check if insufficient balance
+      const { data: wallet } = await adminSupabase
+        .from("wallets")
+        .select("balance_xof")
+        .eq("user_id", user.id)
+        .single();
+      if (wallet && wallet.balance_xof < amount) {
+        return NextResponse.json({ error: "Solde insuffisant" }, { status: 400 });
+      }
       return NextResponse.json({ error: "Erreur lors du débit" }, { status: 500 });
     }
 
-    // Record transaction
-    await adminSupabase.from("wallet_transactions").insert({
-      wallet_id: wallet.id,
-      type: "debit",
-      amount_xof: -amount,
-      description,
-    });
-
     return NextResponse.json({
-      data: { newBalance: wallet.balance_xof - amount },
+      data: { newBalance: updated ?? 0 },
     });
   } catch (err) {
     console.error("[wallet] Debit error:", err);

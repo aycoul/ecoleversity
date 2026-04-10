@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { formatDuration } from "@/lib/exam";
-import { SUBJECT_LABELS, type Subject } from "@/types/domain";
 import {
   Clock,
   CheckCircle2,

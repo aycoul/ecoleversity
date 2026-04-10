@@ -10,7 +10,10 @@ const submitSchema = z.object({
   questionIds: z.array(z.string().uuid()),
   answers: z.array(z.number().int().min(0)),
   durationSeconds: z.number().int().min(0),
-});
+}).refine(
+  (d) => d.questionIds.length === d.answers.length,
+  { message: "questionIds and answers must have the same length" },
+);
 
 export async function POST(request: NextRequest) {
   try {

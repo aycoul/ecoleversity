@@ -55,10 +55,7 @@ export async function chatWithAma(
       model: "claude-haiku-4-5-20251001",
       max_tokens: 500,
       system: systemWithContext,
-      messages: messages.map((m) => ({
-        role: m.role,
-        content: m.content,
-      })),
+      messages,
     });
 
     const reply =
@@ -87,9 +84,11 @@ async function fetchRelevantArticles(query: string): Promise<string | null> {
   const supabase = createAdminClient();
 
   // Simple text search on title and content
+  // Sanitize keywords: strip non-alphanumeric to prevent PostgREST filter injection
   const keywords = query
     .toLowerCase()
     .split(/\s+/)
+    .map((w) => w.replace(/[^a-zà-ÿ0-9]/g, ""))
     .filter((w) => w.length > 3)
     .slice(0, 3);
 

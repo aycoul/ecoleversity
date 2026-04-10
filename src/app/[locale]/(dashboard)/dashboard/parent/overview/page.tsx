@@ -24,18 +24,26 @@ export default async function ParentOverviewPage() {
   const { data: enrollments } = childIds.length > 0
     ? await supabase
         .from("enrollments")
-        .select("id, learner_id, course_id, progress_pct, completed_at")
+        .select("id, learner_id, course_id, live_class_id, progress_pct, completed_at")
         .in("learner_id", childIds)
     : { data: [] };
 
-  // Fetch upcoming sessions
-  const { data: upcomingSessions } = await supabase
-    .from("live_classes")
-    .select("id, title, scheduled_at, duration_minutes, subject")
-    .in("status", ["scheduled"])
-    .gte("scheduled_at", new Date().toISOString())
-    .order("scheduled_at", { ascending: true })
-    .limit(5);
+  // Fetch enrolled class IDs for this parent's children
+  const enrolledClassIds = (enrollments ?? [])
+    .map((e) => e.live_class_id)
+    .filter((id): id is string => !!id);
+
+  // Fetch upcoming sessions only for enrolled classes
+  const { data: upcomingSessions } = enrolledClassIds.length > 0
+    ? await supabase
+        .from("live_classes")
+        .select("id, title, scheduled_at, duration_minutes, subject")
+        .in("id", enrolledClassIds)
+        .in("status", ["scheduled"])
+        .gte("scheduled_at", new Date().toISOString())
+        .order("scheduled_at", { ascending: true })
+        .limit(5)
+    : { data: [] };
 
   // Fetch courses for enrollment details
   const courseIds = (enrollments ?? []).map((e) => e.course_id).filter(Boolean);

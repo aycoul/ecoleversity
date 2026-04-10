@@ -13,13 +13,18 @@ export async function GET(request: NextRequest) {
       return new NextResponse("Missing parameters", { status: 400 });
     }
 
-    // Simple token verification (hash of userId + secret)
+    // HMAC token verification — requires service role key
+    const secret = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!secret) {
+      return new NextResponse("Calendar feed not configured", { status: 503 });
+    }
+
     const crypto = await import("crypto");
     const expectedToken = crypto
-      .createHash("sha256")
-      .update(`${userId}:${process.env.SUPABASE_SERVICE_ROLE_KEY ?? ""}`)
+      .createHmac("sha256", secret)
+      .update(userId)
       .digest("hex")
-      .slice(0, 16);
+      .slice(0, 32);
 
     if (token !== expectedToken) {
       return new NextResponse("Invalid token", { status: 401 });
@@ -27,11 +32,34 @@ export async function GET(request: NextRequest) {
 
     const supabase = createAdminClient();
 
-    // Fetch upcoming sessions for this user (as teacher or parent's child)
+    // Get user's learner IDs (if parent) for enrollment-based filtering
+    const { data: learners } = await supabase
+      .from("learner_profiles")
+      .select("id")
+      .eq("parent_id", userId);
+
+    const learnerIds = (learners ?? []).map((l) => l.id);
+
+    // Fetch enrolled class IDs for this user's children
+    const { data: enrollments } = learnerIds.length > 0
+      ? await supabase
+          .from("enrollments")
+          .select("live_class_id")
+          .in("learner_id", learnerIds)
+      : { data: [] };
+
+    const enrolledClassIds = (enrollments ?? []).map((e) => e.live_class_id).filter(Boolean);
+
+    // Fetch sessions: teacher's own classes OR enrolled classes
+    const classFilter = enrolledClassIds.length > 0
+      ? `teacher_id.eq.${userId},id.in.(${enrolledClassIds.join(",")})`
+      : `teacher_id.eq.${userId}`;
+
     const { data: sessions } = await supabase
       .from("live_classes")
       .select("id, title, scheduled_at, duration_minutes, jitsi_room_id, teacher_id")
       .in("status", ["scheduled", "live"])
+      .or(classFilter)
       .gte("scheduled_at", new Date().toISOString())
       .order("scheduled_at", { ascending: true })
       .limit(50);
