@@ -89,7 +89,18 @@ When a step completes, the NEXT step becomes active. When all 7 steps complete f
 | `/test` | [ ] Pending | |
 | `/review` | [ ] Pending | |
 | `/code-simplify` | [ ] Pending | |
-| `/ship` | [ ] Pending | PLATFORM GOES LIVE |
+| `/ship` | [ ] Pending | |
+
+### Phase 7: AI Operations Team + AI Teacher Twins
+| Step | Status | Notes |
+|------|--------|-------|
+| `/spec` | [ ] Pending | 6 business agents + AI Twin pipeline |
+| `/plan` | [ ] Pending | VPS service + recording + transcription + Twin chat |
+| `/build` | [ ] Pending | |
+| `/test` | [ ] Pending | |
+| `/review` | [ ] Pending | |
+| `/code-simplify` | [ ] Pending | |
+| `/ship` | [ ] Pending | PLATFORM GOES LIVE — full automation + AI twins |
 
 ---
 
