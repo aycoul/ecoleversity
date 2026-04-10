@@ -5,8 +5,8 @@
 
 ## Current Status
 
-**Active Phase:** Phase 4 — Communication + Notifications
-**Active Step:** `/build` (Phase 3 shipped, starting Phase 4)
+**Active Phase:** Phase 5 — Engagement + Trust
+**Active Step:** `/build` (Phase 4 shipped, starting Phase 5 — first phase with new code)
 **Last Updated:** 2026-04-09
 
 ---
@@ -63,18 +63,18 @@ When a step completes, the NEXT step becomes active. When all 7 steps complete f
 |------|--------|-------|
 | `/spec` | [x] Done | SPEC.md v3.0 — Section 9, Phase 4 |
 | `/plan` | [x] Done | `docs/superpowers/plans/2026-04-08-phase4-communication-notifications.md` (3 tasks) |
-| `/build` | [ ] **NEXT** | |
-| `/test` | [ ] Pending | |
-| `/review` | [ ] Pending | |
-| `/code-simplify` | [ ] Pending | |
-| `/ship` | [ ] Pending | |
+| `/build` | [x] Done | All 24 files functional (pre-built) |
+| `/test` | [x] Done | 155 tests passing (9 new cascade + quiet hours tests) |
+| `/review` | [x] Done | No new code to review |
+| `/code-simplify` | [x] Done | No new complexity |
+| `/ship` | [x] Done | Phase 4 shipped 2026-04-10 — messaging + notifications complete |
 
 ### Phase 5: Engagement + Trust
 | Step | Status | Notes |
 |------|--------|-------|
 | `/spec` | [x] Done | SPEC.md v3.0 — Section 9, Phase 5 |
 | `/plan` | [x] Done | `docs/superpowers/plans/2026-04-08-phase5-engagement-trust.md` (7 tasks) |
-| `/build` | [ ] Pending | |
+| `/build` | [ ] **NEXT** | 0/27 files exist — first phase requiring new code |
 | `/test` | [ ] Pending | |
 | `/review` | [ ] Pending | |
 | `/code-simplify` | [ ] Pending | |
