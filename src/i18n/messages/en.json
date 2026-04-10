@@ -321,12 +321,12 @@
     "adminConfirm": "Confirm payment",
     "pendingPayments": "Pending payments",
     "noPendingPayments": "No pending payments",
-    "payByCard": "Pay by credit card",
-    "cardSubtitle": "Visa, Mastercard — for diaspora (EUR, USD, XOF)",
-    "payCardButton": "Pay {amount} FCFA by card",
+    "payByCard": "Pay with PayPal",
+    "cardSubtitle": "Visa, Mastercard, PayPal — for diaspora (EUR)",
+    "payCardButton": "Pay with PayPal",
     "cardDescription": "Class with {teacher} on écoleVersity",
-    "cardNotAvailable": "Card payment is not available at the moment",
-    "cardError": "Error loading card payment"
+    "cardNotAvailable": "PayPal payment is not available at the moment",
+    "cardError": "PayPal payment error"
   },
   "session": {
     "title": "Live session",

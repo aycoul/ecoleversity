@@ -12,7 +12,7 @@ import {
   CheckCircle2,
   AlertTriangle,
 } from "lucide-react";
-import { FlutterwaveCheckout } from "./flutterwave-checkout";
+import { PaypalCheckout } from "./paypal-checkout";
 
 type PaymentInstructionsProps = {
   transactionId: string;
@@ -22,8 +22,6 @@ type PaymentInstructionsProps = {
   scheduledAt: string;
   durationMinutes: number;
   createdAt: string;
-  customerEmail: string;
-  customerName: string;
 };
 
 const EXPIRY_HOURS = 2;
@@ -136,8 +134,6 @@ export function PaymentInstructions({
   scheduledAt,
   durationMinutes,
   createdAt,
-  customerEmail,
-  customerName,
 }: PaymentInstructionsProps) {
   const t = useTranslations("payment");
   const router = useRouter();
@@ -295,12 +291,10 @@ export function PaymentInstructions({
         </div>
       )}
 
-      {/* Flutterwave CC (diaspora) */}
-      <FlutterwaveCheckout
+      {/* PayPal (diaspora credit cards) */}
+      <PaypalCheckout
         paymentReference={paymentReference}
         amountXof={amountXof}
-        customerEmail={customerEmail}
-        customerName={customerName}
         teacherName={teacherName}
         onSuccess={() => setStatus("confirmed")}
       />

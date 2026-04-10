@@ -321,12 +321,12 @@
     "adminConfirm": "Confirmer le paiement",
     "pendingPayments": "Paiements en attente",
     "noPendingPayments": "Aucun paiement en attente",
-    "payByCard": "Payer par carte bancaire",
-    "cardSubtitle": "Visa, Mastercard — pour la diaspora (EUR, USD, XOF)",
-    "payCardButton": "Payer {amount} FCFA par carte",
+    "payByCard": "Payer par PayPal",
+    "cardSubtitle": "Visa, Mastercard, PayPal — pour la diaspora (EUR)",
+    "payCardButton": "Payer par PayPal",
     "cardDescription": "Cours avec {teacher} sur écoleVersity",
-    "cardNotAvailable": "Le paiement par carte n'est pas disponible pour le moment",
-    "cardError": "Erreur lors du chargement du paiement par carte"
+    "cardNotAvailable": "Le paiement PayPal n'est pas disponible pour le moment",
+    "cardError": "Erreur lors du paiement PayPal"
   },
   "session": {
     "title": "Cours en direct",

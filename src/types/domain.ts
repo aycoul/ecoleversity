@@ -326,14 +326,14 @@ export const IVORIAN_CITIES = [
 export type IvorianCity = (typeof IVORIAN_CITIES)[number];
 
 // ─── PAYMENT ───
-export const PAYMENT_PROVIDERS = ["orange_money", "wave", "mtn_momo", "flutterwave"] as const;
+export const PAYMENT_PROVIDERS = ["orange_money", "wave", "mtn_momo", "paypal"] as const;
 export type PaymentProvider = (typeof PAYMENT_PROVIDERS)[number];
 
 export const PAYMENT_PROVIDER_LABELS: Record<PaymentProvider, string> = {
   orange_money: "Orange Money",
   wave: "Wave",
   mtn_momo: "MTN MoMo",
-  flutterwave: "Carte bancaire (Visa/Mastercard)",
+  paypal: "PayPal (Visa/Mastercard)",
 };
 
 // ─── HELPERS ───

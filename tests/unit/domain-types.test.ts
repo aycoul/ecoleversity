@@ -222,10 +222,10 @@ describe("domain types", () => {
       expect(PAYMENT_PROVIDERS).toHaveLength(4);
     });
 
-    it("includes Orange Money, Wave, and Flutterwave", () => {
+    it("includes Orange Money, Wave, and PayPal", () => {
       expect(PAYMENT_PROVIDERS).toContain("orange_money");
       expect(PAYMENT_PROVIDERS).toContain("wave");
-      expect(PAYMENT_PROVIDERS).toContain("flutterwave");
+      expect(PAYMENT_PROVIDERS).toContain("paypal");
     });
 
     it("every provider has a label", () => {
