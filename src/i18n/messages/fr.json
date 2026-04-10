@@ -626,5 +626,28 @@
     "shareWhatsApp": "Partager sur WhatsApp",
     "shareMessage": "Rejoins écoleVersity, la plateforme de cours particuliers ! Utilise mon lien : {url} et nous recevons chacun {amount} FCFA de crédit 🎓",
     "referrals": "{count} parrainages"
+  },
+  "help": {
+    "title": "Centre d'aide",
+    "subtitle": "Trouvez des réponses à vos questions",
+    "searchPlaceholder": "Rechercher un article...",
+    "categoryAll": "Tout",
+    "categoryParent": "Parents",
+    "categoryTeacher": "Enseignants",
+    "categoryPayment": "Paiements",
+    "categoryTechnical": "Technique",
+    "noArticles": "Aucun article trouvé",
+    "needMoreHelp": "Vous ne trouvez pas votre réponse ?",
+    "talkToAma": "Parler à Ama, notre assistante"
+  },
+  "ama": {
+    "pageTitle": "Aide et support",
+    "pageSubtitle": "Ama, votre assistante virtuelle, est là pour vous aider",
+    "subtitle": "Assistante écoleVersity",
+    "greeting": "Bonjour ! Je suis Ama, votre assistante écoleVersity. Comment puis-je vous aider ? 😊",
+    "placeholder": "Posez votre question...",
+    "errorReply": "Désolée, une erreur est survenue. Veuillez réessayer.",
+    "createTicket": "Créer un ticket de support",
+    "ticketCreated": "Votre ticket a été créé ! Notre équipe vous répondra rapidement."
   }
 }

@@ -626,5 +626,28 @@
     "shareWhatsApp": "Share on WhatsApp",
     "shareMessage": "Join écoleVersity, the online tutoring platform! Use my link: {url} and we both get {amount} FCFA credit 🎓",
     "referrals": "{count} referrals"
+  },
+  "help": {
+    "title": "Help Center",
+    "subtitle": "Find answers to your questions",
+    "searchPlaceholder": "Search articles...",
+    "categoryAll": "All",
+    "categoryParent": "Parents",
+    "categoryTeacher": "Teachers",
+    "categoryPayment": "Payments",
+    "categoryTechnical": "Technical",
+    "noArticles": "No articles found",
+    "needMoreHelp": "Can't find your answer?",
+    "talkToAma": "Talk to Ama, our assistant"
+  },
+  "ama": {
+    "pageTitle": "Help & Support",
+    "pageSubtitle": "Ama, your virtual assistant, is here to help",
+    "subtitle": "écoleVersity Assistant",
+    "greeting": "Hello! I'm Ama, your écoleVersity assistant. How can I help you? 😊",
+    "placeholder": "Ask your question...",
+    "errorReply": "Sorry, an error occurred. Please try again.",
+    "createTicket": "Create a support ticket",
+    "ticketCreated": "Your ticket has been created! Our team will get back to you soon."
   }
 }
