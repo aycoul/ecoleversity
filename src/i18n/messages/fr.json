@@ -540,7 +540,9 @@
     "resumeWatching": "Reprendre la lecture",
     "continueCourse": "Continuer",
     "myCourses": "Mes cours",
-    "noCourses": "Aucun cours en cours"
+    "noCourses": "Aucun cours en cours",
+    "generateCertificate": "Générer le certificat",
+    "downloadCertificate": "Télécharger le certificat"
   },
   "messaging": {
     "title": "Messages",

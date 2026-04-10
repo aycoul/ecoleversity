@@ -540,7 +540,9 @@
     "resumeWatching": "Resume watching",
     "continueCourse": "Continue",
     "myCourses": "My courses",
-    "noCourses": "No courses in progress"
+    "noCourses": "No courses in progress",
+    "generateCertificate": "Generate certificate",
+    "downloadCertificate": "Download certificate"
   },
   "messaging": {
     "title": "Messages",
