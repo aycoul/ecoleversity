@@ -588,5 +588,29 @@
     "terms": "Terms of Service",
     "privacy": "Privacy Policy",
     "social": "Follow us"
+  },
+  "exam": {
+    "hubTitle": "Exam Preparation",
+    "hubSubtitle": "Practice with mock tests for national exams",
+    "subjectsCount": "{count} subjects available",
+    "startPractice": "Start practicing",
+    "backToHub": "Back to exams",
+    "backToExam": "Back",
+    "chooseSubject": "Choose a subject to start a practice test",
+    "startFor": "Test for {name}",
+    "addChildFirst": "Add a child in your profile first",
+    "testInstructions": "Answer the questions within the time limit. Your results are saved.",
+    "questionOf": "Question {current} of {total}",
+    "previous": "Previous",
+    "next": "Next",
+    "submitTest": "Submit test",
+    "scoreMessage": "{score} correct out of {total}",
+    "duration": "Duration",
+    "correctAnswer": "Correct answer",
+    "retryTest": "Retry test",
+    "pastAttempts": "Past results",
+    "noQuestions": "No questions available for this subject",
+    "loadError": "Error loading questions",
+    "submitError": "Error submitting answers"
   }
 }

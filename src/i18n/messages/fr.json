@@ -588,5 +588,29 @@
     "terms": "Conditions d'utilisation",
     "privacy": "Politique de confidentialit\u00e9",
     "social": "Suivez-nous"
+  },
+  "exam": {
+    "hubTitle": "Préparation aux examens",
+    "hubSubtitle": "Entraînez-vous avec des tests pratiques pour les examens nationaux",
+    "subjectsCount": "{count} matières disponibles",
+    "startPractice": "Commencer l'entraînement",
+    "backToHub": "Retour aux examens",
+    "backToExam": "Retour",
+    "chooseSubject": "Choisissez une matière pour commencer un test pratique",
+    "startFor": "Test pour {name}",
+    "addChildFirst": "Ajoutez un enfant dans votre profil",
+    "testInstructions": "Répondez aux questions dans le temps imparti. Vos résultats sont enregistrés.",
+    "questionOf": "Question {current} sur {total}",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "submitTest": "Terminer le test",
+    "scoreMessage": "{score} bonnes réponses sur {total}",
+    "duration": "Durée",
+    "correctAnswer": "Bonne réponse",
+    "retryTest": "Refaire le test",
+    "pastAttempts": "Résultats précédents",
+    "noQuestions": "Aucune question disponible pour cette matière",
+    "loadError": "Erreur lors du chargement des questions",
+    "submitError": "Erreur lors de la soumission"
   }
 }
