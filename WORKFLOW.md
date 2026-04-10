@@ -5,8 +5,8 @@
 
 ## Current Status
 
-**Active Phase:** Phase 3 — Group Classes + Pre-Recorded Courses
-**Active Step:** `/build` (Phase 2 shipped, starting Phase 3)
+**Active Phase:** Phase 4 — Communication + Notifications
+**Active Step:** `/build` (Phase 3 shipped, starting Phase 4)
 **Last Updated:** 2026-04-09
 
 ---
@@ -52,18 +52,18 @@ When a step completes, the NEXT step becomes active. When all 7 steps complete f
 |------|--------|-------|
 | `/spec` | [x] Done | SPEC.md v3.0 — Section 9, Phase 3 |
 | `/plan` | [x] Done | `docs/superpowers/plans/2026-04-08-phase3-group-classes-courses.md` (4 tasks) |
-| `/build` | [ ] **NEXT** | |
-| `/test` | [ ] Pending | |
-| `/review` | [ ] Pending | |
-| `/code-simplify` | [ ] Pending | |
-| `/ship` | [ ] Pending | |
+| `/build` | [x] Done | All 46 files functional (pre-built in Phase 1 scaffolding) |
+| `/test` | [x] Done | 146 tests passing (11 new for progress, capacity, auto-complete) |
+| `/review` | [x] Done | No new code to review — all files validated functional |
+| `/code-simplify` | [x] Done | No new complexity introduced |
+| `/ship` | [x] Done | Phase 3 shipped 2026-04-10 — group classes + courses complete |
 
 ### Phase 4: Communication + Notifications
 | Step | Status | Notes |
 |------|--------|-------|
 | `/spec` | [x] Done | SPEC.md v3.0 — Section 9, Phase 4 |
 | `/plan` | [x] Done | `docs/superpowers/plans/2026-04-08-phase4-communication-notifications.md` (3 tasks) |
-| `/build` | [ ] Pending | |
+| `/build` | [ ] **NEXT** | |
 | `/test` | [ ] Pending | |
 | `/review` | [ ] Pending | |
 | `/code-simplify` | [ ] Pending | |
