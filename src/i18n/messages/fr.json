@@ -651,5 +651,60 @@
     "errorReply": "Désolée, une erreur est survenue. Veuillez réessayer.",
     "createTicket": "Créer un ticket de support",
     "ticketCreated": "Votre ticket a été créé ! Notre équipe vous répondra rapidement."
+  },
+  "coupon": {
+    "pageTitle": "Codes promo & Mode absence",
+    "title": "Mes codes promo",
+    "create": "Nouveau code",
+    "codeLabel": "Code",
+    "discountLabel": "Réduction (%)",
+    "maxUsesLabel": "Utilisations max",
+    "expiresLabel": "Date d'expiration",
+    "createCoupon": "Créer le code",
+    "noCoupons": "Aucun code promo",
+    "created": "Code créé !",
+    "deleted": "Code supprimé",
+    "used": "utilisé(s)",
+    "expires": "expire le"
+  },
+  "away": {
+    "title": "Mode absence",
+    "description": "Activez le mode absence pour informer vos élèves",
+    "activate": "Activer",
+    "deactivate": "Désactiver",
+    "awayEnabled": "Mode absence activé",
+    "awayDisabled": "Mode absence désactivé",
+    "untilLabel": "Absent jusqu'au",
+    "messageLabel": "Message d'absence",
+    "messagePlaceholder": "Je suis en vacances, je reviens bientôt !"
+  },
+  "report": {
+    "report": "Signaler",
+    "selectCategory": "Motif du signalement",
+    "inappropriate": "Contenu inapproprié",
+    "safety": "Sécurité des élèves",
+    "spam": "Spam",
+    "offPlatform": "Contact hors plateforme",
+    "other": "Autre",
+    "descriptionPlaceholder": "Décrivez le problème (optionnel)",
+    "send": "Envoyer le signalement",
+    "submitted": "Signalement envoyé"
+  },
+  "calendar": {
+    "title": "Synchroniser mon calendrier",
+    "description": "Ajoutez vos cours à votre calendrier préféré",
+    "addToGoogle": "Ajouter à Google Calendar",
+    "copyLink": "Copier le lien iCal",
+    "copied": "Lien copié !",
+    "downloadIcs": "Télécharger le fichier .ics"
+  },
+  "parentOverview": {
+    "title": "Vue d'ensemble",
+    "activeCourses": "Cours actifs",
+    "completed": "Terminés",
+    "avgProgress": "Progression moy.",
+    "upcomingSessions": "Prochains cours",
+    "noChildren": "Aucun enfant ajouté",
+    "addChild": "Ajouter un enfant"
   }
 }

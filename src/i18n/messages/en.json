@@ -651,5 +651,60 @@
     "errorReply": "Sorry, an error occurred. Please try again.",
     "createTicket": "Create a support ticket",
     "ticketCreated": "Your ticket has been created! Our team will get back to you soon."
+  },
+  "coupon": {
+    "pageTitle": "Promo Codes & Away Mode",
+    "title": "My promo codes",
+    "create": "New code",
+    "codeLabel": "Code",
+    "discountLabel": "Discount (%)",
+    "maxUsesLabel": "Max uses",
+    "expiresLabel": "Expiry date",
+    "createCoupon": "Create code",
+    "noCoupons": "No promo codes",
+    "created": "Code created!",
+    "deleted": "Code deleted",
+    "used": "used",
+    "expires": "expires"
+  },
+  "away": {
+    "title": "Away Mode",
+    "description": "Enable away mode to inform your students",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "awayEnabled": "Away mode enabled",
+    "awayDisabled": "Away mode disabled",
+    "untilLabel": "Away until",
+    "messageLabel": "Away message",
+    "messagePlaceholder": "I'm on vacation, I'll be back soon!"
+  },
+  "report": {
+    "report": "Report",
+    "selectCategory": "Reason for report",
+    "inappropriate": "Inappropriate content",
+    "safety": "Student safety",
+    "spam": "Spam",
+    "offPlatform": "Off-platform contact",
+    "other": "Other",
+    "descriptionPlaceholder": "Describe the issue (optional)",
+    "send": "Send report",
+    "submitted": "Report sent"
+  },
+  "calendar": {
+    "title": "Sync my calendar",
+    "description": "Add your classes to your favorite calendar",
+    "addToGoogle": "Add to Google Calendar",
+    "copyLink": "Copy iCal link",
+    "copied": "Link copied!",
+    "downloadIcs": "Download .ics file"
+  },
+  "parentOverview": {
+    "title": "Overview",
+    "activeCourses": "Active courses",
+    "completed": "Completed",
+    "avgProgress": "Avg. progress",
+    "upcomingSessions": "Upcoming sessions",
+    "noChildren": "No children added",
+    "addChild": "Add a child"
   }
 }
