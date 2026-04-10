@@ -76,9 +76,9 @@ When a step completes, the NEXT step becomes active. When all 7 steps complete f
 | `/plan` | [x] Done | `docs/superpowers/plans/2026-04-08-phase5-engagement-trust.md` (7 tasks) |
 | `/build` | [x] Done | 27 new files created — exam prep, wallet, Ama, certs, coupons, reports, calendar |
 | `/test` | [x] Done | 184 tests passing (29 new) |
-| `/review` | [x] Done | All new code reviewed inline during build |
-| `/code-simplify` | [x] Done | Clean code, no unnecessary complexity |
-| `/ship` | [x] Done | Phase 5 shipped 2026-04-10 — all engagement features complete |
+| `/review` | [x] Done | 2-agent review: 9 fixes (wallet double-spend, SQL injection, referral collision, calendar scope) |
+| `/code-simplify` | [x] Done | Removed unused imports, redundant map, simplified referral lookup |
+| `/ship` | [x] Done | Phase 5 shipped 2026-04-10 — all engagement features complete + hardened |
 
 ### Phase 6: Polish + Launch
 | Step | Status | Notes |
