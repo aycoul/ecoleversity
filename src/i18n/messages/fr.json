@@ -612,5 +612,19 @@
     "noQuestions": "Aucune question disponible pour cette matière",
     "loadError": "Erreur lors du chargement des questions",
     "submitError": "Erreur lors de la soumission"
+  },
+  "wallet": {
+    "title": "Mon portefeuille",
+    "balance": "Solde disponible",
+    "history": "Historique des transactions",
+    "noTransactions": "Aucune transaction"
+  },
+  "referral": {
+    "title": "Parrainage",
+    "description": "Partagez votre code et recevez {amount} FCFA pour chaque inscription réussie !",
+    "copyLink": "Copier le lien",
+    "shareWhatsApp": "Partager sur WhatsApp",
+    "shareMessage": "Rejoins écoleVersity, la plateforme de cours particuliers ! Utilise mon lien : {url} et nous recevons chacun {amount} FCFA de crédit 🎓",
+    "referrals": "{count} parrainages"
   }
 }

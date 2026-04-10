@@ -612,5 +612,19 @@
     "noQuestions": "No questions available for this subject",
     "loadError": "Error loading questions",
     "submitError": "Error submitting answers"
+  },
+  "wallet": {
+    "title": "My Wallet",
+    "balance": "Available balance",
+    "history": "Transaction history",
+    "noTransactions": "No transactions"
+  },
+  "referral": {
+    "title": "Referral Program",
+    "description": "Share your code and earn {amount} FCFA for each successful signup!",
+    "copyLink": "Copy link",
+    "shareWhatsApp": "Share on WhatsApp",
+    "shareMessage": "Join écoleVersity, the online tutoring platform! Use my link: {url} and we both get {amount} FCFA credit 🎓",
+    "referrals": "{count} referrals"
   }
 }
