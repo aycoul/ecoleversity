@@ -49,36 +49,40 @@
 }
 
 :root {
-  /* Brand colors from logo */
-  --ev-blue: #2B3090;
-  --ev-blue-light: #3B40A0;
-  --ev-blue-dark: #1E2270;
-  --ev-green: #4CC53E;
-  --ev-green-light: #6AD85E;
-  --ev-green-dark: #3AA830;
-  --ev-green-50: #F0FBF0;
-  --ev-blue-50: #EEEEF8;
+  /* Brand colors — warm blue + amber/gold + emerald */
+  --ev-blue: #1E40AF;
+  --ev-blue-light: #2563EB;
+  --ev-blue-dark: #1E3A8A;
+  --ev-amber: #F59E0B;
+  --ev-amber-light: #FBBF24;
+  --ev-amber-dark: #D97706;
+  --ev-green: #10B981;
+  --ev-green-light: #34D399;
+  --ev-green-dark: #059669;
+  --ev-green-50: #ECFDF5;
+  --ev-blue-50: #EFF6FF;
+  --ev-amber-50: #FFFBEB;
 
-  --background: oklch(1 0 0);
+  --background: #FFFBF0;
   --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
+  --card: #FFFFFF;
   --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
+  --popover: #FFFFFF;
   --popover-foreground: oklch(0.145 0 0);
-  --primary: #2B3090;
+  --primary: #1E40AF;
   --primary-foreground: #ffffff;
   --secondary: var(--ev-green-50);
-  --secondary-foreground: #2B3090;
+  --secondary-foreground: #1E40AF;
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
-  --accent: #4CC53E;
+  --accent: #F59E0B;
   --accent-foreground: #ffffff;
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: #2B3090;
-  --chart-1: #2B3090;
-  --chart-2: #4CC53E;
+  --ring: #1E40AF;
+  --chart-1: #1E40AF;
+  --chart-2: #10B981;
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);

@@ -72,7 +72,7 @@ export default async function Home() {
               <div className="mt-8 flex animate-fade-in-up flex-col gap-3 animation-delay-200 sm:flex-row sm:justify-center lg:justify-start">
                 <Link
                   href="/register?role=parent"
-                  className="group inline-flex h-13 items-center justify-center gap-2 rounded-xl bg-[var(--ev-green)] px-8 text-base font-semibold text-white shadow-lg shadow-[var(--ev-green)]/25 transition-all hover:bg-[var(--ev-green-light)] hover:shadow-xl hover:shadow-[var(--ev-green)]/30"
+                  className="group inline-flex h-13 items-center justify-center gap-2 rounded-xl bg-[var(--ev-amber)] px-8 text-base font-semibold text-white shadow-lg shadow-[var(--ev-amber)]/25 transition-all hover:bg-[var(--ev-amber-light)] hover:shadow-xl hover:shadow-[var(--ev-amber)]/30"
                 >
                   {t("hero.ctaParent")}
                   <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
@@ -358,7 +358,7 @@ export default async function Home() {
                 <div className="mt-8 flex flex-col gap-4 sm:flex-row">
                   <Link
                     href="/register?role=parent"
-                    className="group inline-flex h-13 items-center justify-center gap-2 rounded-xl bg-[var(--ev-green)] px-8 text-base font-semibold text-white shadow-lg shadow-black/20 transition-all hover:bg-[var(--ev-green-light)] hover:shadow-xl"
+                    className="group inline-flex h-13 items-center justify-center gap-2 rounded-xl bg-[var(--ev-amber)] px-8 text-base font-semibold text-white shadow-lg shadow-black/20 transition-all hover:bg-[var(--ev-amber-light)] hover:shadow-xl"
                   >
                     {t("hero.ctaParent")}
                     <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />

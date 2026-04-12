@@ -4,8 +4,8 @@
   "description": "Le meilleur maître de maison en ligne — Côte d'Ivoire",
   "start_url": "/fr",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#2B3090",
+  "background_color": "#FFFBF0",
+  "theme_color": "#1E40AF",
   "orientation": "portrait",
   "icons": [
     {
