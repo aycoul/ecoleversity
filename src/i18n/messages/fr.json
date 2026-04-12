@@ -18,42 +18,54 @@
     "back": "Retour"
   },
   "landing": {
-    "badge": "Plateforme #1 de tutorat en Côte d'Ivoire",
+    "badge": "Essai gratuit — 30 jours",
     "hero": {
-      "title": "Le meilleur maître de maison, en ligne",
-      "subtitle": "Trouvez un enseignant qualifié pour votre enfant. Cours particuliers, cours de groupe, préparation aux examens — où que vous soyez en Côte d'Ivoire.",
-      "ctaParent": "Je cherche un enseignant",
-      "ctaTeacher": "Je suis enseignant",
+      "title": "Votre enfant mérite le meilleur accompagnement scolaire",
+      "subtitle": "Cours en direct, cours de groupe, préparation aux examens, aide aux devoirs — essayez gratuitement pendant 30 jours.",
+      "ctaParent": "Commencer gratuitement",
+      "ctaTeacher": "Devenir enseignant",
       "trustVerified": "Enseignants vérifiés",
       "trustPayment": "Orange Money & Wave",
-      "trustLive": "Cours en direct"
+      "trustFree": "30 jours gratuits"
+    },
+    "services": {
+      "sectionLabel": "Nos services",
+      "title": "Tout ce dont votre enfant a besoin",
+      "liveTutoring": "Cours particuliers en vidéo",
+      "liveTutoringDesc": "Votre enfant apprend en direct avec un enseignant qualifié, depuis votre téléphone",
+      "groupClass": "Cours de groupe",
+      "groupClassDesc": "Apprenez à plusieurs, payez moins — classes de 2 à 15 élèves",
+      "examPrep": "Préparation aux examens",
+      "examPrepDesc": "CEPE · BEPC · BAC · Concours — entraînement ciblé pour réussir",
+      "onDemand": "Tutorat à la demande",
+      "onDemandDesc": "Besoin d'aide maintenant ? Un enseignant disponible répond en minutes",
+      "courses": "Cours enregistrés",
+      "coursesDesc": "Des vidéos de cours à regarder à votre rythme, quand vous voulez",
+      "homeworkHelp": "Aide aux devoirs",
+      "homeworkHelpDesc": "Un coup de main quotidien pour les exercices et les leçons"
     },
     "howItWorks": {
       "sectionLabel": "Simple & rapide",
       "title": "Comment ça marche ?",
-      "step1Title": "Trouvez un enseignant",
-      "step1Desc": "Parcourez notre catalogue d'enseignants vérifiés — CNI + diplôme contrôlés. Filtrez par matière, classe et ville.",
-      "step2Title": "Réservez un cours",
-      "step2Desc": "Choisissez un créneau et payez en 2 minutes avec Orange Money ou Wave. Confirmation instantanée.",
-      "step3Title": "Apprenez en direct",
-      "step3Desc": "Votre enfant rejoint le cours en vidéo depuis votre téléphone. Ça fonctionne même en 3G.",
-      "verified": "CNI + diplôme vérifiés",
-      "verifiedDesc": "Chaque enseignant passe par une vérification en 3 étapes : pièce d'identité, diplôme, et vidéo d'introduction. Pas de raccourcis.",
-      "mobile": "Optimisé pour Abidjan",
-      "mobileDesc": "Conçu pour les téléphones Android sur réseau 3G. Pages légères, vidéo adaptative, fonctionne partout en Côte d'Ivoire.",
+      "step1Title": "Inscrivez-vous gratuitement",
+      "step1Desc": "Créez votre compte en 2 minutes. Ajoutez votre enfant et sa classe. C'est gratuit pendant 30 jours.",
+      "step2Title": "Choisissez un service",
+      "step2Desc": "Cours en direct, cours de groupe, préparation examen ou aide aux devoirs — vous choisissez ce qui convient.",
+      "step3Title": "Votre enfant apprend",
+      "step3Desc": "En vidéo depuis votre téléphone. Ça fonctionne même en 3G. Suivez sa progression depuis votre tableau de bord.",
+      "verified": "Enseignants vérifiés",
+      "verifiedDesc": "Chaque enseignant passe par une vérification en 3 étapes : pièce d'identité, diplôme, et vidéo d'introduction.",
+      "mobile": "Fonctionne partout",
+      "mobileDesc": "Conçu pour les téléphones Android sur réseau 3G. Pages légères, vidéo adaptative.",
       "payment": "Orange Money ou Wave",
-      "paymentDesc": "Envoyez le montant, c'est confirmé en 2 minutes. Pas de carte bancaire nécessaire. Les enseignants sont payés chaque semaine.",
+      "paymentDesc": "Payez facilement avec Orange Money ou Wave. Confirmation en 2 minutes. Diaspora : PayPal accepté.",
       "safe": "Vos enfants protégés",
-      "safeDesc": "Les enseignants ne voient jamais les coordonnées de vos enfants. Pas de numéros, pas d'emails, pas de photos dans les messages."
+      "safeDesc": "Les enseignants ne voient jamais les coordonnées de vos enfants. Sécurité et confidentialité garanties."
     },
     "dreams": {
       "sectionLabel": "L'avenir commence ici",
       "title": "Ils peuvent tout devenir",
-      "subtitle": "Chaque enfant a un potentiel immense. Avec les bons enseignants, il n'y a pas de limites.",
-      "futureDoctor": "Demain Médecin",
-      "futureEngineer": "Demain Ingénieure",
-      "futureEntrepreneur": "Demain Entrepreneur",
-      "todayStudent": "Aujourd'hui élève"
+      "subtitle": "Chaque enfant a un potentiel immense. Avec les bons enseignants, il n'y a pas de limites."
     },
     "testimonial": {
       "sectionLabel": "Ils nous font confiance",
@@ -65,8 +77,8 @@
       "roleStudent": "Parent de 2 enfants, Yamoussoukro"
     },
     "cta": {
-      "title": "Offrez le meilleur à votre enfant",
-      "subtitle": "Rejoignez écoleVersity et donnez à votre enfant accès aux meilleurs enseignants de Côte d'Ivoire — depuis votre téléphone."
+      "title": "Essayez gratuitement pendant 30 jours",
+      "subtitle": "Inscrivez-vous maintenant et donnez à votre enfant accès aux meilleurs enseignants — depuis votre téléphone."
     }
   },
   "auth": {

@@ -10,9 +10,14 @@ import {
   Banknote,
   Lock,
   ArrowRight,
-  CheckCircle2,
   Sparkles,
   Quote,
+  GraduationCap,
+  Users,
+  BookOpen,
+  Clock,
+  PlayCircle,
+  PenTool,
 } from "lucide-react";
 import { AnimateOnScroll } from "@/components/common/animate-on-scroll";
 
@@ -32,10 +37,13 @@ export default async function Home() {
     { icon: Lock, titleKey: "safe" as const, descKey: "safeDesc" as const },
   ];
 
-  const futures = [
-    { src: "/illustrations/future-doctor.webp", labelKey: "futureDoctor" as const },
-    { src: "/illustrations/future-engineer.webp", labelKey: "futureEngineer" as const },
-    { src: "/illustrations/future-entrepreneur.webp", labelKey: "futureEntrepreneur" as const },
+  const services = [
+    { icon: Video, titleKey: "liveTutoring" as const, descKey: "liveTutoringDesc" as const, src: "/illustrations/live-tutoring.webp" },
+    { icon: Users, titleKey: "groupClass" as const, descKey: "groupClassDesc" as const, src: "/illustrations/group-class.webp" },
+    { icon: GraduationCap, titleKey: "examPrep" as const, descKey: "examPrepDesc" as const, src: "/illustrations/exam-prep.webp" },
+    { icon: Clock, titleKey: "onDemand" as const, descKey: "onDemandDesc" as const, src: "/illustrations/on-demand.webp" },
+    { icon: PlayCircle, titleKey: "courses" as const, descKey: "coursesDesc" as const, src: "/illustrations/courses.webp" },
+    { icon: PenTool, titleKey: "homeworkHelp" as const, descKey: "homeworkHelpDesc" as const, src: "/illustrations/homework-help.webp" },
   ];
 
   return (
@@ -49,7 +57,7 @@ export default async function Home() {
           <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
             <div className="text-center lg:text-left">
               <div className="mb-5 inline-flex animate-fade-in items-center gap-2 rounded-full border border-[var(--ev-green)]/20 bg-[var(--ev-green-50)] px-4 py-1.5 text-sm font-medium text-[var(--ev-green-dark)]">
-                <CheckCircle2 className="size-4" />
+                <Sparkles className="size-4" />
                 <span>{t("badge")}</span>
               </div>
 
@@ -64,14 +72,14 @@ export default async function Home() {
               <div className="mt-8 flex animate-fade-in-up flex-col gap-3 animation-delay-200 sm:flex-row sm:justify-center lg:justify-start">
                 <Link
                   href="/register?role=parent"
-                  className="group inline-flex h-13 items-center justify-center gap-2 rounded-xl bg-[var(--ev-blue)] px-8 text-base font-semibold text-white shadow-lg shadow-[var(--ev-blue)]/25 transition-all hover:bg-[var(--ev-blue-light)] hover:shadow-xl hover:shadow-[var(--ev-blue)]/30"
+                  className="group inline-flex h-13 items-center justify-center gap-2 rounded-xl bg-[var(--ev-green)] px-8 text-base font-semibold text-white shadow-lg shadow-[var(--ev-green)]/25 transition-all hover:bg-[var(--ev-green-light)] hover:shadow-xl hover:shadow-[var(--ev-green)]/30"
                 >
                   {t("hero.ctaParent")}
                   <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
                 </Link>
                 <Link
                   href="/register?role=teacher"
-                  className="inline-flex h-13 items-center justify-center rounded-xl border-2 border-[var(--ev-green)] px-8 text-base font-semibold text-[var(--ev-green-dark)] transition-all hover:bg-[var(--ev-green-50)]"
+                  className="inline-flex h-13 items-center justify-center rounded-xl border-2 border-[var(--ev-blue)] px-8 text-base font-semibold text-[var(--ev-blue)] transition-all hover:bg-[var(--ev-blue-50)]"
                 >
                   {t("hero.ctaTeacher")}
                 </Link>
@@ -87,18 +95,18 @@ export default async function Home() {
                   {t("hero.trustPayment")}
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <Video className="size-4 text-[var(--ev-green)]" />
-                  {t("hero.trustLive")}
+                  <Sparkles className="size-4 text-[var(--ev-green)]" />
+                  {t("hero.trustFree")}
                 </span>
               </div>
             </div>
 
             <div className="animate-fade-in-up animation-delay-300 lg:order-last">
               <Image
-                src="/illustrations/hero-kids.webp"
+                src="/illustrations/hero.webp"
                 alt=""
                 width={600}
-                height={450}
+                height={340}
                 className="mx-auto w-full max-w-lg rounded-2xl lg:max-w-none"
                 priority
               />
@@ -107,8 +115,58 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ─── SECTION 2: HOW IT WORKS + FEATURES (MERGED) ─── */}
+      {/* ─── SECTION 2: SERVICES ─── */}
       <section className="bg-[var(--ev-blue-50)]/50">
+        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
+          <AnimateOnScroll>
+            <div className="text-center">
+              <p className="text-sm font-semibold uppercase tracking-widest text-[var(--ev-green)]">
+                {t("services.sectionLabel")}
+              </p>
+              <h2 className="mt-2 text-3xl font-bold tracking-tight text-[var(--ev-blue)] sm:text-4xl">
+                {t("services.title")}
+              </h2>
+            </div>
+          </AnimateOnScroll>
+
+          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {services.map((service, i) => {
+              const Icon = service.icon;
+              return (
+                <AnimateOnScroll key={service.titleKey} delay={i * 80}>
+                  <div className="group overflow-hidden rounded-2xl border border-slate-100 bg-white transition-all hover:border-[var(--ev-blue)]/10 hover:shadow-lg hover:shadow-[var(--ev-blue)]/5">
+                    <div className="overflow-hidden">
+                      <Image
+                        src={service.src}
+                        alt=""
+                        width={400}
+                        height={225}
+                        className="w-full transition-transform duration-500 group-hover:scale-105"
+                      />
+                    </div>
+                    <div className="p-5">
+                      <div className="mb-2 flex items-center gap-2">
+                        <div className="flex size-8 items-center justify-center rounded-lg bg-[var(--ev-green)]/10 text-[var(--ev-green)]">
+                          <Icon className="size-4" />
+                        </div>
+                        <h3 className="text-base font-bold text-[var(--ev-blue)]">
+                          {t(`services.${service.titleKey}`)}
+                        </h3>
+                      </div>
+                      <p className="text-sm leading-6 text-slate-600">
+                        {t(`services.${service.descKey}`)}
+                      </p>
+                    </div>
+                  </div>
+                </AnimateOnScroll>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── SECTION 3: HOW IT WORKS ─── */}
+      <section className="bg-white">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
           <AnimateOnScroll>
             <div className="text-center">
@@ -121,7 +179,6 @@ export default async function Home() {
             </div>
           </AnimateOnScroll>
 
-          {/* 3 Steps */}
           <div className="mt-14 grid gap-10 sm:grid-cols-3 sm:gap-8">
             {steps.map((step, i) => {
               const Icon = step.icon;
@@ -148,20 +205,7 @@ export default async function Home() {
             })}
           </div>
 
-          {/* Parent-child illustration bridge */}
-          <AnimateOnScroll>
-            <div className="mt-16 flex justify-center">
-              <Image
-                src="/illustrations/parent-child.webp"
-                alt=""
-                width={480}
-                height={360}
-                className="w-full max-w-sm rounded-2xl shadow-lg shadow-[var(--ev-blue)]/10"
-              />
-            </div>
-          </AnimateOnScroll>
-
-          {/* 4 Feature cards — CI-specific */}
+          {/* Feature cards */}
           <div className="mt-16 grid gap-5 sm:grid-cols-2">
             {features.map((feature, i) => {
               const Icon = feature.icon;
@@ -187,8 +231,8 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ─── SECTION 3: DREAMS ─── */}
-      <section className="bg-white">
+      {/* ─── SECTION 4: DREAMS ─── */}
+      <section className="bg-[var(--ev-blue-50)]/40">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
           <AnimateOnScroll>
             <div className="text-center">
@@ -210,42 +254,19 @@ export default async function Home() {
           <AnimateOnScroll delay={100}>
             <div className="mt-10 flex justify-center">
               <Image
-                src="/illustrations/dreams.webp"
+                src="/illustrations/futures.webp"
                 alt=""
                 width={800}
-                height={400}
+                height={450}
                 className="w-full max-w-3xl rounded-2xl"
               />
             </div>
           </AnimateOnScroll>
-
-          <div className="mt-12 grid gap-5 sm:grid-cols-3">
-            {futures.map((future, i) => (
-              <AnimateOnScroll key={future.labelKey} delay={i * 100}>
-                <div className="group overflow-hidden rounded-2xl border border-slate-100 transition-all hover:border-[var(--ev-blue)]/10 hover:shadow-lg hover:shadow-[var(--ev-blue)]/5">
-                  <div className="overflow-hidden">
-                    <Image
-                      src={future.src}
-                      alt=""
-                      width={500}
-                      height={280}
-                      className="w-full transition-transform duration-500 group-hover:scale-105"
-                    />
-                  </div>
-                  <div className="p-4 text-center">
-                    <p className="text-sm font-bold text-[var(--ev-blue)]">
-                      {t("dreams.todayStudent")} → {t(`dreams.${future.labelKey}`)}
-                    </p>
-                  </div>
-                </div>
-              </AnimateOnScroll>
-            ))}
-          </div>
         </div>
       </section>
 
-      {/* ─── SECTION 4: TESTIMONIALS ─── */}
-      <section className="bg-[var(--ev-blue-50)]/40">
+      {/* ─── SECTION 5: TESTIMONIALS ─── */}
+      <section className="bg-white">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
           <AnimateOnScroll>
             <div className="text-center">
@@ -256,7 +277,6 @@ export default async function Home() {
           </AnimateOnScroll>
 
           <div className="mt-12 grid gap-8 sm:grid-cols-2">
-            {/* Teacher testimonial */}
             <AnimateOnScroll delay={0}>
               <div className="relative rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8">
                 <Quote className="absolute right-6 top-6 size-8 text-[var(--ev-green)]/20" />
@@ -264,13 +284,9 @@ export default async function Home() {
                   &ldquo;{t("testimonial.quote")}&rdquo;
                 </p>
                 <div className="mt-6 flex items-center gap-3">
-                  <Image
-                    src="/illustrations/teacher.webp"
-                    alt=""
-                    width={48}
-                    height={48}
-                    className="size-12 rounded-full object-cover"
-                  />
+                  <div className="flex size-12 items-center justify-center rounded-full bg-[var(--ev-blue-50)] text-sm font-bold text-[var(--ev-blue)]">
+                    KA
+                  </div>
                   <div>
                     <p className="text-sm font-bold text-[var(--ev-blue)]">
                       {t("testimonial.author")}
@@ -283,7 +299,6 @@ export default async function Home() {
               </div>
             </AnimateOnScroll>
 
-            {/* Parent testimonial */}
             <AnimateOnScroll delay={150}>
               <div className="relative rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8">
                 <Quote className="absolute right-6 top-6 size-8 text-[var(--ev-green)]/20" />
@@ -291,13 +306,9 @@ export default async function Home() {
                   &ldquo;{t("testimonial.quoteStudent")}&rdquo;
                 </p>
                 <div className="mt-6 flex items-center gap-3">
-                  <Image
-                    src="/illustrations/parent-child.webp"
-                    alt=""
-                    width={48}
-                    height={48}
-                    className="size-12 rounded-full object-cover"
-                  />
+                  <div className="flex size-12 items-center justify-center rounded-full bg-[var(--ev-blue-50)] text-sm font-bold text-[var(--ev-blue)]">
+                    TI
+                  </div>
                   <div>
                     <p className="text-sm font-bold text-[var(--ev-blue)]">
                       {t("testimonial.authorStudent")}
@@ -313,7 +324,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ─── SECTION 5: FINAL CTA ─── */}
+      {/* ─── SECTION 6: FINAL CTA ─── */}
       <section className="bg-gradient-to-br from-[var(--ev-blue)] via-[var(--ev-blue-dark)] to-[var(--ev-blue)]">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
           <div className="grid items-center gap-10 lg:grid-cols-2">
@@ -323,7 +334,7 @@ export default async function Home() {
                   src="/illustrations/graduation.webp"
                   alt=""
                   width={400}
-                  height={400}
+                  height={225}
                   className="w-full max-w-xs rounded-2xl"
                 />
               </div>

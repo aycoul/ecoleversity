@@ -18,42 +18,54 @@
     "back": "Back"
   },
   "landing": {
-    "badge": "#1 tutoring platform in Ivory Coast",
+    "badge": "Free trial — 30 days",
     "hero": {
-      "title": "The best home tutor, online",
-      "subtitle": "Find a qualified teacher for your child. Private lessons, group classes, exam preparation — wherever you are in Ivory Coast.",
-      "ctaParent": "I'm looking for a teacher",
-      "ctaTeacher": "I'm a teacher",
+      "title": "Your child deserves the best academic support",
+      "subtitle": "Live tutoring, group classes, exam prep, homework help — try free for 30 days.",
+      "ctaParent": "Start for free",
+      "ctaTeacher": "Become a teacher",
       "trustVerified": "Verified teachers",
       "trustPayment": "Orange Money & Wave",
-      "trustLive": "Live classes"
+      "trustFree": "30 days free"
+    },
+    "services": {
+      "sectionLabel": "Our services",
+      "title": "Everything your child needs",
+      "liveTutoring": "Live video tutoring",
+      "liveTutoringDesc": "Your child learns live with a qualified teacher, from your phone",
+      "groupClass": "Group classes",
+      "groupClassDesc": "Learn together, pay less — classes of 2 to 15 students",
+      "examPrep": "Exam preparation",
+      "examPrepDesc": "CEPE · BEPC · BAC · Entrance exams — targeted training to succeed",
+      "onDemand": "On-demand tutoring",
+      "onDemandDesc": "Need help now? An available teacher responds in minutes",
+      "courses": "Recorded courses",
+      "coursesDesc": "Video lessons to watch at your own pace, whenever you want",
+      "homeworkHelp": "Homework help",
+      "homeworkHelpDesc": "Daily support for exercises and lessons"
     },
     "howItWorks": {
       "sectionLabel": "Simple & fast",
       "title": "How does it work?",
-      "step1Title": "Find a teacher",
-      "step1Desc": "Browse our catalog of verified teachers — ID + diploma checked. Filter by subject, grade, and city.",
-      "step2Title": "Book a class",
-      "step2Desc": "Choose a time slot and pay in 2 minutes with Orange Money or Wave. Instant confirmation.",
-      "step3Title": "Learn live",
-      "step3Desc": "Your child joins the video class from your phone. Works even on 3G.",
-      "verified": "ID + diploma verified",
-      "verifiedDesc": "Every teacher goes through a 3-step verification: national ID, diploma, and introduction video. No shortcuts.",
-      "mobile": "Optimized for Abidjan",
-      "mobileDesc": "Built for Android phones on 3G networks. Lightweight pages, adaptive video, works everywhere in Ivory Coast.",
+      "step1Title": "Sign up for free",
+      "step1Desc": "Create your account in 2 minutes. Add your child and their grade. Free for 30 days.",
+      "step2Title": "Choose a service",
+      "step2Desc": "Live tutoring, group classes, exam prep, or homework help — you choose what fits.",
+      "step3Title": "Your child learns",
+      "step3Desc": "Via video from your phone. Works even on 3G. Track progress from your dashboard.",
+      "verified": "Verified teachers",
+      "verifiedDesc": "Every teacher goes through 3-step verification: national ID, diploma, and introduction video.",
+      "mobile": "Works everywhere",
+      "mobileDesc": "Built for Android phones on 3G networks. Lightweight pages, adaptive video.",
       "payment": "Orange Money or Wave",
-      "paymentDesc": "Send the amount, confirmed in 2 minutes. No credit card needed. Teachers are paid every week.",
+      "paymentDesc": "Pay easily with Orange Money or Wave. Confirmed in 2 minutes. Diaspora: PayPal accepted.",
       "safe": "Your children protected",
-      "safeDesc": "Teachers never see your children's contact information. No phone numbers, no emails, no photos in messages."
+      "safeDesc": "Teachers never see your children's contact information. Security and privacy guaranteed."
     },
     "dreams": {
       "sectionLabel": "The future starts here",
       "title": "They can become anything",
-      "subtitle": "Every child has immense potential. With the right teachers, there are no limits.",
-      "futureDoctor": "Tomorrow's Doctor",
-      "futureEngineer": "Tomorrow's Engineer",
-      "futureEntrepreneur": "Tomorrow's Entrepreneur",
-      "todayStudent": "Today's student"
+      "subtitle": "Every child has immense potential. With the right teachers, there are no limits."
     },
     "testimonial": {
       "sectionLabel": "They trust us",
@@ -65,8 +77,8 @@
       "roleStudent": "Parent of 2 children, Yamoussoukro"
     },
     "cta": {
-      "title": "Give your child the best",
-      "subtitle": "Join écoleVersity and give your child access to the best teachers in Ivory Coast — from your phone."
+      "title": "Try free for 30 days",
+      "subtitle": "Sign up now and give your child access to the best teachers — from your phone."
     }
   },
   "auth": {
