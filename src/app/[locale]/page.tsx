@@ -266,7 +266,7 @@ export default async function Home() {
       </section>
 
       {/* ─── SECTION 5: TESTIMONIALS ─── */}
-      <section className="bg-[var(--ev-amber-50)]">
+      <section className="bg-slate-50">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
           <AnimateOnScroll>
             <div className="text-center">
