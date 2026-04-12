@@ -49,7 +49,7 @@ export default async function Home() {
   return (
     <>
       {/* ─── SECTION 1: HERO ─── */}
-      <section className="relative overflow-hidden bg-white">
+      <section className="relative overflow-hidden bg-[var(--background)]">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(43,48,144,0.06),transparent)]" />
         <div className="absolute right-0 top-0 -z-0 h-96 w-96 rounded-full bg-[var(--ev-green)]/5 blur-3xl" />
 
@@ -166,7 +166,7 @@ export default async function Home() {
       </section>
 
       {/* ─── SECTION 3: HOW IT WORKS ─── */}
-      <section className="bg-white">
+      <section className="bg-[var(--background)]">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
           <AnimateOnScroll>
             <div className="text-center">
@@ -266,7 +266,7 @@ export default async function Home() {
       </section>
 
       {/* ─── SECTION 5: TESTIMONIALS ─── */}
-      <section className="bg-white">
+      <section className="bg-[var(--background)]">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
           <AnimateOnScroll>
             <div className="text-center">

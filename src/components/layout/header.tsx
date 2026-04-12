@@ -22,8 +22,8 @@ export function Header() {
   const tc = useTranslations("common");
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-slate-100 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
-      <div className="mx-auto flex h-18 max-w-7xl items-center justify-between px-4 md:px-8">
+    <header className="sticky top-0 z-40 w-full border-b border-slate-100 bg-[#FFFBF0]/95 backdrop-blur supports-[backdrop-filter]:bg-[#FFFBF0]/80">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 md:px-8">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-1.5">
           <Image
@@ -31,7 +31,7 @@ export function Header() {
             alt="écoleVersity"
             width={200}
             height={52}
-            className="h-12 w-auto sm:h-14"
+            className="h-14 w-auto sm:h-16"
             priority
           />
         </Link>
