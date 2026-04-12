@@ -276,6 +276,7 @@ export const EXAMS_BY_CATEGORY: Record<ExamCategory, readonly TargetExam[]> = {
 export const TUTORING_CATEGORIES = [
   "curriculum",           // Standard CI curriculum tutoring
   "exam_prep",            // Exam-specific preparation
+  "on_demand",            // Instant help — student requests, available teacher picks up
   "study_abroad",         // Prepare students for international studies
   "language_learning",    // Learning new languages (not in school curriculum)
   "professional_dev",     // Professional skills & certifications
@@ -288,6 +289,7 @@ export type TutoringCategory = (typeof TUTORING_CATEGORIES)[number];
 export const TUTORING_CATEGORY_LABELS: Record<TutoringCategory, string> = {
   curriculum: "Programme scolaire",
   exam_prep: "Préparation aux examens",
+  on_demand: "Tutorat à la demande",
   study_abroad: "Études à l'étranger",
   language_learning: "Apprentissage des langues",
   professional_dev: "Développement professionnel",
