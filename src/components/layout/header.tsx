@@ -29,9 +29,9 @@ export function Header() {
           <Image
             src="/logo.png"
             alt="écoleVersity"
-            width={200}
-            height={52}
-            className="h-14 w-auto sm:h-16"
+            width={220}
+            height={56}
+            className="h-14 w-auto rounded sm:h-16"
             priority
           />
         </Link>

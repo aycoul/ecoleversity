@@ -65,7 +65,7 @@ export default async function Home() {
                 {t("hero.title")}
               </h1>
 
-              <p className="mt-5 animate-fade-in-up text-lg leading-8 text-slate-600 animation-delay-100 sm:text-xl">
+              <p className="mt-5 animate-fade-in-up text-xl leading-8 text-slate-600 animation-delay-100 sm:text-2xl">
                 {t("hero.subtitle")}
               </p>
 
@@ -85,7 +85,7 @@ export default async function Home() {
                 </Link>
               </div>
 
-              <div className="mt-8 flex flex-wrap items-center justify-center gap-5 text-sm text-slate-500 lg:justify-start">
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-5 text-base text-slate-500 lg:justify-start">
                 <span className="flex items-center gap-1.5">
                   <ShieldCheck className="size-4 text-[var(--ev-green)]" />
                   {t("hero.trustVerified")}
@@ -105,9 +105,9 @@ export default async function Home() {
               <Image
                 src="/illustrations/hero.webp"
                 alt=""
-                width={600}
-                height={340}
-                className="mx-auto w-full max-w-lg rounded-2xl lg:max-w-none"
+                width={700}
+                height={400}
+                className="mx-auto w-full rounded-2xl shadow-xl shadow-[var(--ev-blue)]/10"
                 priority
               />
             </div>
@@ -135,13 +135,13 @@ export default async function Home() {
               return (
                 <AnimateOnScroll key={service.titleKey} delay={i * 80}>
                   <div className="group overflow-hidden rounded-2xl border border-slate-100 bg-white transition-all hover:border-[var(--ev-blue)]/10 hover:shadow-lg hover:shadow-[var(--ev-blue)]/5">
-                    <div className="overflow-hidden">
+                    <div className="aspect-[16/9] overflow-hidden">
                       <Image
                         src={service.src}
                         alt=""
                         width={400}
                         height={225}
-                        className="w-full transition-transform duration-500 group-hover:scale-105"
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                     </div>
                     <div className="p-5">
@@ -149,11 +149,11 @@ export default async function Home() {
                         <div className="flex size-8 items-center justify-center rounded-lg bg-[var(--ev-green)]/10 text-[var(--ev-green)]">
                           <Icon className="size-4" />
                         </div>
-                        <h3 className="text-base font-bold text-[var(--ev-blue)]">
+                        <h3 className="text-lg font-bold text-[var(--ev-blue)]">
                           {t(`services.${service.titleKey}`)}
                         </h3>
                       </div>
-                      <p className="text-sm leading-6 text-slate-600">
+                      <p className="text-base leading-6 text-slate-600">
                         {t(`services.${service.descKey}`)}
                       </p>
                     </div>
@@ -193,10 +193,10 @@ export default async function Home() {
                         {step.num}
                       </span>
                     </div>
-                    <h3 className="mt-5 text-lg font-bold text-[var(--ev-blue)]">
+                    <h3 className="mt-5 text-xl font-bold text-[var(--ev-blue)]">
                       {t(`howItWorks.${step.titleKey}`)}
                     </h3>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                    <p className="mt-2 text-base leading-7 text-slate-600">
                       {t(`howItWorks.${step.descKey}`)}
                     </p>
                   </div>
@@ -216,10 +216,10 @@ export default async function Home() {
                       <Icon className="size-5" />
                     </div>
                     <div>
-                      <h3 className="text-base font-bold text-[var(--ev-blue)]">
+                      <h3 className="text-lg font-bold text-[var(--ev-blue)]">
                         {t(`howItWorks.${feature.titleKey}`)}
                       </h3>
-                      <p className="mt-1 text-sm leading-6 text-slate-600">
+                      <p className="mt-1 text-base leading-7 text-slate-600">
                         {t(`howItWorks.${feature.descKey}`)}
                       </p>
                     </div>
@@ -245,7 +245,7 @@ export default async function Home() {
               <h2 className="text-3xl font-bold tracking-tight text-[var(--ev-blue)] sm:text-4xl">
                 {t("dreams.title")}
               </h2>
-              <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-600">
+              <p className="mx-auto mt-4 max-w-2xl text-xl text-slate-600">
                 {t("dreams.subtitle")}
               </p>
             </div>
@@ -266,7 +266,7 @@ export default async function Home() {
       </section>
 
       {/* ─── SECTION 5: TESTIMONIALS ─── */}
-      <section className="bg-[var(--background)]">
+      <section className="bg-[var(--ev-amber-50)]">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
           <AnimateOnScroll>
             <div className="text-center">
@@ -280,7 +280,7 @@ export default async function Home() {
             <AnimateOnScroll delay={0}>
               <div className="relative rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8">
                 <Quote className="absolute right-6 top-6 size-8 text-[var(--ev-green)]/20" />
-                <p className="text-base leading-7 text-slate-700">
+                <p className="text-lg leading-8 text-slate-700">
                   &ldquo;{t("testimonial.quote")}&rdquo;
                 </p>
                 <div className="mt-6 flex items-center gap-3">
@@ -302,7 +302,7 @@ export default async function Home() {
             <AnimateOnScroll delay={150}>
               <div className="relative rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8">
                 <Quote className="absolute right-6 top-6 size-8 text-[var(--ev-green)]/20" />
-                <p className="text-base leading-7 text-slate-700">
+                <p className="text-lg leading-8 text-slate-700">
                   &ldquo;{t("testimonial.quoteStudent")}&rdquo;
                 </p>
                 <div className="mt-6 flex items-center gap-3">
