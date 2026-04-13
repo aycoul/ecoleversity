@@ -50,10 +50,10 @@ export default async function Home() {
 
   // Featured classes (placeholder data — will come from DB later)
   const featuredClasses = [
-    { title: "Maths — Préparation BEPC", teacher: "M. Diallo Moussa", rating: 4.9, reviews: 47, age: "13-16", duration: "60 min", image: "/illustrations/courses.webp" },
-    { title: "Français — Rédaction CE2-CM2", teacher: "Mme Koné Aminata", rating: 4.8, reviews: 32, age: "8-12", duration: "45 min", image: "/illustrations/live-tutoring.webp" },
-    { title: "Anglais — Conversation Lycée", teacher: "M. N'Guessan Paul", rating: 5.0, reviews: 18, age: "15-18", duration: "30 min", image: "/illustrations/on-demand.webp" },
-    { title: "Sciences — SVT Terminale D", teacher: "Mme Touré Fatou", rating: 4.7, reviews: 56, age: "16-18", duration: "60 min", image: "/illustrations/exam-prep.webp" },
+    { title: "Maths — Préparation BEPC", teacher: "M. Diallo Moussa", rating: 4.9, reviews: 47, age: "13-16", duration: "60 min", image: "/illustrations/featured-maths.webp" },
+    { title: "Français — Rédaction CE2-CM2", teacher: "Mme Koné Aminata", rating: 4.8, reviews: 32, age: "8-12", duration: "45 min", image: "/illustrations/featured-french.webp" },
+    { title: "Anglais — Conversation Lycée", teacher: "M. N'Guessan Paul", rating: 5.0, reviews: 18, age: "15-18", duration: "30 min", image: "/illustrations/featured-english.webp" },
+    { title: "Sciences — SVT Terminale D", teacher: "Mme Touré Fatou", rating: 4.7, reviews: 56, age: "16-18", duration: "60 min", image: "/illustrations/featured-science.webp" },
   ];
 
   return (

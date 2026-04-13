@@ -619,7 +619,9 @@
   },
   "exam": {
     "hubTitle": "Exam Preparation",
-    "hubSubtitle": "Practice with mock tests for national exams",
+    "hubSubtitle": "National and international exams — practice with mock tests",
+    "nationalExams": "National exams (Ivory Coast)",
+    "internationalExams": "International exams & admissions",
     "subjectsCount": "{count} subjects available",
     "startPractice": "Start practicing",
     "backToHub": "Back to exams",

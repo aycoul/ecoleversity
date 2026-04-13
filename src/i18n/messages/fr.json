@@ -619,7 +619,9 @@
   },
   "exam": {
     "hubTitle": "Préparation aux examens",
-    "hubSubtitle": "Entraînez-vous avec des tests pratiques pour les examens nationaux",
+    "hubSubtitle": "Examens nationaux et internationaux — entraînez-vous avec des tests pratiques",
+    "nationalExams": "Examens nationaux (Côte d'Ivoire)",
+    "internationalExams": "Examens internationaux & admissions",
     "subjectsCount": "{count} matières disponibles",
     "startPractice": "Commencer l'entraînement",
     "backToHub": "Retour aux examens",

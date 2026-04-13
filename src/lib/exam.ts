@@ -22,9 +22,10 @@ export function formatDuration(seconds: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-/** Get subjects tested in each national exam */
+/** Get subjects tested in each exam (national + international) */
 export function getExamSubjects(examType: string): string[] {
   switch (examType) {
+    // National CI
     case "CEPE":
       return ["francais", "mathematiques", "sciences", "histoire_geo", "education_civique"];
     case "CONCOURS_6EME":
@@ -33,6 +34,14 @@ export function getExamSubjects(examType: string): string[] {
       return ["francais", "mathematiques", "anglais", "physique_chimie", "svt", "histoire_geo"];
     case "BAC":
       return ["francais", "mathematiques", "anglais", "physique_chimie", "svt", "philosophie", "histoire_geo"];
+    // International
+    case "IB_DIPLOMA":
+      return ["mathematiques", "anglais", "francais", "physique_chimie", "svt", "histoire_geo", "economie"];
+    case "SAT":
+      return ["mathematiques", "anglais"];
+    case "TOEFL":
+    case "IELTS":
+      return ["anglais"];
     default:
       return [];
   }
