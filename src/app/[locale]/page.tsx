@@ -18,6 +18,8 @@ import {
   Clock,
   PlayCircle,
   PenTool,
+  Star,
+  X,
 } from "lucide-react";
 import { AnimateOnScroll } from "@/components/common/animate-on-scroll";
 
@@ -46,33 +48,74 @@ export default async function Home() {
     { icon: PenTool, titleKey: "homeworkHelp" as const, descKey: "homeworkHelpDesc" as const, src: "/illustrations/homework-help.webp" },
   ];
 
+  // Featured classes (placeholder data — will come from DB later)
+  const featuredClasses = [
+    { title: "Maths — Préparation BEPC", teacher: "M. Diallo Moussa", rating: 4.9, reviews: 47, age: "13-16", duration: "60 min", image: "/illustrations/courses.webp" },
+    { title: "Français — Rédaction CE2-CM2", teacher: "Mme Koné Aminata", rating: 4.8, reviews: 32, age: "8-12", duration: "45 min", image: "/illustrations/live-tutoring.webp" },
+    { title: "Anglais — Conversation Lycée", teacher: "M. N'Guessan Paul", rating: 5.0, reviews: 18, age: "15-18", duration: "30 min", image: "/illustrations/on-demand.webp" },
+    { title: "Sciences — SVT Terminale D", teacher: "Mme Touré Fatou", rating: 4.7, reviews: 56, age: "16-18", duration: "60 min", image: "/illustrations/exam-prep.webp" },
+  ];
+
   return (
     <>
-      {/* ─── SECTION 1: HERO ─── */}
-      <section className="relative overflow-hidden bg-[var(--background)]">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(43,48,144,0.06),transparent)]" />
-        <div className="absolute right-0 top-0 -z-0 h-96 w-96 rounded-full bg-[var(--ev-green)]/5 blur-3xl" />
+      {/* ─── ANNOUNCEMENT BANNER ─── */}
+      <div className="bg-[var(--ev-blue)] px-4 py-2.5 text-center text-sm font-medium text-white">
+        <span className="mr-2">🎓</span>
+        {t("banner")}
+        <Link href="/register" className="ml-2 underline decoration-white/50 underline-offset-2 hover:decoration-white">
+          {t("bannerCta")} →
+        </Link>
+      </div>
 
-        <div className="relative mx-auto max-w-6xl px-4 pb-8 pt-10 sm:px-6 sm:pb-16 sm:pt-16 lg:pb-20 lg:pt-20">
+      {/* ─── SECTION 1: HERO ─── */}
+      <section className="relative overflow-hidden bg-white">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(30,64,175,0.04),transparent)]" />
+
+        <div className="relative mx-auto max-w-6xl px-4 pb-8 pt-10 sm:px-6 sm:pb-16 sm:pt-14 lg:pb-20 lg:pt-16">
           <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
             <div className="text-center lg:text-left">
-              <div className="mb-5 inline-flex animate-fade-in items-center gap-2 rounded-full border border-[var(--ev-green)]/20 bg-[var(--ev-green-50)] px-4 py-1.5 text-sm font-medium text-[var(--ev-green-dark)]">
+              <div className="mb-5 inline-flex animate-fade-in items-center gap-2 rounded-full border border-[var(--ev-amber)]/20 bg-[var(--ev-amber-50)] px-4 py-1.5 text-sm font-semibold text-[var(--ev-amber-dark)]">
                 <Sparkles className="size-4" />
                 <span>{t("badge")}</span>
               </div>
 
-              <h1 className="animate-fade-in-up text-4xl font-extrabold tracking-tight text-[var(--ev-blue)] sm:text-5xl lg:text-[3.5rem] lg:leading-[1.1]">
-                {t("hero.title")}
+              {/* BOLD hero — accent word in different color like Outschool */}
+              <h1 className="animate-fade-in-up tracking-tight">
+                <span className="block text-3xl font-extrabold text-slate-800 sm:text-4xl lg:text-[2.75rem] lg:leading-[1.15]">
+                  {t("hero.titleLine1")}
+                </span>
+                <span className="block text-5xl font-extrabold text-[var(--ev-blue)] sm:text-6xl lg:text-[4.5rem] lg:leading-[1]">
+                  {t("hero.titleAccent")}
+                </span>
               </h1>
 
-              <p className="mt-5 animate-fade-in-up text-xl leading-8 text-slate-600 animation-delay-100 sm:text-2xl">
+              <p className="mt-5 animate-fade-in-up text-lg leading-8 text-slate-600 animation-delay-100 sm:text-xl">
                 {t("hero.subtitle")}
               </p>
 
-              <div className="mt-8 flex animate-fade-in-up flex-col gap-3 animation-delay-200 sm:flex-row sm:justify-center lg:justify-start">
+              {/* SEARCH BAR — like Outschool/Preply */}
+              <div className="mt-6 animate-fade-in-up animation-delay-150">
+                <div className="flex items-center gap-2 rounded-full border-2 border-slate-200 bg-white px-4 py-2 shadow-sm transition-all focus-within:border-[var(--ev-blue)] focus-within:shadow-md sm:px-5 sm:py-3">
+                  <Search className="size-5 shrink-0 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder={t("hero.searchPlaceholder")}
+                    className="w-full bg-transparent text-base text-slate-800 outline-none placeholder:text-slate-400"
+                    readOnly
+                  />
+                  <Link
+                    href="/teachers"
+                    className="shrink-0 rounded-full bg-[var(--ev-amber)] px-5 py-2 text-sm font-bold text-white transition-all hover:bg-[var(--ev-amber-light)]"
+                  >
+                    {t("hero.searchButton")}
+                  </Link>
+                </div>
+              </div>
+
+              <div className="mt-6 flex animate-fade-in-up flex-col gap-3 animation-delay-200 sm:flex-row sm:justify-center lg:justify-start">
                 <Link
                   href="/register?role=parent"
-                  className="group inline-flex h-13 items-center justify-center gap-2 rounded-xl bg-[var(--ev-amber)] px-8 text-base font-semibold text-white shadow-lg shadow-[var(--ev-amber)]/25 transition-all hover:bg-[var(--ev-amber-light)] hover:shadow-xl hover:shadow-[var(--ev-amber)]/30"
+                  className="group inline-flex h-13 items-center justify-center gap-2 rounded-xl bg-[var(--ev-amber)] px-8 text-base font-semibold text-white shadow-lg shadow-[var(--ev-amber)]/25 transition-all hover:bg-[var(--ev-amber-light)] hover:shadow-xl"
                 >
                   {t("hero.ctaParent")}
                   <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
@@ -85,7 +128,7 @@ export default async function Home() {
                 </Link>
               </div>
 
-              <div className="mt-8 flex flex-wrap items-center justify-center gap-5 text-base text-slate-500 lg:justify-start">
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-5 text-sm text-slate-500 lg:justify-start">
                 <span className="flex items-center gap-1.5">
                   <ShieldCheck className="size-4 text-[var(--ev-green)]" />
                   {t("hero.trustVerified")}
@@ -95,7 +138,7 @@ export default async function Home() {
                   {t("hero.trustPayment")}
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <Sparkles className="size-4 text-[var(--ev-green)]" />
+                  <Sparkles className="size-4 text-[var(--ev-amber)]" />
                   {t("hero.trustFree")}
                 </span>
               </div>
@@ -115,8 +158,73 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ─── SECTION 2: SERVICES ─── */}
-      <section className="bg-[var(--ev-blue-50)]/50">
+      {/* ─── SECTION 2: FEATURED CLASSES (like Outschool trending) ─── */}
+      <section className="bg-white">
+        <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
+          <AnimateOnScroll>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-widest text-[var(--ev-amber)]">
+                  {t("featured.sectionLabel")}
+                </p>
+                <h2 className="mt-1 text-2xl font-bold text-[var(--ev-blue)] sm:text-3xl">
+                  {t("featured.title")}
+                </h2>
+              </div>
+              <Link
+                href="/teachers"
+                className="hidden items-center gap-1 text-sm font-semibold text-[var(--ev-blue)] hover:underline sm:flex"
+              >
+                {t("featured.viewAll")} <ArrowRight className="size-4" />
+              </Link>
+            </div>
+          </AnimateOnScroll>
+
+          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {featuredClasses.map((cls, i) => (
+              <AnimateOnScroll key={i} delay={i * 80}>
+                <Link href="/teachers" className="group block overflow-hidden rounded-2xl border border-slate-100 bg-white transition-all hover:shadow-lg hover:shadow-[var(--ev-blue)]/5">
+                  <div className="aspect-[4/3] overflow-hidden">
+                    <Image
+                      src={cls.image}
+                      alt=""
+                      width={300}
+                      height={225}
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="text-sm font-bold text-slate-900 line-clamp-2">{cls.title}</h3>
+                    <p className="mt-1 text-xs text-slate-500">{cls.teacher}</p>
+                    <div className="mt-2 flex items-center gap-1">
+                      <Star className="size-3.5 fill-[var(--ev-amber)] text-[var(--ev-amber)]" />
+                      <span className="text-xs font-semibold text-slate-800">{cls.rating}</span>
+                      <span className="text-xs text-slate-400">({cls.reviews})</span>
+                    </div>
+                    <div className="mt-2 flex items-center gap-3 text-xs text-slate-500">
+                      <span>{cls.age} ans</span>
+                      <span>·</span>
+                      <span>{cls.duration}</span>
+                    </div>
+                  </div>
+                </Link>
+              </AnimateOnScroll>
+            ))}
+          </div>
+
+          <div className="mt-8 text-center sm:hidden">
+            <Link
+              href="/teachers"
+              className="inline-flex items-center gap-1 rounded-full bg-[var(--ev-blue-50)] px-6 py-2.5 text-sm font-semibold text-[var(--ev-blue)] hover:bg-[var(--ev-blue)]/10"
+            >
+              {t("featured.viewAll")} <ArrowRight className="size-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── SECTION 3: SERVICES ─── */}
+      <section className="bg-slate-50">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
           <AnimateOnScroll>
             <div className="text-center">
@@ -165,8 +273,8 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ─── SECTION 3: HOW IT WORKS ─── */}
-      <section className="bg-[var(--background)]">
+      {/* ─── SECTION 4: HOW IT WORKS ─── */}
+      <section className="bg-white">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
           <AnimateOnScroll>
             <div className="text-center">
@@ -189,7 +297,7 @@ export default async function Home() {
                       <div className="flex size-16 items-center justify-center rounded-2xl bg-[var(--ev-blue)] text-white shadow-lg shadow-[var(--ev-blue)]/20">
                         <Icon className="size-7" />
                       </div>
-                      <span className="absolute -right-2 -top-2 flex size-7 items-center justify-center rounded-full bg-[var(--ev-green)] text-xs font-bold text-white">
+                      <span className="absolute -right-2 -top-2 flex size-7 items-center justify-center rounded-full bg-[var(--ev-amber)] text-xs font-bold text-white">
                         {step.num}
                       </span>
                     </div>
@@ -205,7 +313,6 @@ export default async function Home() {
             })}
           </div>
 
-          {/* Feature cards */}
           <div className="mt-16 grid gap-5 sm:grid-cols-2">
             {features.map((feature, i) => {
               const Icon = feature.icon;
@@ -231,12 +338,12 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ─── SECTION 4: DREAMS ─── */}
-      <section className="bg-[var(--ev-blue-50)]/40">
+      {/* ─── SECTION 5: DREAMS ─── */}
+      <section className="bg-slate-50">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
           <AnimateOnScroll>
             <div className="text-center">
-              <div className="mb-3 inline-flex items-center gap-2 text-[var(--ev-green)]">
+              <div className="mb-3 inline-flex items-center gap-2 text-[var(--ev-amber)]">
                 <Sparkles className="size-5" />
                 <span className="text-sm font-semibold uppercase tracking-widest">
                   {t("dreams.sectionLabel")}
@@ -265,8 +372,8 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ─── SECTION 5: TESTIMONIALS ─── */}
-      <section className="bg-slate-50">
+      {/* ─── SECTION 6: TESTIMONIALS ─── */}
+      <section className="bg-white">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
           <AnimateOnScroll>
             <div className="text-center">
@@ -288,12 +395,8 @@ export default async function Home() {
                     KA
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-[var(--ev-blue)]">
-                      {t("testimonial.author")}
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      {t("testimonial.role")}
-                    </p>
+                    <p className="text-sm font-bold text-[var(--ev-blue)]">{t("testimonial.author")}</p>
+                    <p className="text-xs text-slate-500">{t("testimonial.role")}</p>
                   </div>
                 </div>
               </div>
@@ -310,12 +413,8 @@ export default async function Home() {
                     TI
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-[var(--ev-blue)]">
-                      {t("testimonial.authorStudent")}
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      {t("testimonial.roleStudent")}
-                    </p>
+                    <p className="text-sm font-bold text-[var(--ev-blue)]">{t("testimonial.authorStudent")}</p>
+                    <p className="text-xs text-slate-500">{t("testimonial.roleStudent")}</p>
                   </div>
                 </div>
               </div>
@@ -324,7 +423,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ─── SECTION 6: FINAL CTA ─── */}
+      {/* ─── SECTION 7: FINAL CTA ─── */}
       <section className="bg-gradient-to-br from-[var(--ev-blue)] via-[var(--ev-blue-dark)] to-[var(--ev-blue)]">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
           <div className="grid items-center gap-10 lg:grid-cols-2">

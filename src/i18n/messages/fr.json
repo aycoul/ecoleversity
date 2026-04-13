@@ -18,15 +18,25 @@
     "back": "Retour"
   },
   "landing": {
+    "banner": "Essai gratuit pendant 30 jours — sans engagement",
+    "bannerCta": "Commencer maintenant",
     "badge": "Essai gratuit — 30 jours",
     "hero": {
-      "title": "Votre enfant mérite le meilleur accompagnement scolaire",
-      "subtitle": "Cours en direct, cours de groupe, préparation aux examens, aide aux devoirs — essayez gratuitement pendant 30 jours.",
+      "titleLine1": "Votre enfant mérite le",
+      "titleAccent": "meilleur accompagnement",
+      "subtitle": "Cours en direct, cours de groupe, préparation aux examens, aide aux devoirs — essayez gratuitement.",
+      "searchPlaceholder": "Quelle matière cherchez-vous ? (Maths, Français, Anglais...)",
+      "searchButton": "Rechercher",
       "ctaParent": "Commencer gratuitement",
       "ctaTeacher": "Devenir enseignant",
       "trustVerified": "Enseignants vérifiés",
       "trustPayment": "Orange Money & Wave",
       "trustFree": "30 jours gratuits"
+    },
+    "featured": {
+      "sectionLabel": "Populaires",
+      "title": "Les cours les plus demandés",
+      "viewAll": "Voir tous les cours"
     },
     "services": {
       "sectionLabel": "Nos services",

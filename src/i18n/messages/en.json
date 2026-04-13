@@ -18,15 +18,25 @@
     "back": "Back"
   },
   "landing": {
+    "banner": "Free trial for 30 days — no commitment",
+    "bannerCta": "Start now",
     "badge": "Free trial — 30 days",
     "hero": {
-      "title": "Your child deserves the best academic support",
-      "subtitle": "Live tutoring, group classes, exam prep, homework help — try free for 30 days.",
+      "titleLine1": "Your child deserves the",
+      "titleAccent": "best academic support",
+      "subtitle": "Live tutoring, group classes, exam prep, homework help — try free.",
+      "searchPlaceholder": "What subject are you looking for? (Math, French, English...)",
+      "searchButton": "Search",
       "ctaParent": "Start for free",
       "ctaTeacher": "Become a teacher",
       "trustVerified": "Verified teachers",
       "trustPayment": "Orange Money & Wave",
       "trustFree": "30 days free"
+    },
+    "featured": {
+      "sectionLabel": "Popular",
+      "title": "Most popular classes",
+      "viewAll": "View all classes"
     },
     "services": {
       "sectionLabel": "Our services",
