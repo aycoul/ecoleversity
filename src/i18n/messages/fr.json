@@ -231,10 +231,13 @@
   },
   "navigation": {
     "home": "Accueil",
+    "findTeacher": "Trouver un prof",
     "teachers": "Enseignants",
     "courses": "Cours",
     "classes": "Cours en direct",
+    "examPrep": "Examens",
     "exams": "Préparation examens",
+    "teach": "Enseigner",
     "dashboard": "Tableau de bord",
     "messages": "Messages",
     "help": "Aide"

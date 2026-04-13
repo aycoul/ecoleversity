@@ -231,10 +231,13 @@
   },
   "navigation": {
     "home": "Home",
+    "findTeacher": "Find a tutor",
     "teachers": "Teachers",
     "courses": "Courses",
     "classes": "Live classes",
+    "examPrep": "Exams",
     "exams": "Exam prep",
+    "teach": "Teach",
     "dashboard": "Dashboard",
     "messages": "Messages",
     "help": "Help"

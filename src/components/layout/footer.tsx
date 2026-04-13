@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
+import { LocaleSwitcher } from "./locale-switcher";
 
 export function Footer() {
   const t = useTranslations("footer");
@@ -95,9 +96,10 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Copyright */}
-        <div className="mt-8 border-t border-white/10 pt-6 text-center text-xs text-slate-400">
-          {t("copyright")}
+        {/* Language + Copyright */}
+        <div className="mt-8 flex flex-col items-center gap-3 border-t border-white/10 pt-6">
+          <LocaleSwitcher variant="footer" />
+          <p className="text-xs text-slate-400">{t("copyright")}</p>
         </div>
       </div>
     </footer>
