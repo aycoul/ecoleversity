@@ -72,7 +72,7 @@ export default async function Home() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(30,64,175,0.04),transparent)]" />
 
         <div className="relative mx-auto max-w-6xl px-4 pb-8 pt-10 sm:px-6 sm:pb-16 sm:pt-14 lg:pb-20 lg:pt-16">
-          <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
+          <div className="grid items-center gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10">
             <div className="text-center lg:text-left">
               <div className="mb-5 inline-flex animate-fade-in items-center gap-2 rounded-full border border-[var(--ev-amber)]/20 bg-[var(--ev-amber-50)] px-4 py-1.5 text-sm font-semibold text-[var(--ev-amber-dark)]">
                 <Sparkles className="size-4" />
@@ -84,7 +84,7 @@ export default async function Home() {
                 <span className="block text-3xl font-extrabold text-slate-800 sm:text-4xl lg:text-[2.75rem] lg:leading-[1.15]">
                   {t("hero.titleLine1")}
                 </span>
-                <span className="block text-5xl font-extrabold text-[var(--ev-blue)] sm:text-6xl lg:text-[4.5rem] lg:leading-[1]">
+                <span className="block text-4xl font-extrabold text-[var(--ev-blue)] sm:text-5xl lg:text-[3.5rem] lg:leading-[1.05]">
                   {t("hero.titleAccent")}
                 </span>
               </h1>
