@@ -42,6 +42,12 @@ export function Footer() {
               {t("help")}
             </Link>
             <Link
+              href="/institutions"
+              className="text-sm text-slate-400 transition-colors hover:text-white"
+            >
+              {t("institutions")}
+            </Link>
+            <Link
               href="/terms"
               className="text-sm text-slate-400 transition-colors hover:text-white"
             >
