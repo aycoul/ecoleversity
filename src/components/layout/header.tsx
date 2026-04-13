@@ -5,15 +5,8 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { MobileNav } from "./mobile-nav";
-import { Menu, Search, GraduationCap, BookOpen, Users, Zap } from "lucide-react";
+import { Menu } from "lucide-react";
 import Image from "next/image";
-
-const navLinks = [
-  { href: "/teachers", key: "findTeacher", icon: Search },
-  { href: "/courses", key: "courses", icon: BookOpen },
-  { href: "/classes", key: "classes", icon: Users },
-  { href: "/exams", key: "examPrep", icon: GraduationCap },
-] as const;
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -35,38 +28,40 @@ export function Header() {
           />
         </Link>
 
-        {/* Desktop nav — centered */}
+        {/* Desktop nav — clean 4 items */}
         <nav className="hidden items-center gap-1 lg:flex">
-          {navLinks.map((link) => {
-            const Icon = link.icon;
-            return (
-              <Link
-                key={link.key}
-                href={link.href}
-                className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-[15px] font-semibold text-slate-700 transition-all hover:bg-[var(--ev-blue-50)] hover:text-[var(--ev-blue)]"
-              >
-                <Icon className="size-4 opacity-60" />
-                {t(link.key)}
-              </Link>
-            );
-          })}
-
-          {/* Teach CTA in nav */}
+          <Link
+            href="/teachers"
+            className="rounded-lg px-4 py-2 text-[15px] font-semibold text-slate-700 transition-all hover:bg-[var(--ev-blue-50)] hover:text-[var(--ev-blue)]"
+          >
+            {t("findTeacher")}
+          </Link>
+          <Link
+            href="/courses"
+            className="rounded-lg px-4 py-2 text-[15px] font-semibold text-slate-700 transition-all hover:bg-[var(--ev-blue-50)] hover:text-[var(--ev-blue)]"
+          >
+            {t("ourCourses")}
+          </Link>
+          <Link
+            href="/exams"
+            className="rounded-lg px-4 py-2 text-[15px] font-semibold text-slate-700 transition-all hover:bg-[var(--ev-blue-50)] hover:text-[var(--ev-blue)]"
+          >
+            {t("examPrep")}
+          </Link>
           <Link
             href="/register?role=teacher"
-            className="ml-1 flex items-center gap-1.5 rounded-lg px-3 py-2 text-[15px] font-semibold text-[var(--ev-green-dark)] transition-all hover:bg-[var(--ev-green-50)]"
+            className="rounded-lg px-4 py-2 text-[15px] font-semibold text-[var(--ev-green-dark)] transition-all hover:bg-[var(--ev-green-50)]"
           >
-            <Zap className="size-4" />
             {t("teach")}
           </Link>
         </nav>
 
-        {/* Desktop actions — right */}
+        {/* Desktop actions */}
         <div className="hidden items-center gap-2 lg:flex">
           <Link href="/login">
             <Button
               variant="ghost"
-              className="text-[15px] font-semibold text-slate-700 hover:text-[var(--ev-blue)]"
+              className="text-[15px] font-semibold text-slate-600 hover:text-[var(--ev-blue)]"
             >
               {tc("login")}
             </Button>
@@ -87,7 +82,6 @@ export function Header() {
           <Menu className="size-6" />
         </button>
 
-        {/* Mobile nav sheet */}
         <MobileNav open={mobileOpen} onOpenChange={setMobileOpen} />
       </div>
     </header>

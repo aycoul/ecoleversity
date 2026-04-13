@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { LocaleSwitcher } from "./locale-switcher";
 import Image from "next/image";
+import { Search, BookOpen, GraduationCap, Zap, HelpCircle } from "lucide-react";
 
 type MobileNavProps = {
   open: boolean;
@@ -21,11 +22,11 @@ type MobileNavProps = {
 };
 
 const navLinks = [
-  { href: "/", key: "home" },
-  { href: "/teachers", key: "teachers" },
-  { href: "/courses", key: "courses" },
-  { href: "/classes", key: "classes" },
-  { href: "/help", key: "help" },
+  { href: "/teachers", key: "findTeacher", icon: Search },
+  { href: "/courses", key: "ourCourses", icon: BookOpen },
+  { href: "/exams", key: "examPrep", icon: GraduationCap },
+  { href: "/register?role=teacher", key: "teach", icon: Zap, accent: true },
+  { href: "/help", key: "help", icon: HelpCircle },
 ] as const;
 
 export function MobileNav({ open, onOpenChange }: MobileNavProps) {
@@ -46,17 +47,25 @@ export function MobileNav({ open, onOpenChange }: MobileNavProps) {
         <Separator />
 
         <nav className="flex flex-1 flex-col gap-1 px-4">
-          {navLinks.map((link) => (
-            <SheetClose key={link.key} render={<div />}>
-              <Link
-                href={link.href}
-                onClick={() => onOpenChange(false)}
-                className="flex rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-[var(--ev-green-50)] hover:text-[var(--ev-blue)]"
-              >
-                {t(link.key)}
-              </Link>
-            </SheetClose>
-          ))}
+          {navLinks.map((link) => {
+            const Icon = link.icon;
+            return (
+              <SheetClose key={link.key} render={<div />}>
+                <Link
+                  href={link.href}
+                  onClick={() => onOpenChange(false)}
+                  className={`flex items-center gap-3 rounded-lg px-3 py-3 text-base font-semibold transition-colors ${
+                    "accent" in link && link.accent
+                      ? "text-[var(--ev-green-dark)] hover:bg-[var(--ev-green-50)]"
+                      : "text-slate-700 hover:bg-[var(--ev-blue-50)] hover:text-[var(--ev-blue)]"
+                  }`}
+                >
+                  <Icon className="size-5 opacity-60" />
+                  {t(link.key)}
+                </Link>
+              </SheetClose>
+            );
+          })}
         </nav>
 
         <Separator />
@@ -66,12 +75,12 @@ export function MobileNav({ open, onOpenChange }: MobileNavProps) {
             <LocaleSwitcher />
           </div>
           <Link href="/login" onClick={() => onOpenChange(false)}>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full text-base font-semibold">
               {tc("login")}
             </Button>
           </Link>
           <Link href="/register" onClick={() => onOpenChange(false)}>
-            <Button className="w-full bg-[var(--ev-blue)] text-white hover:bg-[var(--ev-blue-light)]">
+            <Button className="w-full rounded-full bg-[var(--ev-amber)] text-base font-bold text-white hover:bg-[var(--ev-amber-light)]">
               {tc("register")}
             </Button>
           </Link>
