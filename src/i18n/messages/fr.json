@@ -111,12 +111,12 @@
     "phoneLogin": "Continuer avec le téléphone",
     "displayName": "Votre nom complet",
     "or": "ou",
-    "loginSubtitle": "Acc\u00e9dez \u00e0 votre espace",
+    "loginSubtitle": "Accédez à votre espace",
     "registerSubtitleParent": "Trouvez un enseignant pour votre enfant",
     "registerSubtitleTeacher": "Gagnez de l'argent en enseignant en ligne",
-    "createAccount": "Cr\u00e9er un compte",
-    "verifyTitle": "V\u00e9rification",
-    "signUpSuccess": "Compte cr\u00e9\u00e9 avec succ\u00e8s"
+    "createAccount": "Créer un compte",
+    "verifyTitle": "Vérification",
+    "signUpSuccess": "Compte créé avec succès"
   },
   "onboarding": {
     "teacher": {
@@ -254,24 +254,24 @@
     "help": "Aide"
   },
   "teacher": {
-    "availability": "Disponibilit\u00e9s",
-    "setAvailability": "D\u00e9finir mes disponibilit\u00e9s",
+    "availability": "Disponibilités",
+    "setAvailability": "Définir mes disponibilités",
     "saveAvailability": "Enregistrer",
     "savingAvailability": "Enregistrement...",
-    "availabilitySaved": "Disponibilit\u00e9s enregistr\u00e9es",
+    "availabilitySaved": "Disponibilités enregistrées",
     "availabilitySaveError": "Erreur lors de l'enregistrement",
     "profile": "Profil enseignant",
-    "subjects": "Mati\u00e8res",
+    "subjects": "Matières",
     "grades": "Niveaux",
     "rating": "{rating} sur 5 ({count} avis)",
-    "verified": "V\u00e9rifi\u00e9",
+    "verified": "Vérifié",
     "follow": "Suivre",
     "following": "Suivi",
     "unfollow": "Ne plus suivre",
-    "followers": "{count} abonn\u00e9s",
-    "bookSession": "R\u00e9server un cours",
-    "noAvailability": "Aucune disponibilit\u00e9 d\u00e9finie",
-    "availableSlots": "Cr\u00e9neaux disponibles",
+    "followers": "{count} abonnés",
+    "bookSession": "Réserver un cours",
+    "noAvailability": "Aucune disponibilité définie",
+    "availableSlots": "Créneaux disponibles",
     "reviews": "Avis",
     "noReviews": "Aucun avis pour le moment",
     "bio": "Biographie",
@@ -329,21 +329,21 @@
   "payment": {
     "title": "Paiement en attente",
     "sessionWith": "Cours avec {teacher}",
-    "instructions": "Pour confirmer, envoyez {amount} FCFA \u00e0 l'un de ces num\u00e9ros :",
+    "instructions": "Pour confirmer, envoyez {amount} FCFA à l'un de ces numéros :",
     "orangeMoney": "Orange Money",
     "wave": "Wave",
-    "copyNumber": "Copier le num\u00e9ro",
-    "copied": "Copi\u00e9 !",
-    "referenceLabel": "Ajoutez cette r\u00e9f\u00e9rence dans le message du transfert :",
-    "copyReference": "Copier la r\u00e9f\u00e9rence",
-    "autoConfirmMessage": "Votre r\u00e9servation sera confirm\u00e9e automatiquement apr\u00e8s r\u00e9ception du paiement.",
+    "copyNumber": "Copier le numéro",
+    "copied": "Copié !",
+    "referenceLabel": "Ajoutez cette référence dans le message du transfert :",
+    "copyReference": "Copier la référence",
+    "autoConfirmMessage": "Votre réservation sera confirmée automatiquement après réception du paiement.",
     "waiting": "En attente de paiement...",
-    "checkStatus": "V\u00e9rifier le statut",
-    "confirmed": "Paiement confirm\u00e9 !",
-    "confirmedMessage": "Votre cours est r\u00e9serv\u00e9. Vous recevrez un rappel avant le cours.",
+    "checkStatus": "Vérifier le statut",
+    "confirmed": "Paiement confirmé !",
+    "confirmedMessage": "Votre cours est réservé. Vous recevrez un rappel avant le cours.",
     "goToSession": "Voir mon cours",
-    "expires": "R\u00e9servation expire dans {time}",
-    "expired": "R\u00e9servation expir\u00e9e",
+    "expires": "Réservation expire dans {time}",
+    "expired": "Réservation expirée",
     "adminConfirm": "Confirmer le paiement",
     "pendingPayments": "Paiements en attente",
     "noPendingPayments": "Aucun paiement en attente",
@@ -357,22 +357,22 @@
   "session": {
     "title": "Cours en direct",
     "waiting": "Le cours commence dans",
-    "ready": "Le cours va bient\u00f4t commencer !",
+    "ready": "Le cours va bientôt commencer !",
     "join": "Rejoindre le cours",
     "joinExternal": "Ouvrir dans Jitsi Meet",
     "live": "Cours en direct",
-    "elapsed": "Temps \u00e9coul\u00e9",
-    "ended": "Cours termin\u00e9",
-    "endedMessage": "Merci d'avoir particip\u00e9 !",
-    "rateTeacher": "\u00c9valuer l'enseignant",
+    "elapsed": "Temps écoulé",
+    "ended": "Cours terminé",
+    "endedMessage": "Merci d'avoir participé !",
+    "rateTeacher": "Évaluer l'enseignant",
     "leave": "Quitter le cours",
     "upcoming": "Prochains cours",
-    "noSessions": "Aucun cours pr\u00e9vu",
-    "prepareTips": "Pr\u00e9parez votre cam\u00e9ra et votre micro avant le cours",
+    "noSessions": "Aucun cours prévu",
+    "prepareTips": "Préparez votre caméra et votre micro avant le cours",
     "sessionWith": "Cours avec {teacher}",
-    "subject": "Mati\u00e8re : {subject}",
-    "dateTime": "{date} \u00e0 {time}",
-    "duration": "Dur\u00e9e : {duration} min"
+    "subject": "Matière : {subject}",
+    "dateTime": "{date} à {time}",
+    "duration": "Durée : {duration} min"
   },
   "rating": {
     "title": "Évaluer votre cours",
@@ -517,37 +517,37 @@
     "english": "English"
   },
   "courseCatalog": {
-    "title": "Cours enregistr\u00e9s",
-    "subtitle": "Apprenez \u00e0 votre rythme",
-    "filterSubject": "Mati\u00e8re",
+    "title": "Cours enregistrés",
+    "subtitle": "Apprenez à votre rythme",
+    "filterSubject": "Matière",
     "filterGrade": "Niveau",
     "filterExam": "Examen",
-    "allSubjects": "Toutes les mati\u00e8res",
+    "allSubjects": "Toutes les matières",
     "allGrades": "Tous les niveaux",
     "allExams": "Tous les examens",
     "sortBy": "Trier par",
-    "sortPopularity": "Popularit\u00e9",
+    "sortPopularity": "Popularité",
     "sortRating": "Meilleure note",
     "sortPriceLow": "Prix croissant",
-    "sortPriceHigh": "Prix d\u00e9croissant",
-    "sortNewest": "Plus r\u00e9cent",
-    "noResults": "Aucun cours trouv\u00e9",
-    "results": "{count} cours trouv\u00e9(s)",
+    "sortPriceHigh": "Prix décroissant",
+    "sortNewest": "Plus récent",
+    "noResults": "Aucun cours trouvé",
+    "results": "{count} cours trouvé(s)",
     "filters": "Filtres",
-    "lessons": "{count} le\u00e7on(s)",
+    "lessons": "{count} leçon(s)",
     "totalDuration": "{hours}h {minutes}min",
     "viewCourse": "Voir le cours",
-    "enrollNow": "S'inscrire \u2014 {price} FCFA",
+    "enrollNow": "S'inscrire — {price} FCFA",
     "continueCourse": "Continuer le cours",
-    "alreadyEnrolled": "D\u00e9j\u00e0 inscrit",
+    "alreadyEnrolled": "Déjà inscrit",
     "selectChild": "Pour quel enfant ?",
     "syllabus": "Programme du cours",
-    "preview": "Aper\u00e7u gratuit",
-    "enrolledStudents": "{count} \u00e9l\u00e8ve(s) inscrit(s)",
+    "preview": "Aperçu gratuit",
+    "enrolledStudents": "{count} élève(s) inscrit(s)",
     "courseReviews": "Avis sur ce cours",
     "noReviews": "Aucun avis pour le moment",
     "by": "par",
-    "courseDetails": "D\u00e9tails du cours",
+    "courseDetails": "Détails du cours",
     "teacherProfile": "Voir le profil",
     "enrollError": "Erreur lors de l'inscription",
     "addChildFirst": "Ajoutez un enfant dans votre profil d'abord"
@@ -574,13 +574,13 @@
     "title": "Messages",
     "noConversations": "Aucune conversation",
     "startConversation": "Envoyer un message",
-    "typeMessage": "\u00c9crivez votre message...",
+    "typeMessage": "Écrivez votre message...",
     "send": "Envoyer",
     "attachFile": "Joindre un fichier",
-    "fileOnly": "Seuls les fichiers PDF, DOC et TXT sont autoris\u00e9s",
-    "noImages": "Les images ne sont pas autoris\u00e9es dans les messages directs",
-    "contactDetected": "Votre message contient des informations de contact. Pour la s\u00e9curit\u00e9 des \u00e9l\u00e8ves, les \u00e9changes de coordonn\u00e9es sont interdits sur la plateforme.",
-    "contactBlocked": "Message bloqu\u00e9 \u2014 informations de contact d\u00e9tect\u00e9es",
+    "fileOnly": "Seuls les fichiers PDF, DOC et TXT sont autorisés",
+    "noImages": "Les images ne sont pas autorisées dans les messages directs",
+    "contactDetected": "Votre message contient des informations de contact. Pour la sécurité des élèves, les échanges de coordonnées sont interdits sur la plateforme.",
+    "contactBlocked": "Message bloqué — informations de contact détectées",
     "unread": "{count} non lu(s)",
     "today": "Aujourd'hui",
     "yesterday": "Hier"
@@ -589,29 +589,29 @@
     "enablePush": "Activez les notifications pour ne rien manquer",
     "enable": "Activer",
     "dismiss": "Plus tard",
-    "pushEnabled": "Notifications activ\u00e9es !"
+    "pushEnabled": "Notifications activées !"
   },
   "settings": {
-    "title": "Param\u00e8tres",
+    "title": "Paramètres",
     "notifications": "Notifications",
-    "preferredChannel": "Canal pr\u00e9f\u00e9r\u00e9",
+    "preferredChannel": "Canal préféré",
     "channels": "Canaux de notification",
     "whatsapp": "WhatsApp",
     "email": "Email",
     "push": "Notifications push",
-    "enabled": "Activ\u00e9",
-    "disabled": "D\u00e9sactiv\u00e9",
+    "enabled": "Activé",
+    "disabled": "Désactivé",
     "quietHours": "Heures de silence",
     "quietHoursDesc": "Pas de notifications entre ces heures (sauf urgences)",
     "from": "De",
-    "to": "\u00c0",
-    "save": "Enregistrer les pr\u00e9f\u00e9rences",
-    "saved": "Pr\u00e9f\u00e9rences enregistr\u00e9es",
+    "to": "À",
+    "save": "Enregistrer les préférences",
+    "saved": "Préférences enregistrées",
     "saveError": "Erreur lors de l'enregistrement"
   },
   "footer": {
-    "copyright": "\u00a9 2026 écoleVersity. Tous droits r\u00e9serv\u00e9s.",
-    "about": "\u00c0 propos",
+    "copyright": "© 2026 écoleVersity. Tous droits réservés.",
+    "about": "À propos",
     "help": "Aide",
     "institutions": "Établissements",
     "terms": "Conditions d'utilisation",
@@ -764,5 +764,130 @@
     "upcomingSessions": "Prochains cours",
     "noChildren": "Aucun enfant ajouté",
     "addChild": "Ajouter un enfant"
+  },
+  "about": {
+    "title": "À propos d'écoleVersity",
+    "subtitle": "Nous croyons que chaque enfant mérite un accompagnement scolaire de qualité, où qu'il soit. écoleVersity connecte les familles aux meilleurs enseignants grâce à la technologie.",
+    "missionTitle": "Notre mission",
+    "missionText": "écoleVersity est né d'un constat simple : en Côte d'Ivoire et en Afrique de l'Ouest, trouver un bon enseignant pour son enfant est un défi. Les meilleurs professeurs sont souvent à Abidjan, et les familles des autres villes n'y ont pas accès. Notre plateforme supprime cette barrière géographique en permettant à tout élève, du CP1 à la Terminale, d'apprendre en direct avec des enseignants vérifiés — depuis un simple téléphone et une connexion 3G.",
+    "howTitle": "Comment ça fonctionne",
+    "howTeachers": "Enseignants vérifiés",
+    "howTeachersDesc": "Chaque enseignant passe une vérification en 3 étapes : pièce d'identité, diplôme et vidéo d'introduction.",
+    "howLive": "Cours en direct",
+    "howLiveDesc": "Les cours se font en vidéo, en direct. Votre enfant interagit avec son enseignant comme s'il était dans la même pièce.",
+    "howCourses": "Cours et examens",
+    "howCoursesDesc": "En plus du tutorat en direct, accédez à des cours enregistrés et des tests de préparation aux examens CEPE, BEPC et BAC.",
+    "valuesTitle": "Nos valeurs",
+    "valueSafety": "Sécurité des enfants",
+    "valueSafetyDesc": "Les enseignants ne voient jamais les coordonnées de vos enfants. Sécurité et confidentialité garanties.",
+    "valueExcellence": "Excellence pédagogique",
+    "valueExcellenceDesc": "Nous sélectionnons les enseignants les plus qualifiés et suivons la qualité grâce aux évaluations des parents.",
+    "valueAccess": "Accès pour tous",
+    "valueAccessDesc": "Conçu pour fonctionner sur réseau 3G avec un simple téléphone Android.",
+    "valueInnovation": "Innovation IA",
+    "valueInnovationDesc": "Nos tuteurs IA apprennent du programme officiel ivoirien pour un accompagnement personnalisé 24h/24.",
+    "contactTitle": "Contactez-nous",
+    "contactText": "Une question ? Une suggestion ? Notre équipe est à votre écoute.",
+    "contactCta": "Parler à Ama"
+  },
+  "terms": {
+    "title": "Conditions Générales d'Utilisation",
+    "lastUpdated": "Dernière mise à jour : 13 avril 2026",
+    "acceptance": {
+      "title": "1. Acceptation des conditions",
+      "text": "En accédant à écoleVersity (ecoleversity.com), vous acceptez d'être lié par les présentes conditions. Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser la plateforme."
+    },
+    "services": {
+      "title": "2. Description des services",
+      "text": "écoleVersity est une plateforme de tutorat en ligne qui met en relation des parents/élèves avec des enseignants vérifiés. Nos services comprennent : le tutorat en direct par vidéo, les cours de groupe, les cours enregistrés, la préparation aux examens, l'aide aux devoirs et le tutorat à la demande."
+    },
+    "accounts": {
+      "title": "3. Comptes utilisateurs",
+      "text": "Vous devez créer un compte pour utiliser nos services. Vous êtes responsable de la confidentialité de vos identifiants. Les comptes parents gèrent les profils de leurs enfants. Les comptes enseignants nécessitent une vérification d'identité (CNI + diplôme)."
+    },
+    "payments": {
+      "title": "4. Paiements",
+      "text": "Les paiements s'effectuent via Orange Money, Wave ou PayPal. Les montants sont indiqués en FCFA. Une commission de 20% est prélevée sur chaque transaction. Les enseignants reçoivent 80% du montant des cours et sont payés chaque semaine."
+    },
+    "refunds": {
+      "title": "5. Remboursement",
+      "text": "Si un cours ne se déroule pas correctement, un crédit sera ajouté à votre portefeuille écoleVersity. Les demandes doivent être faites dans les 48 heures. La garantie satisfaction permet un crédit de 50% (maximum 2 fois par an)."
+    },
+    "teachers": {
+      "title": "6. Obligations des enseignants",
+      "text": "Les enseignants s'engagent à fournir des documents authentiques, respecter les horaires, maintenir un comportement professionnel, et ne pas contacter les élèves ou parents en dehors de la plateforme."
+    },
+    "conduct": {
+      "title": "7. Règles de conduite",
+      "text": "Il est interdit de partager des coordonnées personnelles dans les messages, d'envoyer des images dans les messages directs, d'utiliser un langage inapproprié, de créer plusieurs comptes, ou de tenter de contourner le système de paiement."
+    },
+    "children": {
+      "title": "8. Protection des mineurs",
+      "text": "écoleVersity prend la protection des enfants très au sérieux. Les enseignants communiquent uniquement avec les comptes parents. Les messages sont analysés pour détecter les tentatives de partage de coordonnées. Le contenu est modéré par intelligence artificielle."
+    },
+    "content": {
+      "title": "9. Propriété intellectuelle",
+      "text": "Les cours créés par les enseignants restent leur propriété. En publiant sur écoleVersity, les enseignants accordent une licence non exclusive pour diffuser le contenu aux élèves inscrits. Le logo, le design et le code d'écoleVersity sont protégés."
+    },
+    "contact": {
+      "title": "10. Blocage de contacts",
+      "text": "Pour la sécurité des élèves, écoleVersity bloque automatiquement les tentatives de partage de coordonnées. Les numéros, emails, réseaux sociaux et URLs sont détectés et masqués. Les enseignants qui contournent ce système s'exposent à des sanctions."
+    },
+    "termination": {
+      "title": "11. Résiliation",
+      "text": "écoleVersity peut suspendre ou résilier un compte en cas de violation. Sanctions enseignants : avertissement, restriction 7 jours, restriction 30 jours, bannissement permanent. Les utilisateurs peuvent fermer leur compte à tout moment."
+    },
+    "liability": {
+      "title": "12. Responsabilité",
+      "text": "écoleVersity est une plateforme de mise en relation. Les enseignants sont des prestataires indépendants. La plateforme n'est pas responsable des interruptions liées au réseau ou à la connexion internet."
+    },
+    "modifications": {
+      "title": "13. Modifications",
+      "text": "écoleVersity se réserve le droit de modifier ces conditions. Les utilisateurs seront informés des modifications importantes par email ou notification."
+    }
+  },
+  "privacy": {
+    "title": "Politique de Confidentialité",
+    "lastUpdated": "Dernière mise à jour : 13 avril 2026",
+    "collection": {
+      "title": "1. Données collectées",
+      "text": "Nous collectons : informations de compte (nom, email, téléphone), profils d'élèves (prénom, classe), données enseignants (CNI, diplômes, disponibilités), transactions, messages (analysés pour la sécurité), et données d'utilisation."
+    },
+    "usage": {
+      "title": "2. Utilisation des données",
+      "text": "Vos données servent à fournir nos services, vérifier les enseignants, traiter les paiements, envoyer des notifications, améliorer la plateforme, et protéger la sécurité des élèves."
+    },
+    "children": {
+      "title": "3. Protection des données des mineurs",
+      "text": "Les données des élèves bénéficient d'une protection renforcée. Seuls les parents gèrent les profils. Les enseignants n'accèdent qu'au prénom et à la classe. Les coordonnées ne sont jamais partagées. Aucune image dans les messages directs."
+    },
+    "storage": {
+      "title": "4. Stockage",
+      "text": "Données stockées sur Supabase en Europe (Paris, eu-west-3). Chiffrement en transit (HTTPS/TLS) et au repos. Sauvegardes quotidiennes. Les données de paiement sont traitées par Orange Money, Wave et PayPal."
+    },
+    "thirdParties": {
+      "title": "5. Partage avec des tiers",
+      "text": "Nous partageons vos données avec : Supabase (base de données), Resend (emails), Jitsi/JaaS (vidéo), PayPal (paiements), Cloudflare (vidéos), Anthropic (chatbot IA). Nous ne vendons jamais vos données."
+    },
+    "cookies": {
+      "title": "6. Cookies",
+      "text": "écoleVersity utilise des cookies essentiels : authentification, préférences de langue, session. Pas de cookies publicitaires ni de trackers tiers."
+    },
+    "rights": {
+      "title": "7. Vos droits",
+      "text": "Vous disposez des droits d'accès, de rectification, de suppression et de portabilité de vos données. Contact : info@ecoleversity.com"
+    },
+    "security": {
+      "title": "8. Sécurité",
+      "text": "Mesures : HTTPS/TLS, authentification Supabase Auth, Row Level Security sur chaque table, vérification HMAC des webhooks, détection de contacts, modération IA."
+    },
+    "changes": {
+      "title": "9. Modifications",
+      "text": "Cette politique peut être mise à jour. Nous vous informerons des modifications importantes par email."
+    },
+    "contact": {
+      "title": "10. Contact",
+      "text": "Pour toute question : info@ecoleversity.com\nSite : ecoleversity.com/support"
+    }
   }
 }

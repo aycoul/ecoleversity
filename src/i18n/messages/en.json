@@ -537,7 +537,7 @@
     "lessons": "{count} lesson(s)",
     "totalDuration": "{hours}h {minutes}min",
     "viewCourse": "View course",
-    "enrollNow": "Enroll \u2014 {price} FCFA",
+    "enrollNow": "Enroll — {price} FCFA",
     "continueCourse": "Continue course",
     "alreadyEnrolled": "Already enrolled",
     "selectChild": "For which child?",
@@ -580,7 +580,7 @@
     "fileOnly": "Only PDF, DOC, and TXT files are allowed",
     "noImages": "Images are not allowed in direct messages",
     "contactDetected": "Your message contains contact information. For student safety, sharing personal contact details is not allowed on the platform.",
-    "contactBlocked": "Message blocked \u2014 contact information detected",
+    "contactBlocked": "Message blocked — contact information detected",
     "unread": "{count} unread",
     "today": "Today",
     "yesterday": "Yesterday"
@@ -610,7 +610,7 @@
     "saveError": "Error saving preferences"
   },
   "footer": {
-    "copyright": "\u00a9 2026 écoleVersity. All rights reserved.",
+    "copyright": "© 2026 écoleVersity. All rights reserved.",
     "about": "About",
     "help": "Help",
     "institutions": "Institutions",
@@ -764,5 +764,130 @@
     "upcomingSessions": "Upcoming sessions",
     "noChildren": "No children added",
     "addChild": "Add a child"
+  },
+  "about": {
+    "title": "About écoleVersity",
+    "subtitle": "We believe every child deserves quality academic support, wherever they are. écoleVersity connects families to the best teachers through technology.",
+    "missionTitle": "Our mission",
+    "missionText": "écoleVersity was born from a simple observation: in Ivory Coast and West Africa, finding a good teacher for your child is a challenge. The best teachers are often in Abidjan, and families in other cities don't have access. Our platform removes this geographical barrier, allowing any student from CP1 to Terminale to learn live with verified teachers — from a simple phone and 3G connection.",
+    "howTitle": "How it works",
+    "howTeachers": "Verified teachers",
+    "howTeachersDesc": "Every teacher goes through 3-step verification: national ID, diploma, and introduction video.",
+    "howLive": "Live classes",
+    "howLiveDesc": "Classes are conducted by video, live. Your child interacts with their teacher as if they were in the same room.",
+    "howCourses": "Courses and exams",
+    "howCoursesDesc": "In addition to live tutoring, access recorded courses and exam prep tests for CEPE, BEPC, and BAC.",
+    "valuesTitle": "Our values",
+    "valueSafety": "Child safety",
+    "valueSafetyDesc": "Teachers never see your children's contact information. Security and privacy guaranteed.",
+    "valueExcellence": "Teaching excellence",
+    "valueExcellenceDesc": "We select the most qualified teachers and monitor quality through parent reviews.",
+    "valueAccess": "Access for all",
+    "valueAccessDesc": "Designed to work on 3G networks with a simple Android phone.",
+    "valueInnovation": "AI Innovation",
+    "valueInnovationDesc": "Our AI tutors learn from the official Ivorian curriculum for personalized 24/7 support.",
+    "contactTitle": "Contact us",
+    "contactText": "Questions? Suggestions? Our team is here to help.",
+    "contactCta": "Talk to Ama"
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "lastUpdated": "Last updated: April 13, 2026",
+    "acceptance": {
+      "title": "1. Acceptance",
+      "text": "By accessing écoleVersity (ecoleversity.com), you agree to be bound by these terms. If you do not accept, please do not use the platform."
+    },
+    "services": {
+      "title": "2. Services",
+      "text": "écoleVersity is an online tutoring platform connecting parents/students with verified teachers. Services include: live video tutoring, group classes, recorded courses, exam preparation, homework help, and on-demand tutoring."
+    },
+    "accounts": {
+      "title": "3. User accounts",
+      "text": "You must create an account to use our services. You are responsible for your credentials. Parent accounts manage their children's profiles. Teacher accounts require identity verification (national ID + diploma)."
+    },
+    "payments": {
+      "title": "4. Payments",
+      "text": "Payments are made via Orange Money, Wave, or PayPal. Amounts are in FCFA. A 20% commission is taken on each transaction. Teachers receive 80% and are paid weekly."
+    },
+    "refunds": {
+      "title": "5. Refunds",
+      "text": "If a class doesn't go as planned, a credit is added to your écoleVersity wallet. Requests must be made within 48 hours. The satisfaction guarantee allows a 50% credit (max 2 times per year)."
+    },
+    "teachers": {
+      "title": "6. Teacher obligations",
+      "text": "Teachers must provide authentic documents, respect scheduled times, maintain professional conduct, and not contact students or parents outside the platform."
+    },
+    "conduct": {
+      "title": "7. Code of conduct",
+      "text": "It is forbidden to share personal contact info in messages, send images in DMs, use inappropriate language, create multiple accounts, or bypass the payment system."
+    },
+    "children": {
+      "title": "8. Child protection",
+      "text": "écoleVersity takes child safety seriously. Teachers communicate only with parent accounts. Messages are analyzed for contact sharing attempts. Content is moderated by AI."
+    },
+    "content": {
+      "title": "9. Intellectual property",
+      "text": "Courses created by teachers remain their property. By publishing on écoleVersity, teachers grant a non-exclusive license to distribute content to enrolled students."
+    },
+    "contact": {
+      "title": "10. Contact blocking",
+      "text": "For student safety, écoleVersity automatically blocks contact sharing attempts. Phone numbers, emails, social media, and URLs are detected and masked."
+    },
+    "termination": {
+      "title": "11. Termination",
+      "text": "écoleVersity may suspend or terminate accounts for violations. Teacher sanctions: warning, 7-day restriction, 30-day restriction, permanent ban."
+    },
+    "liability": {
+      "title": "12. Liability",
+      "text": "écoleVersity is a marketplace. Teachers are independent contractors. The platform is not responsible for network interruptions."
+    },
+    "modifications": {
+      "title": "13. Changes",
+      "text": "écoleVersity reserves the right to modify these terms. Users will be notified of important changes by email."
+    }
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated: April 13, 2026",
+    "collection": {
+      "title": "1. Data collected",
+      "text": "We collect: account info (name, email, phone), student profiles (first name, grade), teacher data (ID, diplomas, availability), transactions, messages (analyzed for safety), and usage data."
+    },
+    "usage": {
+      "title": "2. Data usage",
+      "text": "Your data is used to provide services, verify teachers, process payments, send notifications, improve the platform, and protect student safety."
+    },
+    "children": {
+      "title": "3. Children's data protection",
+      "text": "Student data has enhanced protection. Only parents manage profiles. Teachers only see first name and grade. Contact info is never shared. No images in DMs."
+    },
+    "storage": {
+      "title": "4. Storage",
+      "text": "Data stored on Supabase in Europe (Paris, eu-west-3). Encrypted in transit (HTTPS/TLS) and at rest. Daily backups. Payment data processed by Orange Money, Wave, and PayPal."
+    },
+    "thirdParties": {
+      "title": "5. Third parties",
+      "text": "We share data with: Supabase (database), Resend (emails), Jitsi/JaaS (video), PayPal (payments), Cloudflare (videos), Anthropic (AI chatbot). We never sell your data."
+    },
+    "cookies": {
+      "title": "6. Cookies",
+      "text": "écoleVersity uses essential cookies only: authentication, language preferences, user session. No advertising cookies or third-party trackers."
+    },
+    "rights": {
+      "title": "7. Your rights",
+      "text": "You have rights to access, rectify, delete, and export your data. Contact: info@ecoleversity.com"
+    },
+    "security": {
+      "title": "8. Security",
+      "text": "Measures: HTTPS/TLS, Supabase Auth, Row Level Security on every table, HMAC webhook verification, contact detection, AI content moderation."
+    },
+    "changes": {
+      "title": "9. Changes",
+      "text": "This policy may be updated. We will notify you of important changes by email."
+    },
+    "contact": {
+      "title": "10. Contact",
+      "text": "For questions about your data: info@ecoleversity.com\nWebsite: ecoleversity.com/support"
+    }
   }
 }
