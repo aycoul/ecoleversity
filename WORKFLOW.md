@@ -91,16 +91,24 @@ When a step completes, the NEXT step becomes active. When all 7 steps complete f
 | `/code-simplify` | [ ] Pending | |
 | `/ship` | [ ] Pending | |
 
-### Phase 7: AI Operations Team + AI Teacher Twins
+### Phase 7: AI Operations Team + AI Teacher Twins + Curriculum Data
 | Step | Status | Notes |
 |------|--------|-------|
-| `/spec` | [ ] Pending | 6 business agents + AI Twin pipeline |
-| `/plan` | [ ] Pending | VPS service + recording + transcription + Twin chat |
-| `/build` | [ ] Pending | |
+| `/spec` | [ ] Pending | 6 business agents + AI Twin pipeline + CI curriculum integration |
+| `/plan` | [ ] Pending | VPS service + recording + transcription + Twin chat + curriculum data |
+| `/build` | [ ] Pending | Strategy: `docs/strategy/curriculum-data-strategy.md` |
 | `/test` | [ ] Pending | |
 | `/review` | [ ] Pending | |
 | `/code-simplify` | [ ] Pending | |
-| `/ship` | [ ] Pending | PLATFORM GOES LIVE — full automation + AI twins |
+| `/ship` | [ ] Pending | PLATFORM GOES LIVE — full automation + AI twins + curriculum-trained AI |
+
+Phase 7 scope:
+- 6 AI business agents (Payment, Verification, Moderation, Support, Analytics, CEO)
+- AI Teacher Twins (recording → transcription → knowledge base → per-teacher chat)
+- CI Curriculum Data Integration (exam papers, syllabi, progressions → AI training)
+- Session summary reports (AI note-taker → teacher review → parent notification)
+- WhatsApp inbound chatbot (Ama on WhatsApp)
+- Ministry partnership outreach (MENA endorsement letter)
 
 ---
 
