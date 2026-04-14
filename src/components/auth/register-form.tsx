@@ -17,7 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { GraduationCap, Loader2, Users } from "lucide-react";
+import { GraduationCap, Loader2, Users, Phone, Mail } from "lucide-react";
 
 const registerSchema = z.object({
   displayName: z.string().min(2).max(100),
@@ -52,6 +52,10 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
   const [role, setRole] = useState<"parent" | "teacher">(
     initialRole ?? "parent"
   );
+  const [method, setMethod] = useState<"phone" | "email">("phone");
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -76,6 +80,44 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
     }
     setErrors({});
     return true;
+  };
+
+  const handlePhoneRegister = async () => {
+    if (!phone || phone.length < 8 || !displayName) {
+      toast.error(locale === "fr" ? "Veuillez remplir tous les champs" : "Please fill all fields");
+      return;
+    }
+    setLoading(true);
+    const supabase = createClient();
+    const formattedPhone = phone.startsWith("+") ? phone : `+225${phone.replace(/\s/g, "")}`;
+
+    if (!otpSent) {
+      const { error } = await supabase.auth.signInWithOtp({
+        phone: formattedPhone,
+        options: { data: { display_name: displayName, role, language: locale } },
+      });
+      if (error) {
+        toast.error(error.message);
+      } else {
+        setOtpSent(true);
+        toast.success(locale === "fr" ? "Code envoyé !" : "Code sent!");
+      }
+      setLoading(false);
+      return;
+    }
+
+    const { error } = await supabase.auth.verifyOtp({
+      phone: formattedPhone,
+      token: otp,
+      type: "sms",
+    });
+    if (error) {
+      toast.error(error.message);
+      setLoading(false);
+      return;
+    }
+    toast.success(tc("success"));
+    router.push(role === "teacher" ? "/onboarding/teacher" : "/onboarding/parent");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -206,6 +248,80 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {/* Method toggle */}
+        <div className="mb-4 flex rounded-lg border border-slate-200 p-1">
+          <button
+            type="button"
+            onClick={() => setMethod("phone")}
+            className={`flex flex-1 items-center justify-center gap-2 rounded-md py-2 text-sm font-semibold transition-all ${
+              method === "phone" ? "bg-[var(--ev-blue)] text-white" : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            <Phone className="size-4" />
+            WhatsApp
+          </button>
+          <button
+            type="button"
+            onClick={() => setMethod("email")}
+            className={`flex flex-1 items-center justify-center gap-2 rounded-md py-2 text-sm font-semibold transition-all ${
+              method === "email" ? "bg-[var(--ev-blue)] text-white" : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            <Mail className="size-4" />
+            Email
+          </button>
+        </div>
+
+        {/* Phone registration */}
+        {method === "phone" && (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="regName">{t("displayName")}</Label>
+              <Input
+                id="regName"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                autoComplete="name"
+                autoFocus
+              />
+            </div>
+            {!otpSent ? (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="regPhone">{t("phoneNumber")}</Label>
+                  <div className="flex gap-2">
+                    <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-600">+225</div>
+                    <Input id="regPhone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="07 XX XX XX XX" autoComplete="tel" />
+                  </div>
+                </div>
+                <Button onClick={handlePhoneRegister} className="w-full bg-green-600 text-white hover:bg-green-700" disabled={loading || !displayName || !phone}>
+                  {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
+                  {t("sendOtp")}
+                </Button>
+              </>
+            ) : (
+              <>
+                <p className="text-center text-sm text-slate-600">
+                  {t("otpSentTo", { phone: `+225${phone}` })}
+                </p>
+                <div className="space-y-2">
+                  <Label htmlFor="regOtp">{t("otpCode")}</Label>
+                  <Input id="regOtp" type="text" inputMode="numeric" maxLength={6} value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))} placeholder="000000" className="text-center text-2xl tracking-[0.5em]" autoFocus />
+                </div>
+                <Button onClick={handlePhoneRegister} className="w-full bg-[var(--ev-blue)] text-white hover:bg-[var(--ev-blue-light)]" disabled={loading || otp.length < 6}>
+                  {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
+                  {t("verifyOtp")}
+                </Button>
+                <button type="button" onClick={() => { setOtpSent(false); setOtp(""); }} className="block w-full text-center text-xs text-slate-400 hover:text-slate-600">
+                  {t("changeNumber")}
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Email registration */}
+        {method === "email" && (
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="displayName">{t("displayName")}</Label>
@@ -262,28 +378,30 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
             {t("registerTitle")}
           </Button>
 
-          <div className="relative my-4">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-200" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-slate-500">
-                {locale === "fr" ? "ou" : "or"}
-              </span>
-            </div>
-          </div>
-
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full"
-            onClick={handleGoogleLogin}
-            disabled={loading}
-          >
-            <GoogleIcon className="mr-2 size-4" />
-            {t("googleLogin")}
-          </Button>
         </form>
+        )}
+
+        <div className="mt-4 relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-slate-200" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-card px-2 text-slate-500">
+              {locale === "fr" ? "ou" : "or"}
+            </span>
+          </div>
+        </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          className="mt-4 w-full"
+          onClick={handleGoogleLogin}
+          disabled={loading}
+        >
+          <GoogleIcon className="mr-2 size-4" />
+          {t("googleLogin")}
+        </Button>
 
         <p className="mt-4 text-center text-sm text-slate-500">
           {t("hasAccount")}{" "}

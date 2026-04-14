@@ -104,7 +104,7 @@
     "roleParent": "I'm a parent",
     "roleTeacher": "I'm a teacher",
     "roleSelect": "You are...",
-    "otpSent": "A code has been sent to {destination}",
+    "otpSent": "Code sent!",
     "otpEnter": "Enter the verification code",
     "otpResend": "Resend code",
     "googleLogin": "Continue with Google",
@@ -116,7 +116,14 @@
     "registerSubtitleTeacher": "Earn money teaching online",
     "createAccount": "Create an account",
     "verifyTitle": "Verification",
-    "signUpSuccess": "Account created successfully"
+    "signUpSuccess": "Account created successfully",
+    "phoneNumber": "Phone number",
+    "sendOtp": "Get code via SMS",
+    "otpSentTo": "A 6-digit code was sent to {phone}",
+    "otpCode": "Verification code",
+    "verifyOtp": "Verify code",
+    "changeNumber": "Change number",
+    "invalidPhone": "Invalid phone number"
   },
   "onboarding": {
     "teacher": {
