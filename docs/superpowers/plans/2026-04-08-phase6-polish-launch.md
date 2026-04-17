@@ -143,92 +143,133 @@
 
 ---
 
-### Task 39: JaaS Migration + Session Recording Pipeline
+### Task 39: LiveKit Migration + Session Recording Pipeline
 
-**Goal:** Switch from free `meet.jit.si` to JaaS (Jitsi as a Service) with JWT auth and auto-recording. Recordings are stored on Cloudflare R2 and linked to sessions in the DB.
+**Why LiveKit over JaaS:** JaaS paid tier costs $99/mo for 300 users (minimum). LiveKit Cloud free tier covers 100 MAU + 1,000 min/mo — enough for our entire soft launch. Pay-as-you-go scales with revenue ($0.003/min video, $0.004/min recording). LiveKit also supports AI agents joining rooms as participants, which unlocks Phase 7 AI Twins without a separate architecture.
+
+**Goal:** Replace the free `meet.jit.si` embed with LiveKit, add token-based auth, auto-record sessions to Cloudflare R2, and link recordings to sessions in the DB.
+
+**Architecture:**
+- Live video: **LiveKit Cloud** (free tier first, then pay-as-you-go)
+- Session recording: LiveKit Egress → **Cloudflare R2** (S3-compatible storage, $0.015/GB, no egress fees)
+- Recording playback: **Cloudflare Stream** (adaptive bitrate for watch-later)
+- Pre-recorded courses (Phase 3): still **Cloudflare Stream** (unchanged)
 
 **Prerequisites (manual, before coding):**
-1. Log in to [JaaS Console](https://jaas.8x8.vc/) — verify AppID `vpaas-magic-cookie-956edc4e1d074897b914d7ae7102d4b5`
-2. Generate RSA key pair: `ssh-keygen -t rsa -b 4096 -m PEM -f jaas-private.key`
-3. Upload public key to JaaS Console → API Keys → note the returned Key ID (kid)
+1. Sign up at [LiveKit Cloud](https://cloud.livekit.io) — free tier
+2. Create a project: `ecoleversity`
+3. From Project Settings → copy **API Key**, **API Secret**, and **WebSocket URL** (format: `wss://ecoleversity-xxxx.livekit.cloud`)
 4. Create Cloudflare R2 bucket `ecoleversity-recordings` + generate S3-compatible API credentials
-5. Configure webhook in JaaS Console → target: `https://ecoleversity.vercel.app/api/jaas/recording-webhook` → events: `RECORDING_UPLOADED`
+5. Configure LiveKit webhook endpoint in LiveKit Cloud Console → Webhooks → URL: `https://ecoleversity.vercel.app/api/livekit/webhook` → subscribe to `egress_ended` event
 6. Add to `.env.local`:
    ```
-   JAAS_PRIVATE_KEY=<paste RSA private key content, base64 or multiline>
+   LIVEKIT_API_KEY=APIxxxxxxxxx
+   LIVEKIT_API_SECRET=secretxxxxxxxxx
+   LIVEKIT_URL=wss://ecoleversity-xxxx.livekit.cloud
+   NEXT_PUBLIC_LIVEKIT_URL=wss://ecoleversity-xxxx.livekit.cloud
+   LIVEKIT_WEBHOOK_KEY=webhook-signing-key-from-livekit-dashboard
    CLOUDFLARE_R2_ACCESS_KEY_ID=xxx
    CLOUDFLARE_R2_SECRET_ACCESS_KEY=xxx
    CLOUDFLARE_R2_BUCKET=ecoleversity-recordings
    CLOUDFLARE_R2_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
+   CLOUDFLARE_R2_REGION=auto
    ```
 
 **Files:**
-- Modify: `src/lib/video/jitsi.ts` — add JaaS domain, room name format, JWT helpers
-- Create: `src/app/api/jitsi/generate-token/route.ts` — server-side JWT generation (RS256)
-- Modify: `src/components/session/jitsi-embed.tsx` — load JaaS script, fetch JWT, pass to API
-- Modify: `src/components/session/session-room.tsx` — pass user ID/email/role for JWT
-- Create: `src/app/api/jaas/recording-webhook/route.ts` — handle RECORDING_UPLOADED event
-- Create: `src/lib/cloudflare/r2.ts` — upload recording to R2 via S3-compatible API
+- Delete/replace: `src/lib/video/jitsi.ts` → rename to `src/lib/video/livekit.ts`
+- Create: `src/app/api/livekit/token/route.ts` — server-side access token generation
+- Create: `src/app/api/livekit/start-recording/route.ts` — trigger Egress when teacher joins
+- Create: `src/app/api/livekit/webhook/route.ts` — handle `egress_ended` event
+- Replace: `src/components/session/jitsi-embed.tsx` → `src/components/session/livekit-room.tsx`
+- Modify: `src/components/session/session-room.tsx` — use new LiveKit component
+- Modify: `src/app/[locale]/(learning)/session/[id]/page.tsx` — pass user ID/email/role
+- Create: `src/lib/cloudflare/r2.ts` — configure Egress to write directly to R2
 - Create: `supabase/migrations/00005_session_recordings.sql` — session_recordings table
 
-- [ ] **Step 1:** Install dependencies: `npm install jsonwebtoken @aws-sdk/client-s3` + `npm install -D @types/jsonwebtoken`
+- [ ] **Step 1:** Install dependencies: `npm install livekit-client @livekit/components-react @livekit/components-styles livekit-server-sdk @aws-sdk/client-s3`
 
-- [ ] **Step 2:** Update `src/lib/video/jitsi.ts` — add JaaS functions:
-  - `getJaaSDomain()` → returns `"8x8.vc"`
-  - `getJaaSRoomName(roomId)` → returns `"${JAAS_APP_ID}/${roomId}"`
-  - `getJaaSExternalApiUrl()` → returns `"https://8x8.vc/${JAAS_APP_ID}/external_api.js"`
-  - Keep existing `getJitsiMeetUrl()` as mobile fallback
+- [ ] **Step 2:** Create `src/lib/video/livekit.ts` with helpers:
+  - `getLiveKitUrl()` → returns `process.env.NEXT_PUBLIC_LIVEKIT_URL`
+  - `getRoomName(liveClassId)` → returns `"session-${liveClassId}"` (stable room name per class)
+  - Delete old `src/lib/video/jitsi.ts` (no longer used)
 
-- [ ] **Step 3:** Create JWT generation API route (`src/app/api/jitsi/generate-token/route.ts`):
-  - Auth check: only authenticated users can request tokens
-  - JWT payload: `{ aud: "jitsi", iss: "chat", sub: JAAS_APP_ID, room, context.user, features.recording }`
-  - Sign with RS256 using private key, `kid` = JAAS_API_KEY
-  - Teachers get `affiliation: "owner"` + `features.recording: true`
-  - Parents/students get `affiliation: "member"` + `features.recording: false`
-  - Token expires in 1 hour
+- [ ] **Step 3:** Create access token API route (`src/app/api/livekit/token/route.ts`):
+  - Auth check: verify Supabase session, load user profile
+  - Verify user is enrolled in this class OR is the teacher
+  - Generate token using `AccessToken` from `livekit-server-sdk`:
+    - `identity`: user ID
+    - `name`: display name
+    - `metadata`: JSON with `{ role: "teacher" | "parent", email }`
+    - `grants.room`: room name, `roomJoin: true`, `canPublish: true`, `canSubscribe: true`
+    - Teachers get `canPublishData: true` + `roomAdmin: true`
+    - Token TTL: 1 hour
+  - Return `{ token, url }` to client
 
-- [ ] **Step 4:** Update `session-room.tsx` — pass `userId`, `userEmail` props to `JitsiEmbed`. Update the session page to fetch and pass these values.
+- [ ] **Step 4:** Create recording trigger API route (`src/app/api/livekit/start-recording/route.ts`):
+  - Only teachers can trigger (auth check + role check)
+  - Use `EgressClient` from `livekit-server-sdk`
+  - Start `RoomCompositeEgress` with:
+    - `roomName`: matches live class
+    - S3 output: Cloudflare R2 credentials, bucket, key = `recordings/${liveClassId}/${Date.now()}.mp4`
+    - Layout: `speaker` (or `grid` for group classes)
+  - Save `egress_id` to `session_recordings` table (status: `starting`)
+  - Return `{ egressId }`
 
-- [ ] **Step 5:** Update `jitsi-embed.tsx` — full JaaS migration:
-  - Fetch JWT from `/api/jitsi/generate-token` before initializing
-  - Load script from `getJaaSExternalApiUrl()` instead of `meet.jit.si`
-  - Pass `jwt` and `roomName: getJaaSRoomName(roomId)` to `JitsiMeetExternalAPI("8x8.vc", {...})`
-  - Mobile fallback: still use `getJitsiMeetUrl()` (free, no recording)
+- [ ] **Step 5:** Replace `jitsi-embed.tsx` with `src/components/session/livekit-room.tsx`:
+  - Use `LiveKitRoom`, `VideoConference`, `RoomAudioRenderer` from `@livekit/components-react`
+  - Fetch token from `/api/livekit/token` on mount
+  - On teacher join: auto-fire `/api/livekit/start-recording` (if not already recording)
+  - Import `@livekit/components-styles` for default UI
+  - Handle `onDisconnected` → call `onClose` prop (same contract as old JitsiEmbed)
+  - Keep mobile responsive: LiveKit's `VideoConference` handles mobile natively
 
-- [ ] **Step 6:** Create Supabase migration `00005_session_recordings.sql`:
+- [ ] **Step 6:** Update `session-room.tsx` + session page — pass `userId`, `userEmail`, `userRole` down to `LiveKitRoom` component. Replace all `JitsiEmbed` references with new component.
+
+- [ ] **Step 7:** Create Supabase migration `00005_session_recordings.sql`:
   ```sql
   CREATE TABLE session_recordings (
     id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     live_class_id uuid NOT NULL REFERENCES live_classes(id) ON DELETE CASCADE,
-    recording_session_id text UNIQUE NOT NULL,
-    r2_url text NOT NULL,
+    egress_id text UNIQUE NOT NULL,
+    r2_url text,
+    cloudflare_stream_id text,
     duration_seconds integer,
+    file_size_bytes bigint,
     started_at timestamptz,
     ended_at timestamptz,
-    participants jsonb,
-    idempotency_key text UNIQUE NOT NULL,
+    status text NOT NULL DEFAULT 'starting',
     created_at timestamptz DEFAULT now()
   );
   CREATE INDEX idx_session_recordings_class ON session_recordings(live_class_id);
+  CREATE INDEX idx_session_recordings_egress ON session_recordings(egress_id);
+
+  -- RLS: only the teacher and enrolled parents can view
+  ALTER TABLE session_recordings ENABLE ROW LEVEL SECURITY;
+  CREATE POLICY "Teacher sees own recordings" ON session_recordings FOR SELECT
+    USING (EXISTS (SELECT 1 FROM live_classes WHERE id = live_class_id AND teacher_id = auth.uid()));
+  CREATE POLICY "Enrolled parents see recordings" ON session_recordings FOR SELECT
+    USING (EXISTS (SELECT 1 FROM enrollments WHERE live_class_id = session_recordings.live_class_id AND parent_id = auth.uid()));
   ```
-  Also update `live_classes.recording_url` when a recording is saved.
 
-- [ ] **Step 7:** Create R2 upload utility (`src/lib/cloudflare/r2.ts`):
-  - Use `@aws-sdk/client-s3` with R2 endpoint
-  - Upload to `recordings/YYYY/MM/session-id.mp4`
-  - Return the R2 URL
+- [ ] **Step 8:** Create webhook handler (`src/app/api/livekit/webhook/route.ts`):
+  - Verify webhook signature using `WebhookReceiver` from `livekit-server-sdk` with `LIVEKIT_WEBHOOK_KEY`
+  - Handle `egress_ended` event:
+    - Find `session_recordings` row by `egress_id`
+    - Update with: `r2_url` (from egress output), `duration_seconds`, `file_size_bytes`, `ended_at`, `status = 'completed'`
+    - Also update `live_classes.recording_url`
+  - Return 200 quickly
+  - Note: Because egress writes directly to R2, we don't need to download/re-upload — unlike JaaS this is a one-step pipeline
 
-- [ ] **Step 8:** Create recording webhook handler (`src/app/api/jaas/recording-webhook/route.ts`):
-  - Verify webhook authenticity (check AppID matches)
-  - Handle `RECORDING_UPLOADED`: download from `preAuthenticatedLink` → upload to R2 → insert into `session_recordings` → update `live_classes.recording_url`
-  - Idempotency check with `idempotency_key`
-  - Return 200 quickly (avoid webhook timeout)
+- [ ] **Step 9:** Add recording playback to ended session UI — in `session-room.tsx` ENDED state, if `recordingUrl` exists, show "Revoir le cours" button. Playback uses native `<video>` tag with R2 URL (or Cloudflare Stream if we transcode later).
 
-- [ ] **Step 9:** Add recording playback to ended session UI — in `session-room.tsx` ENDED state, if `recordingUrl` exists, show "Revoir le cours" button linking to the video.
+- [ ] **Step 10:** Test end-to-end:
+  - Create a test session in the DB
+  - Join as teacher → token generated → connected to LiveKit room → recording auto-starts
+  - Join as parent (second browser) → both see each other
+  - Teacher ends session → LiveKit egress finalizes → webhook fires → DB updates → R2 has the MP4
+  - Reload session page → "Revoir le cours" button appears → clicks → video plays
 
-- [ ] **Step 10:** Test end-to-end: create session → join as teacher (moderator) → verify recording button appears → record → end call → verify webhook fires → verify R2 upload → verify DB entry → verify playback link.
-
-- [ ] **Step 11:** Build, commit: "feat: migrate to JaaS with JWT auth + session recording pipeline (R2 storage)"
+- [ ] **Step 11:** Build, commit: "feat: migrate video to LiveKit with auto-recording to R2"
 
 ---
 
@@ -240,7 +281,7 @@
 - [ ] SEO: sitemap, robots, Open Graph working
 - [ ] Legal pages live
 - [ ] AI moderation active
-- [ ] JaaS video with recording operational
+- [ ] LiveKit video with auto-recording operational (recordings in R2, playback works)
 - [ ] Admin account created
 - [ ] Help articles seeded
 - [ ] Exam questions seeded
@@ -256,6 +297,7 @@
 | RLS policy gaps | Critical | Write explicit test cases for cross-family data access |
 | AI moderation false positives | Medium | Start lenient, tighten over time; admin can override |
 | Seed exam questions quality | Medium | Keep questions simple; admin interface to add more later |
-| JaaS free tier limit (25 MAU) | Medium | Sufficient for beta; upgrade to paid when needed |
-| Recording webhook fails/delayed | Medium | Idempotency key prevents duplicates; 24h download window |
-| Recording costs at scale | Medium | $0.01/min = ~$60/mo for 100 sessions; pass cost to users if needed |
+| LiveKit free tier limit (100 MAU, 1000 min) | Low | Sufficient for entire soft launch; pay-as-you-go after |
+| Recording webhook fails | Medium | Egress writes directly to R2, so recording exists even if webhook fails; re-sync script can backfill DB |
+| R2 storage costs at scale | Low | $0.015/GB = ~$1/mo for 100 recordings (1hr each at 500MB); no egress fees |
+| LiveKit pricing at scale | Medium | $0.003/min video + $0.004/min egress = ~$50/mo for 12,000 min; cheaper than JaaS |

@@ -28,12 +28,12 @@ export default async function SessionPage({
     .select(
       `
       id,
-      jitsi_room_id,
       scheduled_at,
       duration_minutes,
       status,
       subject,
       teacher_id,
+      recording_url,
       profiles!live_classes_teacher_id_fkey(display_name)
     `
     )
@@ -90,19 +90,17 @@ export default async function SessionPage({
     : profiles?.display_name ?? "—";
   const subjectLabel =
     SUBJECT_LABELS[liveClass.subject as Subject] ?? liveClass.subject ?? "—";
-  const displayName = userProfile.display_name ?? user.email ?? "Utilisateur";
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
       <SessionRoom
         sessionId={liveClass.id}
-        jitsiRoomId={liveClass.jitsi_room_id}
         scheduledAt={liveClass.scheduled_at}
         durationMinutes={liveClass.duration_minutes}
         teacherName={teacherName}
         subjectLabel={subjectLabel}
-        userName={displayName}
         userRole={role === "teacher" ? "teacher" : "parent"}
+        recordingUrl={liveClass.recording_url}
       />
     </div>
   );

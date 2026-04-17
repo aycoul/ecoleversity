@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
 
     const { data: sessions } = await supabase
       .from("live_classes")
-      .select("id, title, scheduled_at, duration_minutes, jitsi_room_id, teacher_id")
+      .select("id, title, scheduled_at, duration_minutes, teacher_id")
       .in("status", ["scheduled", "live"])
       .or(classFilter)
       .gte("scheduled_at", new Date().toISOString())
@@ -87,7 +87,7 @@ export async function GET(request: NextRequest) {
         ] as [number, number, number, number, number],
         duration: { minutes: s.duration_minutes ?? 30 },
         description: `Cours en direct sur écoleVersity`,
-        url: `https://meet.jit.si/${s.jitsi_room_id ?? ""}`,
+        url: `${process.env.NEXT_PUBLIC_APP_URL ?? "https://ecoleversity.com"}/fr/session/${s.id}`,
         status: "CONFIRMED" as const,
         organizer: { name: "écoleVersity" },
       };

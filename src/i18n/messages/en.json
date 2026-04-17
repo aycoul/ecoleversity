@@ -366,7 +366,7 @@
     "waiting": "Session starts in",
     "ready": "Session is about to start!",
     "join": "Join session",
-    "joinExternal": "Open in Jitsi Meet",
+    "joinExternal": "Open session",
     "live": "Live session",
     "elapsed": "Elapsed time",
     "ended": "Session ended",
@@ -379,7 +379,9 @@
     "sessionWith": "Session with {teacher}",
     "subject": "Subject: {subject}",
     "dateTime": "{date} at {time}",
-    "duration": "Duration: {duration} min"
+    "duration": "Duration: {duration} min",
+    "connectError": "Unable to connect to the session",
+    "watchRecording": "Watch recording"
   },
   "rating": {
     "title": "Rate your session",

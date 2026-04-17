@@ -366,7 +366,7 @@
     "waiting": "Le cours commence dans",
     "ready": "Le cours va bientôt commencer !",
     "join": "Rejoindre le cours",
-    "joinExternal": "Ouvrir dans Jitsi Meet",
+    "joinExternal": "Ouvrir le cours",
     "live": "Cours en direct",
     "elapsed": "Temps écoulé",
     "ended": "Cours terminé",
@@ -379,7 +379,9 @@
     "sessionWith": "Cours avec {teacher}",
     "subject": "Matière : {subject}",
     "dateTime": "{date} à {time}",
-    "duration": "Durée : {duration} min"
+    "duration": "Durée : {duration} min",
+    "connectError": "Impossible de se connecter au cours",
+    "watchRecording": "Revoir le cours"
   },
   "rating": {
     "title": "Évaluer votre cours",

@@ -10,23 +10,22 @@ import {
   Video,
   LogOut,
   Star,
+  PlayCircle,
 } from "lucide-react";
 import { CountdownTimer } from "./countdown-timer";
-import { JitsiEmbed } from "./jitsi-embed";
-import { getJitsiMeetUrl } from "@/lib/video/jitsi";
+import { LiveKitRoomEmbed } from "./livekit-room";
 import { Link } from "@/i18n/routing";
 
 type SessionState = "WAITING" | "READY" | "LIVE" | "ENDED";
 
 type SessionRoomProps = {
   sessionId: string;
-  jitsiRoomId: string;
   scheduledAt: string;
   durationMinutes: number;
   teacherName: string;
   subjectLabel: string;
-  userName: string;
   userRole: "parent" | "teacher";
+  recordingUrl?: string | null;
 };
 
 function computeState(
@@ -46,13 +45,12 @@ function computeState(
 
 export function SessionRoom({
   sessionId,
-  jitsiRoomId,
   scheduledAt,
   durationMinutes,
   teacherName,
   subjectLabel,
-  userName,
   userRole,
+  recordingUrl,
 }: SessionRoomProps) {
   const t = useTranslations("session");
   const scheduledDate = new Date(scheduledAt);
@@ -60,7 +58,7 @@ export function SessionRoom({
   const [state, setState] = useState<SessionState>(() =>
     computeState(scheduledDate, durationMinutes)
   );
-  const [showJitsi, setShowJitsi] = useState(false);
+  const [showRoom, setShowRoom] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
   // Re-evaluate state every second
@@ -74,7 +72,7 @@ export function SessionRoom({
 
   // Elapsed timer when LIVE
   useEffect(() => {
-    if (state !== "LIVE" || !showJitsi) return;
+    if (state !== "LIVE" || !showRoom) return;
 
     const interval = setInterval(() => {
       const elapsed = Math.floor(
@@ -84,21 +82,21 @@ export function SessionRoom({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [state, showJitsi, scheduledDate]);
+  }, [state, showRoom, scheduledDate]);
 
   const handleCountdownReady = useCallback(() => {
     setState("READY");
   }, []);
 
   const handleJoinClick = () => {
-    setShowJitsi(true);
+    setShowRoom(true);
     if (state === "READY") {
       // Will transition to LIVE once the scheduled time arrives
     }
   };
 
   const handleLeave = () => {
-    setShowJitsi(false);
+    setShowRoom(false);
   };
 
   const formattedDate = scheduledDate.toLocaleDateString("fr-FR", {
@@ -149,7 +147,7 @@ export function SessionRoom({
   );
 
   // WAITING state
-  if (state === "WAITING" && !showJitsi) {
+  if (state === "WAITING" && !showRoom) {
     return (
       <div className="mx-auto max-w-lg space-y-6">
         {sessionInfoCard}
@@ -182,7 +180,7 @@ export function SessionRoom({
   }
 
   // READY state
-  if (state === "READY" && !showJitsi) {
+  if (state === "READY" && !showRoom) {
     return (
       <div className="mx-auto max-w-lg space-y-6">
         {sessionInfoCard}
@@ -203,7 +201,7 @@ export function SessionRoom({
   }
 
   // LIVE state (or READY with Jitsi open)
-  if ((state === "LIVE" || state === "READY") && showJitsi) {
+  if ((state === "LIVE" || state === "READY") && showRoom) {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
@@ -230,9 +228,9 @@ export function SessionRoom({
           </button>
         </div>
 
-        <JitsiEmbed
-          roomId={jitsiRoomId}
-          userName={userName}
+        <LiveKitRoomEmbed
+          liveClassId={sessionId}
+          userRole={userRole}
           onClose={handleLeave}
         />
       </div>
@@ -249,6 +247,18 @@ export function SessionRoom({
           <p className="text-lg font-semibold text-slate-900">{t("ended")}</p>
           <p className="mt-1 text-sm text-slate-500">{t("endedMessage")}</p>
         </div>
+
+        {recordingUrl && (
+          <a
+            href={recordingUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-[var(--ev-blue)]/20 bg-[var(--ev-blue-50)] px-6 py-3 text-sm font-semibold text-[var(--ev-blue)] transition-colors hover:bg-[var(--ev-blue)]/10"
+          >
+            <PlayCircle className="size-4" />
+            {t("watchRecording")}
+          </a>
+        )}
 
         {userRole === "parent" && (
           <Link
