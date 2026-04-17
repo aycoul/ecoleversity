@@ -84,7 +84,7 @@ When a step completes, the NEXT step becomes active. When all 7 steps complete f
 | Step | Status | Notes |
 |------|--------|-------|
 | `/spec` | [x] Done | SPEC.md v3.0 — Section 9, Phase 6 |
-| `/plan` | [x] Done | `docs/superpowers/plans/2026-04-08-phase6-polish-launch.md` (6 tasks) |
+| `/plan` | [x] Done | `docs/superpowers/plans/2026-04-08-phase6-polish-launch.md` (7 tasks, incl. Task 39: JaaS + recording) |
 | `/build` | [ ] **NEXT** | |
 | `/test` | [ ] Pending | |
 | `/review` | [ ] Pending | |

@@ -102,10 +102,28 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Language + Copyright */}
+        {/* Language + Copyright + Legal */}
         <div className="mt-8 flex flex-col items-center gap-3 border-t border-white/10 pt-6">
           <LocaleSwitcher variant="footer" />
-          <p className="text-xs text-slate-400">{t("copyright")}</p>
+          <div className="flex flex-wrap items-center justify-center gap-1 text-xs text-slate-400">
+            <span>{t("copyright")}</span>
+            <span className="mx-1 hidden sm:inline">·</span>
+            <div className="flex items-center gap-1">
+              <Link
+                href="/privacy"
+                className="transition-colors hover:text-white"
+              >
+                {t("privacy")}
+              </Link>
+              <span>·</span>
+              <Link
+                href="/terms"
+                className="transition-colors hover:text-white"
+              >
+                {t("terms")}
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </footer>
