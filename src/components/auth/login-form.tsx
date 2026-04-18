@@ -76,9 +76,11 @@ export function LoginForm() {
     const cc = countryCode.startsWith("+") ? countryCode : `+${countryCode}`;
     const formattedPhone = phone.startsWith("+") ? phone : `${cc}${phone.replace(/\s/g, "")}`;
 
+    // Channel intentionally omitted — our Send SMS Hook routes to WhatsApp
+    // via AILead regardless. Passing channel:"whatsapp" triggers Supabase's
+    // provider-support check (requires Twilio w/ WhatsApp) which we don't use.
     const { error } = await supabase.auth.signInWithOtp({
       phone: formattedPhone,
-      options: { channel: "whatsapp" },
     });
 
     if (error) {

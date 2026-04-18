@@ -107,10 +107,11 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
         setLoading(false);
         return;
       }
+      // Channel intentionally omitted — our Send SMS Hook routes to WhatsApp
+      // via AILead regardless. See login-form.tsx for rationale.
       const { error } = await supabase.auth.signInWithOtp({
         phone: formattedPhone,
         options: {
-          channel: "whatsapp",
           data: { display_name: displayName, role, language: locale },
         },
       });
@@ -148,7 +149,6 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
     const { error } = await supabase.auth.signInWithOtp({
       phone: formattedPhone,
       options: {
-        channel: "whatsapp",
         data: { display_name: displayName, role, language: locale },
       },
     });
