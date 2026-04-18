@@ -53,6 +53,7 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
     initialRole ?? "parent"
   );
   const [method, setMethod] = useState<"phone" | "email">("phone");
+  const [countryCode, setCountryCode] = useState("+225");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
@@ -98,7 +99,8 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
     }
     setLoading(true);
     const supabase = createClient();
-    const formattedPhone = phone.startsWith("+") ? phone : `+225${phone.replace(/\s/g, "")}`;
+    const cc = countryCode.startsWith("+") ? countryCode : `+${countryCode}`;
+    const formattedPhone = phone.startsWith("+") ? phone : `${cc}${phone.replace(/\s/g, "")}`;
 
     if (!otpSent) {
       if (resendCooldown > 0) {
@@ -141,7 +143,8 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
     if (resendCooldown > 0 || loading) return;
     setLoading(true);
     const supabase = createClient();
-    const formattedPhone = phone.startsWith("+") ? phone : `+225${phone.replace(/\s/g, "")}`;
+    const cc = countryCode.startsWith("+") ? countryCode : `+${countryCode}`;
+    const formattedPhone = phone.startsWith("+") ? phone : `${cc}${phone.replace(/\s/g, "")}`;
     const { error } = await supabase.auth.signInWithOtp({
       phone: formattedPhone,
       options: {
@@ -328,7 +331,19 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
                 <div className="space-y-2">
                   <Label htmlFor="regPhone">{t("phoneNumber")}</Label>
                   <div className="flex gap-2">
-                    <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-600">+225</div>
+                    <Input
+                      id="regPhoneCountryCode"
+                      type="text"
+                      inputMode="tel"
+                      value={countryCode}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/[^+\d]/g, "");
+                        setCountryCode(raw.startsWith("+") ? raw : `+${raw}`);
+                      }}
+                      maxLength={5}
+                      className="w-20 text-center"
+                      aria-label="Indicatif pays"
+                    />
                     <Input id="regPhone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="07 XX XX XX XX" autoComplete="tel" />
                   </div>
                 </div>
@@ -340,7 +355,7 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
             ) : (
               <>
                 <p className="text-center text-sm text-slate-600">
-                  {t("otpSentTo", { phone: `+225${phone}` })}
+                  {t("otpSentTo", { phone: phone.startsWith("+") ? phone : `${countryCode}${phone}` })}
                 </p>
                 <div className="space-y-2">
                   <Label htmlFor="regOtp">{t("otpCode")}</Label>

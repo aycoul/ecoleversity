@@ -44,6 +44,7 @@ export function LoginForm() {
   const router = useRouter();
 
   const [method, setMethod] = useState<"phone" | "email">("phone");
+  const [countryCode, setCountryCode] = useState("+225");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
@@ -72,7 +73,8 @@ export function LoginForm() {
     const supabase = createClient();
 
     // Format phone: add +225 if not present (CI country code)
-    const formattedPhone = phone.startsWith("+") ? phone : `+225${phone.replace(/\s/g, "")}`;
+    const cc = countryCode.startsWith("+") ? countryCode : `+${countryCode}`;
+    const formattedPhone = phone.startsWith("+") ? phone : `${cc}${phone.replace(/\s/g, "")}`;
 
     const { error } = await supabase.auth.signInWithOtp({
       phone: formattedPhone,
@@ -94,7 +96,8 @@ export function LoginForm() {
 
     setLoading(true);
     const supabase = createClient();
-    const formattedPhone = phone.startsWith("+") ? phone : `+225${phone.replace(/\s/g, "")}`;
+    const cc = countryCode.startsWith("+") ? countryCode : `+${countryCode}`;
+    const formattedPhone = phone.startsWith("+") ? phone : `${cc}${phone.replace(/\s/g, "")}`;
 
     const { error } = await supabase.auth.verifyOtp({
       phone: formattedPhone,
@@ -195,9 +198,19 @@ export function LoginForm() {
                 <div className="space-y-2">
                   <Label htmlFor="phone">{t("phoneNumber")}</Label>
                   <div className="flex gap-2">
-                    <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-600">
-                      +225
-                    </div>
+                    <Input
+                      id="phoneCountryCode"
+                      type="text"
+                      inputMode="tel"
+                      value={countryCode}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/[^+\d]/g, "");
+                        setCountryCode(raw.startsWith("+") ? raw : `+${raw}`);
+                      }}
+                      maxLength={5}
+                      className="w-20 text-center"
+                      aria-label="Indicatif pays"
+                    />
                     <Input
                       id="phone"
                       type="tel"
@@ -225,7 +238,7 @@ export function LoginForm() {
             ) : (
               <>
                 <p className="text-center text-sm text-slate-600">
-                  {t("otpSentTo", { phone: phone.startsWith("+") ? phone : `+225${phone}` })}
+                  {t("otpSentTo", { phone: phone.startsWith("+") ? phone : `${countryCode}${phone}` })}
                 </p>
                 <div className="space-y-2">
                   <Label htmlFor="otp">{t("otpCode")}</Label>
