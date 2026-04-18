@@ -1,6 +1,21 @@
 import { getWhatsAppProvider, type SendResult } from './providers';
 
 /**
+ * Formats the OTP code into a French user-facing sentence that slots
+ * into the AILead `ecoleversity_notification` UTILITY template's {{1}}.
+ *
+ * The template body:
+ *   "Bonjour! Voici une notification de EcoleVersity pour vous: {{1}}.
+ *    Rendez-vous sur ecoleversity.com pour plus de details."
+ *
+ * Once AILead graduates to an AUTHENTICATION template (post Meta WABA
+ * verification), this can be simplified back to passing just `code`.
+ */
+function formatOtpMessage(code: string): string {
+  return `votre code de vérification est ${code} (expire dans 5 minutes)`;
+}
+
+/**
  * Send a 6-digit OTP to a parent/teacher via WhatsApp.
  *
  * Used by the Supabase Send SMS Hook (src/app/api/auth/sms-hook/route.ts).
@@ -19,9 +34,9 @@ export async function sendOtpViaWhatsApp(
 ): Promise<SendResult> {
   const provider = getWhatsAppProvider();
   const templateName =
-    process.env.AILEAD_OTP_TEMPLATE_NAME ?? 'ecoleversity_otp_fr';
+    process.env.AILEAD_OTP_TEMPLATE_NAME ?? 'ecoleversity_notification';
 
-  return provider.sendTemplate(phone, templateName, [code], {
+  return provider.sendTemplate(phone, templateName, [formatOtpMessage(code)], {
     idempotencyKey: `otp_${userId}_${code}`,
     language: 'fr',
   });
