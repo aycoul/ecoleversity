@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link, useRouter } from "@/i18n/routing";
 import { z } from "zod";
@@ -56,6 +56,7 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -82,6 +83,14 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
     return true;
   };
 
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => Math.max(0, prev - 1));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
   const handlePhoneRegister = async () => {
     if (!phone || phone.length < 8 || !displayName) {
       toast.error(locale === "fr" ? "Veuillez remplir tous les champs" : "Please fill all fields");
@@ -92,14 +101,22 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
     const formattedPhone = phone.startsWith("+") ? phone : `+225${phone.replace(/\s/g, "")}`;
 
     if (!otpSent) {
+      if (resendCooldown > 0) {
+        setLoading(false);
+        return;
+      }
       const { error } = await supabase.auth.signInWithOtp({
         phone: formattedPhone,
-        options: { data: { display_name: displayName, role, language: locale } },
+        options: {
+          channel: "whatsapp",
+          data: { display_name: displayName, role, language: locale },
+        },
       });
       if (error) {
         toast.error(error.message);
       } else {
         setOtpSent(true);
+        setResendCooldown(30);
         toast.success(locale === "fr" ? "Code envoyé !" : "Code sent!");
       }
       setLoading(false);
@@ -118,6 +135,27 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
     }
     toast.success(tc("success"));
     router.push(role === "teacher" ? "/onboarding/teacher" : "/onboarding/parent");
+  };
+
+  const handleResendOtp = async () => {
+    if (resendCooldown > 0 || loading) return;
+    setLoading(true);
+    const supabase = createClient();
+    const formattedPhone = phone.startsWith("+") ? phone : `+225${phone.replace(/\s/g, "")}`;
+    const { error } = await supabase.auth.signInWithOtp({
+      phone: formattedPhone,
+      options: {
+        channel: "whatsapp",
+        data: { display_name: displayName, role, language: locale },
+      },
+    });
+    if (error) {
+      toast.error(error.message);
+    } else {
+      setResendCooldown(30);
+      toast.success(locale === "fr" ? "Code renvoyé !" : "Code resent!");
+    }
+    setLoading(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -312,7 +350,17 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
                   {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
                   {t("verifyOtp")}
                 </Button>
-                <button type="button" onClick={() => { setOtpSent(false); setOtp(""); }} className="block w-full text-center text-xs text-slate-400 hover:text-slate-600">
+                <button
+                  type="button"
+                  onClick={handleResendOtp}
+                  disabled={loading || resendCooldown > 0}
+                  className="block w-full text-center text-xs text-slate-500 hover:text-slate-700 disabled:text-slate-300 disabled:cursor-not-allowed"
+                >
+                  {resendCooldown > 0
+                    ? t("otpResendIn", { seconds: resendCooldown })
+                    : t("otpResend")}
+                </button>
+                <button type="button" onClick={() => { setOtpSent(false); setOtp(""); setResendCooldown(0); }} className="block w-full text-center text-xs text-slate-400 hover:text-slate-600">
                   {t("changeNumber")}
                 </button>
               </>

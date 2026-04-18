@@ -1,15 +1,15 @@
 import type { NotificationPayload } from './types';
-import { createAdminClient } from '@/lib/supabase/admin';
-
-const API_BASE = 'https://waba.360dialog.io/v1';
-
-function getApiKey(): string | null {
-  return process.env.WHATSAPP_API_KEY ?? null;
-}
+import { getUserContactInfo } from './user-profile';
+import { getWhatsAppProvider } from './providers';
 
 /**
- * Send a WhatsApp template message via 360dialog API.
- * Returns true if sent successfully, false on failure or missing config.
+ * Send a WhatsApp template message via the configured provider
+ * (AILead by default, 360dialog for rollback).
+ *
+ * Returns true if sent successfully, false on any failure.
+ * Keeps the boolean shape for backwards-compatibility with cascade.ts.
+ * Callers needing the structured error should call
+ * getWhatsAppProvider().sendTemplate() directly.
  */
 export async function sendWhatsApp(
   phone: string,
@@ -17,55 +17,22 @@ export async function sendWhatsApp(
   templateParams: string[],
   language: string = 'fr',
 ): Promise<boolean> {
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    console.warn('[whatsapp] WHATSAPP_API_KEY not set, skipping WhatsApp');
-    return false;
+  const provider = getWhatsAppProvider();
+  const result = await provider.sendTemplate(
+    phone,
+    templateName,
+    templateParams,
+    { language },
+  );
+
+  if (!result.success) {
+    console.warn(
+      `[whatsapp] Send failed via ${provider.name}: ${result.errorCode ?? 'unknown'}`,
+    );
   }
 
-  try {
-    const body = {
-      messaging_product: 'whatsapp',
-      to: phone,
-      type: 'template',
-      template: {
-        name: templateName,
-        language: { code: language },
-        components: [
-          {
-            type: 'body',
-            parameters: templateParams.map((value) => ({
-              type: 'text',
-              text: value,
-            })),
-          },
-        ],
-      },
-    };
-
-    const res = await fetch(`${API_BASE}/messages`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'D360-API-KEY': apiKey,
-      },
-      body: JSON.stringify(body),
-    });
-
-    if (!res.ok) {
-      const errorBody = await res.text();
-      console.error(`[whatsapp] API error ${res.status}: ${errorBody}`);
-      return false;
-    }
-
-    return true;
-  } catch (err) {
-    console.error('[whatsapp] Send error:', err);
-    return false;
-  }
+  return result.success;
 }
-
-import { getUserContactInfo } from './user-profile';
 
 /**
  * Map a NotificationPayload to a WhatsApp template call.
@@ -127,7 +94,6 @@ export async function sendWhatsAppNotification(
       ]);
 
     default:
-      // No WhatsApp template for this event
       return false;
   }
 }

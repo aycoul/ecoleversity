@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link, useRouter } from "@/i18n/routing";
 import { toast } from "sonner";
@@ -47,16 +47,26 @@ export function LoginForm() {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Phone OTP login
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => Math.max(0, prev - 1));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
+  // Phone OTP login — delivered via WhatsApp by our Send SMS Hook (AILead)
   const handleSendOtp = async () => {
     if (!phone || phone.length < 8) {
       toast.error(t("invalidPhone"));
       return;
     }
+    if (resendCooldown > 0) return;
 
     setLoading(true);
     const supabase = createClient();
@@ -66,12 +76,14 @@ export function LoginForm() {
 
     const { error } = await supabase.auth.signInWithOtp({
       phone: formattedPhone,
+      options: { channel: "whatsapp" },
     });
 
     if (error) {
       toast.error(error.message);
     } else {
       setOtpSent(true);
+      setResendCooldown(30);
       toast.success(t("otpSent"));
     }
     setLoading(false);
@@ -239,7 +251,17 @@ export function LoginForm() {
                 </Button>
                 <button
                   type="button"
-                  onClick={() => { setOtpSent(false); setOtp(""); }}
+                  onClick={handleSendOtp}
+                  disabled={loading || resendCooldown > 0}
+                  className="block w-full text-center text-xs text-slate-500 hover:text-slate-700 disabled:text-slate-300 disabled:cursor-not-allowed"
+                >
+                  {resendCooldown > 0
+                    ? t("otpResendIn", { seconds: resendCooldown })
+                    : t("otpResend")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setOtpSent(false); setOtp(""); setResendCooldown(0); }}
                   className="block w-full text-center text-xs text-slate-400 hover:text-slate-600"
                 >
                   {t("changeNumber")}
