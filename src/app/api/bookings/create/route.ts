@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { z } from "zod";
 import {
   generatePaymentReference,
@@ -116,8 +117,14 @@ export async function POST(request: NextRequest) {
     const paymentReference = generatePaymentReference();
     const jitsiRoomId = generateJitsiRoomId();
 
+    // Writes use the admin client — parent role can't INSERT on live_classes
+    // or transactions under RLS (only teachers / admins can). We've already
+    // verified the user, the learner ownership, and the teacher verification
+    // status above, so the admin client is the authorization boundary here.
+    const adminSupabase = createAdminClient();
+
     // Create live_class
-    const { data: liveClass, error: classError } = await supabase
+    const { data: liveClass, error: classError } = await adminSupabase
       .from("live_classes")
       .insert({
         teacher_id: teacherId,
@@ -146,7 +153,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create enrollment
-    const { error: enrollError } = await supabase.from("enrollments").insert({
+    const { error: enrollError } = await adminSupabase.from("enrollments").insert({
       learner_id: learnerId,
       live_class_id: liveClass.id,
     });
@@ -154,15 +161,16 @@ export async function POST(request: NextRequest) {
     if (enrollError) {
       console.error("Error creating enrollment:", enrollError);
       // Clean up the live_class
-      await supabase.from("live_classes").delete().eq("id", liveClass.id);
+      await adminSupabase.from("live_classes").delete().eq("id", liveClass.id);
       return NextResponse.json(
         { error: "Erreur lors de l'inscription" },
         { status: 500 }
       );
     }
 
-    // Create transaction
-    const { data: transaction, error: txError } = await supabase
+    // Create transaction (payment_provider nullable — pinned at payment time
+    // by /api/payments/{admin,sms,paypal}-confirm)
+    const { data: transaction, error: txError } = await adminSupabase
       .from("transactions")
       .insert({
         parent_id: user.id,
@@ -182,8 +190,8 @@ export async function POST(request: NextRequest) {
     if (txError || !transaction) {
       console.error("Error creating transaction:", txError);
       // Clean up
-      await supabase.from("enrollments").delete().eq("live_class_id", liveClass.id);
-      await supabase.from("live_classes").delete().eq("id", liveClass.id);
+      await adminSupabase.from("enrollments").delete().eq("live_class_id", liveClass.id);
+      await adminSupabase.from("live_classes").delete().eq("id", liveClass.id);
       return NextResponse.json(
         { error: "Erreur lors de la création de la transaction" },
         { status: 500 }
