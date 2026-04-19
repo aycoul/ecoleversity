@@ -54,3 +54,9 @@ Thumbs.db
 *.key
 *.pem
 credentials.json
+
+# Agent tool artifacts (session-scoped, should not be committed)
+.playwright-mcp/
+.claude/
+/*.png
+!public/**/*.png

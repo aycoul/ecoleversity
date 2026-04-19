@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import {
   UpcomingSessionList,
@@ -14,6 +14,7 @@ type PageProps = {
 export default async function KidClassesPage({ params }: PageProps) {
   const { learner_id } = await params;
   const locale = await getLocale();
+  const t = await getTranslations("kid");
   const supabase = await createServerSupabaseClient();
 
   const {
@@ -99,25 +100,25 @@ export default async function KidClassesPage({ params }: PageProps) {
     <div className="space-y-8">
       <div className="flex items-center gap-3">
         <Video className="size-6 text-[var(--ev-blue)]" />
-        <h1 className="text-2xl font-bold text-slate-900">Mes classes</h1>
+        <h1 className="text-2xl font-bold text-slate-900">{t("myClasses")}</h1>
       </div>
 
       <section>
         <h2 className="mb-3 text-lg font-semibold text-slate-900">
-          Prochaines classes
+          {t("upcomingClasses")}
         </h2>
         <UpcomingSessionList
           sessions={upcoming.map((c) => shape(c as unknown as ClassRow))}
           mode="kid"
           locale={locale}
-          emptyMessage="Aucune classe prévue. Demande à tes parents de t'inscrire à une classe !"
+          emptyMessage={t("emptyUpcomingClasses")}
         />
       </section>
 
       {past.length > 0 && (
         <section>
           <h2 className="mb-3 text-lg font-semibold text-slate-900">
-            Classes passées
+            {t("pastClasses")}
           </h2>
           <UpcomingSessionList
             sessions={past.map((c) => shape(c as unknown as ClassRow))}

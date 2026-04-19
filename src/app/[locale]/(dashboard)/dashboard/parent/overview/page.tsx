@@ -165,12 +165,12 @@ export default async function ParentOverviewPage() {
       {/* Greeting banner */}
       <div className="rounded-2xl bg-gradient-to-br from-[var(--ev-blue)] to-[var(--ev-blue-light)] p-6 text-white md:p-8">
         <h1 className="text-2xl font-bold md:text-3xl">
-          Bonjour {parentFirstName} 👋
+          {t("greeting", { name: parentFirstName })}
         </h1>
         <p className="mt-1 text-sm text-white/80 md:text-base">
           {children.length === 0
-            ? "Ajoutez votre premier enfant pour commencer."
-            : `Vous avez ${children.length} enfant${children.length > 1 ? "s" : ""} inscrit${children.length > 1 ? "s" : ""} sur EcoleVersity.`}
+            ? t("noChildrenCta")
+            : t("childCount", { count: children.length })}
         </p>
       </div>
 
@@ -189,12 +189,12 @@ export default async function ParentOverviewPage() {
       ) : (
         <section>
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-900">Mes enfants</h2>
+            <h2 className="text-lg font-semibold text-slate-900">{t("myChildren")}</h2>
             <Link
               href="/dashboard/parent/children"
               className="text-sm font-medium text-[var(--ev-blue)] hover:underline"
             >
-              Gérer
+              {t("manage")}
             </Link>
           </div>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -220,7 +220,7 @@ export default async function ParentOverviewPage() {
       {children.length > 0 && (
         <section>
           <h2 className="mb-3 text-lg font-semibold text-slate-900">
-            Prochaines sessions
+            {t("upcomingSessionsTitle")}
           </h2>
           <UpcomingSessionList
             sessions={upcomingSessions}

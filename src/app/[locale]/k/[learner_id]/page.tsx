@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import {
@@ -20,6 +20,7 @@ type PageProps = {
 export default async function KidHomePage({ params }: PageProps) {
   const { learner_id } = await params;
   const locale = await getLocale();
+  const t = await getTranslations("kid");
   const supabase = await createServerSupabaseClient();
 
   const {
@@ -132,7 +133,7 @@ export default async function KidHomePage({ params }: PageProps) {
       {/* Greeting */}
       <div className="text-center sm:text-left">
         <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">
-          Salut {learner.first_name} 👋
+          {t("greeting", { name: learner.first_name })}
         </h1>
         <p className="mt-1 text-sm text-slate-500 sm:text-base">
           {GRADE_LEVEL_LABELS[learner.grade_level as GradeLevel] ??
@@ -149,13 +150,13 @@ export default async function KidHomePage({ params }: PageProps) {
       {/* Today's classes */}
       <section>
         <h2 className="mb-3 text-lg font-semibold text-slate-900">
-          Cours d&apos;aujourd&apos;hui
+          {t("todaysClasses")}
         </h2>
         <UpcomingSessionList
           sessions={upcomingSessions}
           mode="kid"
           locale={locale}
-          emptyMessage="Aucun cours aujourd'hui. Repose-toi bien !"
+          emptyMessage={t("emptyToday")}
         />
       </section>
 
@@ -175,10 +176,10 @@ export default async function KidHomePage({ params }: PageProps) {
           </div>
           <div>
             <div className="text-sm font-semibold text-slate-900">
-              Mes classes
+              {t("myClasses")}
             </div>
             <div className="text-xs text-slate-500">
-              Toutes mes classes en direct
+              {t("myClassesSub")}
             </div>
           </div>
         </Link>
@@ -190,8 +191,8 @@ export default async function KidHomePage({ params }: PageProps) {
             <PlayCircle className="size-5" />
           </div>
           <div>
-            <div className="text-sm font-semibold text-slate-900">Mes cours</div>
-            <div className="text-xs text-slate-500">Cours enregistrés</div>
+            <div className="text-sm font-semibold text-slate-900">{t("myCourses")}</div>
+            <div className="text-xs text-slate-500">{t("myCoursesSub")}</div>
           </div>
         </Link>
         <Link
@@ -203,9 +204,9 @@ export default async function KidHomePage({ params }: PageProps) {
           </div>
           <div>
             <div className="text-sm font-semibold text-slate-900">
-              Mes succès
+              {t("myAchievements")}
             </div>
-            <div className="text-xs text-slate-500">Badges & certificats</div>
+            <div className="text-xs text-slate-500">{t("myAchievementsSub")}</div>
           </div>
         </Link>
       </div>
@@ -213,8 +214,7 @@ export default async function KidHomePage({ params }: PageProps) {
       {!hasAnyContent && (
         <div className="rounded-xl border border-dashed border-slate-200 p-8 text-center">
           <p className="text-sm text-slate-500">
-            Tu n&apos;as pas encore de cours inscrits. Demande à tes parents de
-            t&apos;aider à choisir !
+            {t("noContent")}
           </p>
         </div>
       )}

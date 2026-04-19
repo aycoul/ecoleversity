@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { Award } from "lucide-react";
 
@@ -8,6 +9,8 @@ type PageProps = {
 
 export default async function KidAchievementsPage({ params }: PageProps) {
   const { learner_id } = await params;
+  const locale = await getLocale();
+  const t = await getTranslations("kid");
   const supabase = await createServerSupabaseClient();
 
   const {
@@ -45,14 +48,14 @@ export default async function KidAchievementsPage({ params }: PageProps) {
     <div className="space-y-8">
       <div className="flex items-center gap-3">
         <Award className="size-6 text-amber-500" />
-        <h1 className="text-2xl font-bold text-slate-900">Mes succès</h1>
+        <h1 className="text-2xl font-bold text-slate-900">{t("myAchievements")}</h1>
       </div>
 
       {(completed ?? []).length === 0 ? (
         <div className="rounded-xl border border-dashed border-slate-200 p-12 text-center">
           <Award className="mx-auto size-12 text-slate-300" />
           <p className="mt-4 text-sm text-slate-500">
-            Tes succès apparaîtront ici quand tu termineras des cours !
+            {t("emptyAchievements")}
           </p>
         </div>
       ) : (
@@ -61,6 +64,13 @@ export default async function KidAchievementsPage({ params }: PageProps) {
             const course = (courses ?? []).find(
               (c) => c.id === (e.course_id as string)
             );
+            const formattedDate = new Date(
+              e.completed_at as string
+            ).toLocaleDateString(locale === "fr" ? "fr-FR" : "en-US", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            });
             return (
               <div
                 key={e.id as string}
@@ -68,15 +78,10 @@ export default async function KidAchievementsPage({ params }: PageProps) {
               >
                 <Award className="size-10 text-amber-500" />
                 <h3 className="mt-3 font-semibold text-slate-900">
-                  {(course?.title as string) ?? "Cours terminé"}
+                  {(course?.title as string) ?? t("courseCompleted")}
                 </h3>
                 <p className="mt-1 text-xs text-slate-500">
-                  Terminé le{" "}
-                  {new Date(e.completed_at as string).toLocaleDateString("fr-FR", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
+                  {t("completedOn", { date: formattedDate })}
                 </p>
               </div>
             );

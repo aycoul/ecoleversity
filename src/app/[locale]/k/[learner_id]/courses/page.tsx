@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { PlayCircle, CheckCircle2 } from "lucide-react";
@@ -9,6 +10,7 @@ type PageProps = {
 
 export default async function KidCoursesPage({ params }: PageProps) {
   const { learner_id } = await params;
+  const t = await getTranslations("kid");
   const supabase = await createServerSupabaseClient();
 
   const {
@@ -48,12 +50,12 @@ export default async function KidCoursesPage({ params }: PageProps) {
     <div className="space-y-8">
       <div className="flex items-center gap-3">
         <PlayCircle className="size-6 text-[var(--ev-green)]" />
-        <h1 className="text-2xl font-bold text-slate-900">Mes cours</h1>
+        <h1 className="text-2xl font-bold text-slate-900">{t("myCourses")}</h1>
       </div>
 
       {(enrollments ?? []).length === 0 ? (
         <div className="rounded-xl border border-dashed border-slate-200 p-8 text-center text-sm text-slate-400">
-          Aucun cours. Demande à tes parents de t&apos;inscrire à un cours !
+          {t("emptyCourses")}
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -87,13 +89,13 @@ export default async function KidCoursesPage({ params }: PageProps) {
                   {completed && (
                     <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-[var(--ev-green)] px-2 py-1 text-xs font-semibold text-white">
                       <CheckCircle2 className="size-3" />
-                      Terminé
+                      {t("completed")}
                     </div>
                   )}
                 </div>
                 <div className="p-4">
                   <h3 className="line-clamp-2 font-semibold text-slate-900">
-                    {(course?.title as string) ?? "Cours"}
+                    {(course?.title as string) ?? t("courseFallback")}
                   </h3>
                   <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-100">
                     <div
