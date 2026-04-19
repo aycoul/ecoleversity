@@ -114,7 +114,10 @@ export function LoginForm() {
     }
 
     const { path } = await getAuthRedirect(supabase);
-    router.push(path);
+    // Full-page navigation so the root layout re-fetches the auth state
+    // and the top nav reflects the logged-in user. router.push keeps a
+    // stale Header because it does soft navigation.
+    window.location.href = path;
   };
 
   // Email login
@@ -134,7 +137,8 @@ export function LoginForm() {
     }
 
     const { path } = await getAuthRedirect(supabase);
-    router.push(path);
+    // Full-page navigation — see note above.
+    window.location.href = path;
   };
 
   const handleGoogleLogin = async () => {

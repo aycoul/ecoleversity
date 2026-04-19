@@ -98,7 +98,8 @@ export function Header({ user = null }: HeaderProps) {
                   {initial}
                 </div>
               </Link>
-              <Link href="/logout">
+              {/* Plain <a> for full-page nav — ensures root layout re-fetches with cleared auth */}
+              <a href="/logout">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -108,7 +109,7 @@ export function Header({ user = null }: HeaderProps) {
                 >
                   <LogOut className="size-4" />
                 </Button>
-              </Link>
+              </a>
             </>
           ) : (
             <>

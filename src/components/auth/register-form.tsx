@@ -137,7 +137,8 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
       return;
     }
     toast.success(tc("success"));
-    router.push(role === "teacher" ? "/onboarding/teacher" : "/onboarding/parent");
+    // Full-page navigation so the root layout re-renders with the new auth state.
+    window.location.href = role === "teacher" ? "/onboarding/teacher" : "/onboarding/parent";
   };
 
   const handleResendOtp = async () => {
@@ -188,11 +189,9 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
 
     toast.success(tc("success"));
 
-    if (role === "teacher") {
-      router.push("/onboarding/teacher");
-    } else {
-      router.push("/onboarding/parent");
-    }
+    // Full-page navigation so the root layout re-renders with the new auth state.
+    window.location.href =
+      role === "teacher" ? "/onboarding/teacher" : "/onboarding/parent";
   };
 
   const handleGoogleLogin = async () => {
