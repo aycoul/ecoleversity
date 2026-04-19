@@ -790,6 +790,111 @@
     "emptyUpcomingKid": "Aucun cours prévu",
     "join": "Rejoindre"
   },
+  "adminAnalytics": {
+    "title": "Analytique",
+    "subtitle": "Santé du business en un coup d'œil — chiffres, tendances, et état de préparation à une acquisition.",
+    "range": "Période",
+    "dayWindow": "{days} jours",
+    "dataNote": "Source des données",
+    "dataNoteBody": "Calculs directs depuis Supabase — profiles, transactions, live_classes. Pas de cache, pas d'agrégation. Plus de données arrivent, plus les onglets Rétention et Investor s'activent.",
+    "tabs": {
+      "today": "Aujourd'hui",
+      "acquisition": "Acquisition",
+      "marketplace": "Marché",
+      "retention": "Rétention & Économie",
+      "operations": "Opérations",
+      "investor": "Investor pack"
+    },
+    "kpi": {
+      "revenue": "Revenus nets",
+      "revenueHelper": "Commission sur {days} jours",
+      "gmv": "Volume (GMV)",
+      "gmvHelper": "Transactions confirmées sur {days} jours",
+      "signups": "Nouveaux inscrits",
+      "signupsHelper": "{parents} parents · {teachers} enseignants",
+      "sessions": "Sessions",
+      "sessionsHelper": "{pct}% de taux de complétion",
+      "noSessionData": "Pas encore de sessions complétées"
+    },
+    "econ": {
+      "takeRate": "Take rate",
+      "takeRateHelper": "Commission / GMV",
+      "aov": "Panier moyen (AOV)",
+      "aovHelper": "GMV / sessions complétées",
+      "avgRevenuePerSession": "Revenu par session",
+      "avgRevenuePerSessionHelper": "Marge moyenne par session"
+    },
+    "acquisition": {
+      "parents": "Parents inscrits",
+      "parentsHelper": "Tendance quotidienne",
+      "teachers": "Enseignants inscrits",
+      "teachersHelper": "Tendance quotidienne",
+      "missingTitle": "Ce qui manque pour l'onglet complet",
+      "missingBody": "Entonnoir visite → inscription → premier achat, attribution par source (organique / référence / WhatsApp / payé), carte géographique par ville. Ces données arrivent quand nous ajouterons le tracking de source (champ utm / referrer sur les inscriptions)."
+    },
+    "comingSoon": {
+      "marketplace": {
+        "title": "Marché — bientôt disponible",
+        "body": "Liquidité (match rate), supply/demande par matière×niveau, utilisation des enseignants, taux d'annulation. Besoin de 2–3 semaines de données d'activité pour être significatif."
+      },
+      "retention": {
+        "title": "Rétention & Économie — bientôt",
+        "body": "Cohortes D1/D7/D30, LTV parents/enseignants, CAC, ratio LTV:CAC, courbes de revenus par cohorte. Prêt quand nous aurons 60+ jours de données."
+      },
+      "operations": {
+        "title": "Opérations — bientôt",
+        "body": "Latence paiement/versement, SLA tickets, taux de modération, fraude, remboursements. Prêt à construire dès qu'on a du volume."
+      },
+      "investor": {
+        "title": "Investor pack — bientôt",
+        "body": "Résumé investisseurs sur une page : ARR, croissance MoM, take rate, LTV:CAC, couverture géographique, pénétration marché. Export PDF. Prêt quand les onglets ci-dessus sont remplis."
+      }
+    }
+  },
+  "adminAgents": {
+    "title": "Agents IA",
+    "subtitle": "Le Patron et ses 5 lieutenants — surveillance, décisions automatiques et escalades.",
+    "lieutenantsTitle": "Les 5 lieutenants",
+    "escalationQueue": "File d'escalade",
+    "queueEmpty": "Aucune escalade en attente",
+    "queueEmptyHelper": "Les agents escaladent vers vous uniquement pour les décisions sous leur seuil de confiance.",
+    "auditLogTitle": "Journal d'activité récente",
+    "auditEmpty": "Journal vide",
+    "auditEmptyHelper": "Les décisions des agents apparaîtront ici une fois le service VPS Phase 7 lancé.",
+    "confidence": "Confiance",
+    "neverActive": "Jamais actif",
+    "lastActive": "Dernière décision : {time}",
+    "standbyHelper": "En attente d'activation par le fondateur.",
+    "askWhatsappReport": "Rapport WhatsApp",
+    "whatsappReportSoon": "Disponible quand l'agent CEO sera en ligne",
+    "toggleOn": "Activer",
+    "toggleOff": "Désactiver",
+    "threshold": "Seuil de confiance",
+    "thresholdHelper": "En dessous de ce seuil, l'agent vous escalade la décision.",
+    "phase7Header": "Phase 7 — service d'agents VPS à venir",
+    "phase7Body": "Le tableau de bord est prêt mais les agents ne tournent pas encore. Le service VPS (PM2 + Docker) sera déployé après le lancement MVP. En attendant, les escalades réelles arrivent via /admin/payments et /admin/verification.",
+    "phase7Notice": "Agent en standby — sera activé avec le déploiement Phase 7.",
+    "status": {
+      "running": "Actif",
+      "off": "Désactivé",
+      "needsAttention": "Attention requise"
+    },
+    "metric": {
+      "decisions": "Décisions aujourd'hui",
+      "escalations": "Escalades",
+      "confidence": "Confiance moy."
+    },
+    "table": {
+      "when": "Quand",
+      "agent": "Agent",
+      "action": "Action",
+      "decision": "Décision",
+      "confidence": "Confiance"
+    },
+    "toast": {
+      "updated": "Agent mis à jour"
+    }
+  },
   "adminTickets": {
     "title": "Tickets support",
     "subtitle": "Demandes d'aide des utilisateurs — à traiter ou résoudre.",

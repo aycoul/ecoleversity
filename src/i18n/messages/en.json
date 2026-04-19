@@ -790,6 +790,111 @@
     "emptyUpcomingKid": "No classes scheduled",
     "join": "Join"
   },
+  "adminAnalytics": {
+    "title": "Analytics",
+    "subtitle": "Business health at a glance — numbers, trends, and acquisition-readiness.",
+    "range": "Range",
+    "dayWindow": "{days} days",
+    "dataNote": "Data source",
+    "dataNoteBody": "Direct queries over Supabase — profiles, transactions, live_classes. No cache, no aggregation. More data lands and the Retention / Investor tabs activate.",
+    "tabs": {
+      "today": "Today",
+      "acquisition": "Acquisition",
+      "marketplace": "Marketplace",
+      "retention": "Retention & Economics",
+      "operations": "Operations",
+      "investor": "Investor pack"
+    },
+    "kpi": {
+      "revenue": "Net revenue",
+      "revenueHelper": "Commission over {days} days",
+      "gmv": "Volume (GMV)",
+      "gmvHelper": "Confirmed transactions over {days} days",
+      "signups": "New signups",
+      "signupsHelper": "{parents} parents · {teachers} teachers",
+      "sessions": "Sessions",
+      "sessionsHelper": "{pct}% completion rate",
+      "noSessionData": "No completed sessions yet"
+    },
+    "econ": {
+      "takeRate": "Take rate",
+      "takeRateHelper": "Commission / GMV",
+      "aov": "Avg order value (AOV)",
+      "aovHelper": "GMV / completed sessions",
+      "avgRevenuePerSession": "Revenue per session",
+      "avgRevenuePerSessionHelper": "Average margin per session"
+    },
+    "acquisition": {
+      "parents": "Parent signups",
+      "parentsHelper": "Daily trend",
+      "teachers": "Teacher signups",
+      "teachersHelper": "Daily trend",
+      "missingTitle": "Missing for the full acquisition view",
+      "missingBody": "Visit → signup → first purchase funnel, source attribution (organic / referral / WhatsApp / paid), geographic map by city. These arrive once we track signup source (utm/referrer field)."
+    },
+    "comingSoon": {
+      "marketplace": {
+        "title": "Marketplace — coming soon",
+        "body": "Liquidity (match rate), supply/demand per subject×grade, teacher utilization, cancellation rate. Needs 2–3 weeks of activity data to be meaningful."
+      },
+      "retention": {
+        "title": "Retention & Economics — coming soon",
+        "body": "D1/D7/D30 cohorts, parent + teacher LTV, CAC, LTV:CAC ratio, cohort revenue curves. Ready with 60+ days of data."
+      },
+      "operations": {
+        "title": "Operations — coming soon",
+        "body": "Payment/payout latency, ticket SLA, moderation hit rate, fraud, refunds. Ready to build once we have volume."
+      },
+      "investor": {
+        "title": "Investor pack — coming soon",
+        "body": "One-page investor summary: ARR, MoM growth, take rate, LTV:CAC, geographic reach, market penetration. PDF export. Ready once the tabs above fill out."
+      }
+    }
+  },
+  "adminAgents": {
+    "title": "AI agents",
+    "subtitle": "Le Patron and his 5 lieutenants — monitoring, auto decisions, and escalations.",
+    "lieutenantsTitle": "The 5 lieutenants",
+    "escalationQueue": "Escalation queue",
+    "queueEmpty": "No pending escalations",
+    "queueEmptyHelper": "Agents only escalate decisions below their confidence threshold.",
+    "auditLogTitle": "Recent activity log",
+    "auditEmpty": "Log is empty",
+    "auditEmptyHelper": "Agent decisions appear here once the Phase 7 VPS service is live.",
+    "confidence": "Confidence",
+    "neverActive": "Never active",
+    "lastActive": "Last decision: {time}",
+    "standbyHelper": "Waiting for founder to activate.",
+    "askWhatsappReport": "WhatsApp report",
+    "whatsappReportSoon": "Available once the CEO agent is live",
+    "toggleOn": "Turn on",
+    "toggleOff": "Turn off",
+    "threshold": "Confidence threshold",
+    "thresholdHelper": "Below this threshold, the agent escalates the decision to you.",
+    "phase7Header": "Phase 7 — VPS agent service coming",
+    "phase7Body": "The dashboard is ready but the agents aren't running yet. The VPS service (PM2 + Docker) deploys after MVP launch. Meanwhile, real escalations come from /admin/payments and /admin/verification.",
+    "phase7Notice": "Agent on standby — activated with the Phase 7 deployment.",
+    "status": {
+      "running": "Running",
+      "off": "Off",
+      "needsAttention": "Needs attention"
+    },
+    "metric": {
+      "decisions": "Decisions today",
+      "escalations": "Escalations",
+      "confidence": "Avg. confidence"
+    },
+    "table": {
+      "when": "When",
+      "agent": "Agent",
+      "action": "Action",
+      "decision": "Decision",
+      "confidence": "Confidence"
+    },
+    "toast": {
+      "updated": "Agent updated"
+    }
+  },
   "adminTickets": {
     "title": "Support tickets",
     "subtitle": "User help requests — handle or resolve.",
