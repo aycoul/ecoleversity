@@ -22,7 +22,6 @@ export default async function TeacherCatalogPage({
     .from("teacher_profiles")
     .select(`
       id,
-      user_id,
       subjects,
       grade_levels,
       verification_status,
