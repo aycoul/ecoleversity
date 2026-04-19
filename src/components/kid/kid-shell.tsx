@@ -3,6 +3,7 @@
 import { useParams } from "next/navigation";
 import { Link, useRouter } from "@/i18n/routing";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { toast } from "sonner";
 import {
@@ -28,6 +29,7 @@ type KidShellProps = {
 };
 
 export function KidShell({ learners, children }: KidShellProps) {
+  const t = useTranslations("common");
   const params = useParams<{ learner_id?: string }>();
   const activeLearnerId = params?.learner_id;
   const activeLearner = learners.find((l) => l.id === activeLearnerId);
@@ -125,7 +127,7 @@ export function KidShell({ learners, children }: KidShellProps) {
               ) : (
                 <ArrowLeftRight className="size-4" />
               )}
-              <span className="hidden sm:inline">Mode parent</span>
+              <span className="hidden sm:inline">{t("parentMode")}</span>
             </button>
           </div>
         </div>

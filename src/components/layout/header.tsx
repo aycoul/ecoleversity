@@ -90,7 +90,7 @@ export function Header({ user = null }: HeaderProps) {
                   className="gap-2 text-[15px] font-semibold text-slate-700 hover:text-[var(--ev-blue)]"
                 >
                   <LayoutDashboard className="size-4" />
-                  Mon espace
+                  {tc("mySpace")}
                 </Button>
               </Link>
               <Link href={dashboardHref(user.role)} className="flex items-center gap-2">
@@ -104,8 +104,8 @@ export function Header({ user = null }: HeaderProps) {
                   variant="ghost"
                   size="icon"
                   className="text-slate-400 hover:text-slate-700"
-                  aria-label="Se déconnecter"
-                  title="Se déconnecter"
+                  aria-label={tc("logout")}
+                  title={tc("logout")}
                 >
                   <LogOut className="size-4" />
                 </Button>

@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { ChevronDown, LogOut, Plus, Settings, User, UserRound } from "lucide-react";
+import { ChevronDown, LogOut, Plus, Settings } from "lucide-react";
 import { GRADE_LEVEL_LABELS, type GradeLevel } from "@/types/domain";
 
 export type AvatarSwitcherLearner = {
@@ -28,6 +29,7 @@ export function AvatarSwitcher({
   learners,
   isParent,
 }: AvatarSwitcherProps) {
+  const t = useTranslations("common");
   const [open, setOpen] = useState(false);
   const [switching, setSwitching] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -107,7 +109,7 @@ export function AvatarSwitcher({
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium text-slate-900 truncate">{userName}</div>
               <div className="text-xs text-slate-500">
-                {isParent ? "Mode parent" : "Vous"}
+                {isParent ? t("parentMode") : userName}
               </div>
             </div>
             {activeLearnerId === null && (
@@ -156,7 +158,7 @@ export function AvatarSwitcher({
                 className="flex items-center gap-3 px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
               >
                 <Plus className="size-4" />
-                Ajouter un enfant
+                {t("addChild")}
               </a>
             </>
           )}
@@ -167,14 +169,14 @@ export function AvatarSwitcher({
             className="flex items-center gap-3 px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
           >
             <Settings className="size-4" />
-            Paramètres
+            {t("settings")}
           </a>
           <a
             href="/logout"
             className="flex items-center gap-3 px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-b-lg"
           >
             <LogOut className="size-4" />
-            Se déconnecter
+            {t("logout")}
           </a>
         </div>
       )}

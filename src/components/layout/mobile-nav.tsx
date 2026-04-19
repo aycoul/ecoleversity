@@ -119,7 +119,7 @@ export function MobileNav({ open, onOpenChange, user }: MobileNavProps) {
               >
                 <Button className="w-full gap-2 bg-[var(--ev-blue)] text-base font-bold text-white hover:bg-[var(--ev-blue-light)]">
                   <LayoutDashboard className="size-4" />
-                  Mon espace
+                  {tc("mySpace")}
                 </Button>
               </Link>
               {/* Plain <a> — full-page nav clears Header auth state reliably */}
@@ -129,7 +129,7 @@ export function MobileNav({ open, onOpenChange, user }: MobileNavProps) {
                   className="w-full gap-2 text-base font-semibold text-red-600 hover:bg-red-50 hover:text-red-700"
                 >
                   <LogOut className="size-4" />
-                  Se déconnecter
+                  {tc("logout")}
                 </Button>
               </a>
             </>
