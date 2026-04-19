@@ -87,12 +87,18 @@ export async function POST(request: NextRequest) {
 
     // Fire notification asynchronously
     if (transaction.parent_id) {
+      const { data: teacherProfile } = await adminSupabase
+        .from("profiles")
+        .select("display_name")
+        .eq("id", transaction.teacher_id)
+        .maybeSingle();
+
       sendNotification({
         event: 'payment_confirmed',
         userId: transaction.parent_id,
         data: {
           amount: transaction.amount_xof ?? 0,
-          teacherName: transaction.teacher_id ?? '',
+          teacherName: teacherProfile?.display_name ?? 'votre enseignant',
         },
       }).catch((err) => console.error('[notifications] payment_confirmed error:', err));
     }
@@ -101,9 +107,15 @@ export async function POST(request: NextRequest) {
       data: { transactionId, status: "confirmed" },
     });
   } catch (err) {
-    console.error("Admin confirm error:", err);
+    const e = err as Error;
+    console.error(
+      "[admin-confirm] failed:",
+      e?.name,
+      e?.message,
+      e?.stack,
+    );
     return NextResponse.json(
-      { error: "Erreur interne du serveur" },
+      { error: "Erreur interne du serveur", hint: e?.message ?? String(err) },
       { status: 500 }
     );
   }
