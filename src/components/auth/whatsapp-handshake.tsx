@@ -19,14 +19,17 @@ type HandshakeProps = {
 };
 
 function formatWaMeUrl(userPhone: string): string {
-  // NEXT_PUBLIC_AILEAD_WHATSAPP_NUMBER is the destination (EcoleVersity's
-  // shared WABA). wa.me expects the number WITHOUT a leading +.
+  // NEXT_PUBLIC_AILEAD_WHATSAPP_NUMBER is the destination (AILead's shared
+  // WABA). wa.me expects the number WITHOUT a leading +.
   const dest = (process.env.NEXT_PUBLIC_AILEAD_WHATSAPP_NUMBER ?? "").replace(
     /[^\d]/g,
     ""
   );
+  // ECOLE prefix is AILead's keyword-routing token — it tells their tenant
+  // router to attach this inbound to EcoleVersity (not another Anveah
+  // product). Required for OTP logs + 24h window to attribute correctly.
   const greeting = encodeURIComponent(
-    `Bonjour EcoleVersity, j'ouvre la fenêtre de messagerie pour recevoir mon code (${userPhone}).`
+    `ECOLE Bonjour, j'ouvre la fenêtre pour recevoir mon code (${userPhone}).`
   );
   if (!dest) {
     // Fallback — wa.me without destination is still a valid link, opens a picker
@@ -74,6 +77,10 @@ export function WhatsAppHandshake({
           {t("handshakeOpenWhatsApp")}
         </Button>
       </a>
+
+      <p className="text-center text-[11px] text-slate-400">
+        {t("handshakeSenderNote")}
+      </p>
 
       {opened && (
         <p className="text-center text-xs text-slate-500">

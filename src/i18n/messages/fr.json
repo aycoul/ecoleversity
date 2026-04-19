@@ -120,6 +120,7 @@
     "handshakeSkip": "Déjà fait récemment",
     "handshakeBack": "Changer de numéro",
     "handshakeFailed": "Votre code n'est pas arrivé ? Envoyez-nous d'abord un message WhatsApp.",
+    "handshakeSenderNote": "Le numéro s'affichera comme « Test Number » — c'est temporaire pendant notre vérification Meta.",
     "googleLogin": "Continuer avec Google",
     "phoneLogin": "Continuer avec le téléphone",
     "displayName": "Votre nom complet",
