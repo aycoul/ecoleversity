@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Video, Calendar, ChevronRight } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 export type UpcomingSession = {
   id: string;
@@ -27,16 +28,18 @@ function isJoinable(session: UpcomingSession): boolean {
   return now >= start - 10 * 60 * 1000 && now < end;
 }
 
-export function UpcomingSessionList({
+export async function UpcomingSessionList({
   sessions,
   mode,
   locale,
   emptyMessage,
 }: UpcomingSessionListProps) {
+  const t = await getTranslations("dashboardCommon");
   if (sessions.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-slate-200 bg-white p-8 text-center text-sm text-slate-400">
-        {emptyMessage ?? (mode === "kid" ? "Aucun cours prévu" : "Aucune session à venir")}
+        {emptyMessage ??
+          (mode === "kid" ? t("emptyUpcomingKid") : t("emptyUpcomingParent"))}
       </div>
     );
   }
@@ -82,7 +85,7 @@ export function UpcomingSessionList({
                 href={href}
                 className="rounded-lg bg-[var(--ev-green)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--ev-green-dark)]"
               >
-                {mode === "kid" ? "Rejoindre" : "Rejoindre"}
+                {t("join")}
               </Link>
             ) : (
               <ChevronRight className="size-5 text-slate-400" />

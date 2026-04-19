@@ -779,6 +779,13 @@
     "copied": "Lien copié !",
     "downloadIcs": "Télécharger le fichier .ics"
   },
+  "dashboardCommon": {
+    "courseCount": "{count, plural, =0 {0 cours} one {1 cours} other {# cours}}",
+    "nextSession": "Prochain : {when}",
+    "emptyUpcomingParent": "Aucune session à venir",
+    "emptyUpcomingKid": "Aucun cours prévu",
+    "join": "Rejoindre"
+  },
   "parentOverview": {
     "title": "Vue d'ensemble",
     "activeCourses": "Cours actifs",

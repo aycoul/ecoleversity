@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BookOpen, Calendar, ChevronRight } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { GRADE_LEVEL_LABELS, type GradeLevel } from "@/types/domain";
 
 export type LearnerCardProps = {
@@ -14,12 +15,13 @@ export type LearnerCardProps = {
   locale: string;
 };
 
-export function LearnerCard({
+export async function LearnerCard({
   learner,
   enrolledCount,
   nextSessionAt,
   locale,
 }: LearnerCardProps) {
+  const t = await getTranslations("dashboardCommon");
   const nextSessionLabel = nextSessionAt
     ? new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
         weekday: "short",
@@ -48,12 +50,12 @@ export function LearnerCard({
           <div className="mt-3 flex gap-4 text-xs text-slate-600">
             <div className="flex items-center gap-1">
               <BookOpen className="size-3.5" />
-              {enrolledCount} cours
+              {t("courseCount", { count: enrolledCount })}
             </div>
             {nextSessionLabel && (
               <div className="flex items-center gap-1">
                 <Calendar className="size-3.5" />
-                Prochain: {nextSessionLabel}
+                {t("nextSession", { when: nextSessionLabel })}
               </div>
             )}
           </div>
