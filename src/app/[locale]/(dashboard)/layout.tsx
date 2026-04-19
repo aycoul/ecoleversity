@@ -1,8 +1,9 @@
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import type { UserRole } from "@/types/domain";
+import type { UserRole, GradeLevel } from "@/types/domain";
 import { DashboardShell } from "@/components/admin/dashboard-shell";
+import type { AvatarSwitcherLearner } from "@/components/nav/avatar-switcher";
 
 export default async function DashboardLayout({
   children,
@@ -20,7 +21,7 @@ export default async function DashboardLayout({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role, display_name, avatar_url")
+    .select("role, display_name, avatar_url, active_learner_id")
     .eq("id", user.id)
     .single();
 
@@ -29,6 +30,22 @@ export default async function DashboardLayout({
   }
 
   const role = profile.role as UserRole;
+
+  // For parents, fetch learners for the AvatarSwitcher dropdown
+  let learners: AvatarSwitcherLearner[] = [];
+  if (role === "parent") {
+    const { data: learnerRows } = await supabase
+      .from("learner_profiles")
+      .select("id, first_name, grade_level, avatar_url")
+      .eq("parent_id", user.id)
+      .order("created_at", { ascending: true });
+    learners = (learnerRows ?? []).map((l) => ({
+      id: l.id as string,
+      first_name: l.first_name as string,
+      grade_level: l.grade_level as GradeLevel,
+      avatar_url: (l.avatar_url as string | null) ?? null,
+    }));
+  }
   const t = await getTranslations("dashboard.sidebar");
 
   const navConfig: Record<UserRole, Array<{ href: string; label: string; icon: string }>> = {
@@ -75,6 +92,8 @@ export default async function DashboardLayout({
       role={role}
       userName={profile.display_name ?? user.email ?? ""}
       avatarUrl={profile.avatar_url}
+      activeLearnerId={profile.active_learner_id ?? null}
+      learners={learners}
     >
       {children}
     </DashboardShell>

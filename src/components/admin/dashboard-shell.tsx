@@ -4,6 +4,7 @@ import { Link, usePathname } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import type { UserRole } from "@/types/domain";
+import { AvatarSwitcher, type AvatarSwitcherLearner } from "@/components/nav/avatar-switcher";
 import {
   ShieldCheck,
   Ticket,
@@ -14,7 +15,6 @@ import {
   Wallet,
   MessageCircle,
   Users,
-  LogOut,
   Video,
   Receipt,
   Banknote,
@@ -33,6 +33,8 @@ type DashboardShellProps = {
   role: UserRole;
   userName: string;
   avatarUrl?: string | null;
+  activeLearnerId?: string | null;
+  learners?: AvatarSwitcherLearner[];
   children: React.ReactNode;
 };
 
@@ -58,9 +60,12 @@ export function DashboardShell({
   role,
   userName,
   avatarUrl,
+  activeLearnerId = null,
+  learners = [],
   children,
 }: DashboardShellProps) {
   const pathname = usePathname();
+  const userInitial = userName.charAt(0).toUpperCase() || "?";
 
   return (
     <div className="flex min-h-[calc(100vh-3.5rem)]">
@@ -96,30 +101,13 @@ export function DashboardShell({
         </nav>
 
         <div className="border-t border-slate-200 px-4 py-3">
-          <div className="flex items-center gap-3">
-            <div className="flex size-8 items-center justify-center rounded-full bg-[var(--ev-green)]/10 text-sm font-medium text-[var(--ev-blue)]">
-              {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt=""
-                  className="size-8 rounded-full object-cover"
-                />
-              ) : (
-                userName.charAt(0).toUpperCase()
-              )}
-            </div>
-            <div className="flex-1 truncate text-sm font-medium text-slate-700">
-              {userName}
-            </div>
-            <form action="/api/auth/logout" method="POST">
-              <button
-                type="submit"
-                className="rounded-md p-1 text-slate-400 hover:text-slate-600"
-              >
-                <LogOut className="size-4" />
-              </button>
-            </form>
-          </div>
+          <AvatarSwitcher
+            userName={userName}
+            userInitial={userInitial}
+            activeLearnerId={activeLearnerId}
+            learners={learners}
+            isParent={role === "parent"}
+          />
         </div>
       </aside>
 
