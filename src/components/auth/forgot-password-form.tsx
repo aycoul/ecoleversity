@@ -30,13 +30,11 @@ export function ForgotPasswordForm() {
     setLoading(true);
     const supabase = createClient();
 
-    // Route the email link through /api/auth/callback so the PKCE code gets
-    // exchanged for a session server-side, then lands on /reset-password
-    // where the user sets a new password.
-    const redirectTo = `${window.location.origin}/api/auth/callback?next=/reset-password`;
-    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo,
-    });
+    // NOTE: we don't pass redirectTo because the email template uses
+    // {{ .TokenHash }} to build a link to /api/auth/confirm — which works
+    // cross-browser (no PKCE code_verifier dependency). The template
+    // hardcodes "next=/reset-password" so the user lands on the right page.
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim());
 
     if (error) {
       toast.error(error.message);
