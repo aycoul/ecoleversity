@@ -85,7 +85,7 @@ When a step completes, the NEXT step becomes active. When all 7 steps complete f
 |------|--------|-------|
 | `/spec` | [x] Done | SPEC.md v3.0 — Section 9, Phase 6 |
 | `/plan` | [x] Done | `docs/superpowers/plans/2026-04-08-phase6-polish-launch.md` (7 tasks, incl. Task 39: LiveKit + recording to R2) |
-| `/build` | [ ] In progress | Task 36 done (legal pages), Task 39 done (LiveKit + recording), WhatsApp provider refactor done (AILead SaaS integration, 360dialog kept as rollback), OTP-via-WhatsApp wired via Supabase Send SMS Hook (5min expiry, 30s resend throttle, i18n updated). Still open: 33, 34, 35, 37, 38 |
+| `/build` | [ ] In progress | Task 36 done (legal pages), Task 39 done (LiveKit + recording), WhatsApp provider refactor done (AILead SaaS integration, 360dialog kept as rollback), OTP-via-WhatsApp wired via Supabase Send SMS Hook, Phase A shipped (parent+kid dual mode, avatar switcher, triad messaging with PII block-and-log, migration 00015). Still open: 33, 34, 35, 37, 38 |
 | `/test` | [ ] Pending | |
 | `/review` | [ ] Pending | |
 | `/code-simplify` | [ ] Pending | |
