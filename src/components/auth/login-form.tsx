@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Phone, Mail } from "lucide-react";
+import { WhatsAppHandshake } from "./whatsapp-handshake";
 
 function GoogleIcon({ className }: { className?: string }) {
   return (
@@ -47,7 +48,8 @@ export function LoginForm() {
   const [countryCode, setCountryCode] = useState("+225");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
+  type PhoneStage = "input" | "handshake" | "verify";
+  const [phoneStage, setPhoneStage] = useState<PhoneStage>("input");
   const [resendCooldown, setResendCooldown] = useState(0);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -61,20 +63,31 @@ export function LoginForm() {
     return () => clearInterval(timer);
   }, [resendCooldown]);
 
-  // Phone OTP login — delivered via WhatsApp by our Send SMS Hook (AILead)
-  const handleSendOtp = async () => {
+  // Step 1: user entered phone → show handshake step (not send OTP yet)
+  // Why: Meta's dev-mode WABA silently drops freeform text outside the 24h
+  // service window. The handshake makes the user message us first so the
+  // window opens, then we send the OTP. Removed when Business Verification
+  // lands and we can use AUTHENTICATION templates.
+  const handlePhoneSubmit = () => {
     if (!phone || phone.length < 8) {
       toast.error(t("invalidPhone"));
       return;
     }
+    setPhoneStage("handshake");
+  };
+
+  // Format the phone consistently across stages
+  const formattedPhone = (() => {
+    const cc = countryCode.startsWith("+") ? countryCode : `+${countryCode}`;
+    return phone.startsWith("+") ? phone : `${cc}${phone.replace(/\s/g, "")}`;
+  })();
+
+  // Step 2: user confirmed they sent the WhatsApp handshake → fire Supabase OTP
+  const handleSendOtp = async () => {
     if (resendCooldown > 0) return;
 
     setLoading(true);
     const supabase = createClient();
-
-    // Format phone: add +225 if not present (CI country code)
-    const cc = countryCode.startsWith("+") ? countryCode : `+${countryCode}`;
-    const formattedPhone = phone.startsWith("+") ? phone : `${cc}${phone.replace(/\s/g, "")}`;
 
     // Channel intentionally omitted — our Send SMS Hook routes to WhatsApp
     // via AILead regardless. Passing channel:"whatsapp" triggers Supabase's
@@ -85,11 +98,13 @@ export function LoginForm() {
 
     if (error) {
       toast.error(error.message);
-    } else {
-      setOtpSent(true);
-      setResendCooldown(30);
-      toast.success(t("otpSent"));
+      setLoading(false);
+      return;
     }
+
+    setPhoneStage("verify");
+    setResendCooldown(30);
+    toast.success(t("otpSent"));
     setLoading(false);
   };
 
@@ -98,8 +113,6 @@ export function LoginForm() {
 
     setLoading(true);
     const supabase = createClient();
-    const cc = countryCode.startsWith("+") ? countryCode : `+${countryCode}`;
-    const formattedPhone = phone.startsWith("+") ? phone : `${cc}${phone.replace(/\s/g, "")}`;
 
     const { error } = await supabase.auth.verifyOtp({
       phone: formattedPhone,
@@ -196,10 +209,10 @@ export function LoginForm() {
           </button>
         </div>
 
-        {/* Phone OTP form */}
+        {/* Phone OTP form — 3-stage: input → handshake → verify */}
         {method === "phone" && (
           <div className="space-y-4">
-            {!otpSent ? (
+            {phoneStage === "input" && (
               <>
                 <div className="space-y-2">
                   <Label htmlFor="phone">{t("phoneNumber")}</Label>
@@ -229,22 +242,30 @@ export function LoginForm() {
                   </div>
                 </div>
                 <Button
-                  onClick={handleSendOtp}
+                  onClick={handlePhoneSubmit}
                   className="w-full bg-green-600 text-white hover:bg-green-700"
-                  disabled={loading || !phone}
+                  disabled={!phone}
                 >
-                  {loading ? (
-                    <Loader2 className="mr-2 size-4 animate-spin" />
-                  ) : (
-                    <WhatsAppIcon className="mr-2 size-4" />
-                  )}
+                  <WhatsAppIcon className="mr-2 size-4" />
                   {t("sendOtp")}
                 </Button>
               </>
-            ) : (
+            )}
+
+            {phoneStage === "handshake" && (
+              <WhatsAppHandshake
+                userPhone={formattedPhone}
+                onDone={handleSendOtp}
+                onBack={() => setPhoneStage("input")}
+                onSkip={handleSendOtp}
+                sending={loading}
+              />
+            )}
+
+            {phoneStage === "verify" && (
               <>
                 <p className="text-center text-sm text-slate-600">
-                  {t("otpSentTo", { phone: phone.startsWith("+") ? phone : `${countryCode}${phone}` })}
+                  {t("otpSentTo", { phone: formattedPhone })}
                 </p>
                 <div className="space-y-2">
                   <Label htmlFor="otp">{t("otpCode")}</Label>
@@ -280,7 +301,7 @@ export function LoginForm() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => { setOtpSent(false); setOtp(""); setResendCooldown(0); }}
+                  onClick={() => { setPhoneStage("input"); setOtp(""); setResendCooldown(0); }}
                   className="block w-full text-center text-xs text-slate-400 hover:text-slate-600"
                 >
                   {t("changeNumber")}

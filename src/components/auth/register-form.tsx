@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { GraduationCap, Loader2, Users, Phone, Mail } from "lucide-react";
+import { WhatsAppHandshake } from "./whatsapp-handshake";
 
 const registerSchema = z.object({
   displayName: z.string().min(2).max(100),
@@ -56,7 +57,8 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
   const [countryCode, setCountryCode] = useState("+225");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
+  type PhoneStage = "input" | "handshake" | "verify";
+  const [phoneStage, setPhoneStage] = useState<PhoneStage>("input");
   const [resendCooldown, setResendCooldown] = useState(0);
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
@@ -92,39 +94,51 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
     return () => clearInterval(timer);
   }, [resendCooldown]);
 
-  const handlePhoneRegister = async () => {
+  // Compute formatted phone once for all handlers
+  const formattedPhone = (() => {
+    const cc = countryCode.startsWith("+") ? countryCode : `+${countryCode}`;
+    return phone.startsWith("+") ? phone : `${cc}${phone.replace(/\s/g, "")}`;
+  })();
+
+  // Step 1: form submit → move to handshake stage (don't fire OTP yet)
+  const handlePhoneSubmit = () => {
     if (!phone || phone.length < 8 || !displayName) {
       toast.error(locale === "fr" ? "Veuillez remplir tous les champs" : "Please fill all fields");
       return;
     }
+    setPhoneStage("handshake");
+  };
+
+  // Step 2: user confirms they opened the 24h window → fire Supabase OTP
+  const handleSendOtp = async () => {
+    if (resendCooldown > 0) return;
     setLoading(true);
     const supabase = createClient();
-    const cc = countryCode.startsWith("+") ? countryCode : `+${countryCode}`;
-    const formattedPhone = phone.startsWith("+") ? phone : `${cc}${phone.replace(/\s/g, "")}`;
 
-    if (!otpSent) {
-      if (resendCooldown > 0) {
-        setLoading(false);
-        return;
-      }
-      // Channel intentionally omitted — our Send SMS Hook routes to WhatsApp
-      // via AILead regardless. See login-form.tsx for rationale.
-      const { error } = await supabase.auth.signInWithOtp({
-        phone: formattedPhone,
-        options: {
-          data: { display_name: displayName, role, language: locale },
-        },
-      });
-      if (error) {
-        toast.error(error.message);
-      } else {
-        setOtpSent(true);
-        setResendCooldown(30);
-        toast.success(locale === "fr" ? "Code envoyé !" : "Code sent!");
-      }
+    // Channel intentionally omitted — our Send SMS Hook routes to WhatsApp
+    // via AILead regardless. See login-form.tsx for rationale.
+    const { error } = await supabase.auth.signInWithOtp({
+      phone: formattedPhone,
+      options: {
+        data: { display_name: displayName, role, language: locale },
+      },
+    });
+    if (error) {
+      toast.error(error.message);
       setLoading(false);
       return;
     }
+    setPhoneStage("verify");
+    setResendCooldown(30);
+    toast.success(locale === "fr" ? "Code envoyé !" : "Code sent!");
+    setLoading(false);
+  };
+
+  // Step 3: verify the code and redirect to onboarding
+  const handleVerifyOtp = async () => {
+    if (!otp || otp.length < 6) return;
+    setLoading(true);
+    const supabase = createClient();
 
     const { error } = await supabase.auth.verifyOtp({
       phone: formattedPhone,
@@ -145,8 +159,6 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
     if (resendCooldown > 0 || loading) return;
     setLoading(true);
     const supabase = createClient();
-    const cc = countryCode.startsWith("+") ? countryCode : `+${countryCode}`;
-    const formattedPhone = phone.startsWith("+") ? phone : `${cc}${phone.replace(/\s/g, "")}`;
     const { error } = await supabase.auth.signInWithOtp({
       phone: formattedPhone,
       options: {
@@ -325,7 +337,7 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
                 autoFocus
               />
             </div>
-            {!otpSent ? (
+            {phoneStage === "input" && (
               <>
                 <div className="space-y-2">
                   <Label htmlFor="regPhone">{t("phoneNumber")}</Label>
@@ -346,21 +358,32 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
                     <Input id="regPhone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="07 XX XX XX XX" autoComplete="tel" />
                   </div>
                 </div>
-                <Button onClick={handlePhoneRegister} className="w-full bg-green-600 text-white hover:bg-green-700" disabled={loading || !displayName || !phone}>
-                  {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
+                <Button onClick={handlePhoneSubmit} className="w-full bg-green-600 text-white hover:bg-green-700" disabled={!displayName || !phone}>
                   {t("sendOtp")}
                 </Button>
               </>
-            ) : (
+            )}
+
+            {phoneStage === "handshake" && (
+              <WhatsAppHandshake
+                userPhone={formattedPhone}
+                onDone={handleSendOtp}
+                onBack={() => setPhoneStage("input")}
+                onSkip={handleSendOtp}
+                sending={loading}
+              />
+            )}
+
+            {phoneStage === "verify" && (
               <>
                 <p className="text-center text-sm text-slate-600">
-                  {t("otpSentTo", { phone: phone.startsWith("+") ? phone : `${countryCode}${phone}` })}
+                  {t("otpSentTo", { phone: formattedPhone })}
                 </p>
                 <div className="space-y-2">
                   <Label htmlFor="regOtp">{t("otpCode")}</Label>
                   <Input id="regOtp" type="text" inputMode="numeric" maxLength={6} value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))} placeholder="000000" className="text-center text-2xl tracking-[0.5em]" autoFocus />
                 </div>
-                <Button onClick={handlePhoneRegister} className="w-full bg-[var(--ev-blue)] text-white hover:bg-[var(--ev-blue-light)]" disabled={loading || otp.length < 6}>
+                <Button onClick={handleVerifyOtp} className="w-full bg-[var(--ev-blue)] text-white hover:bg-[var(--ev-blue-light)]" disabled={loading || otp.length < 6}>
                   {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
                   {t("verifyOtp")}
                 </Button>
@@ -374,7 +397,7 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
                     ? t("otpResendIn", { seconds: resendCooldown })
                     : t("otpResend")}
                 </button>
-                <button type="button" onClick={() => { setOtpSent(false); setOtp(""); setResendCooldown(0); }} className="block w-full text-center text-xs text-slate-400 hover:text-slate-600">
+                <button type="button" onClick={() => { setPhoneStage("input"); setOtp(""); setResendCooldown(0); }} className="block w-full text-center text-xs text-slate-400 hover:text-slate-600">
                   {t("changeNumber")}
                 </button>
               </>
