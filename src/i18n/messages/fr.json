@@ -790,6 +790,98 @@
     "emptyUpcomingKid": "Aucun cours prévu",
     "join": "Rejoindre"
   },
+  "adminTickets": {
+    "title": "Tickets support",
+    "subtitle": "Demandes d'aide des utilisateurs — à traiter ou résoudre.",
+    "escalatedFromAma": "Escaladé par Ama",
+    "openedSince": "Ouvert depuis {age}",
+    "noConversation": "Aucune conversation enregistrée.",
+    "replyLabel": "Votre réponse",
+    "replyPlaceholder": "Rédigez une réponse à l'utilisateur...",
+    "sendReply": "Envoyer",
+    "startProgress": "Marquer en cours",
+    "resolve": "Résoudre",
+    "emptyHelper": "Les tickets apparaissent ici quand Ama passe la main ou quand un utilisateur dépose une demande.",
+    "tabs": {
+      "open": "Ouverts",
+      "in_progress": "En cours",
+      "escalated_from_ama": "Escaladés par Ama",
+      "resolved": "Résolus"
+    },
+    "empty": {
+      "open": "Aucun ticket ouvert.",
+      "in_progress": "Aucun ticket en cours.",
+      "escalated_from_ama": "Ama gère tout toute seule 🙌",
+      "resolved": "Aucun ticket résolu."
+    },
+    "toast": {
+      "resolve": "Ticket résolu",
+      "start_progress": "Ticket en cours",
+      "reply": "Réponse envoyée",
+      "close": "Ticket fermé"
+    }
+  },
+  "adminStrikes": {
+    "title": "Sanctions",
+    "subtitle": "Avertissements et restrictions appliqués aux enseignants.",
+    "empty": "Aucune sanction enregistrée",
+    "emptyHelper": "Les sanctions apparaissent ici quand un enseignant enfreint les règles.",
+    "activeCount": "{count, plural, =0 {Aucune active} one {# sanction active} other {# sanctions actives}}",
+    "totalCount": "{count, plural, one {# historique total} other {# dans l'historique}}",
+    "historyLabel": "Historique complet",
+    "markAppealed": "Appel reçu",
+    "revoke": "Lever la sanction",
+    "issuedBy": "Émise par {name}",
+    "issuedOn": "le {date}",
+    "expires": "Expire : {date}",
+    "permanent": "Permanente",
+    "stats": {
+      "activeTotal": "Sanctions actives",
+      "appeals": "Appels en attente",
+      "restricted": "Enseignants bannis"
+    },
+    "status": {
+      "active": "Active",
+      "expired": "Expirée",
+      "appealed": "En appel",
+      "revoked": "Levée"
+    },
+    "toast": {
+      "revoke": "Sanction levée",
+      "mark_appealed": "Marquée en appel",
+      "mark_expired": "Marquée expirée"
+    }
+  },
+  "adminReports": {
+    "title": "Signalements",
+    "subtitle": "Contenu signalé par les utilisateurs — à examiner et trancher.",
+    "flagged": "a signalé",
+    "reason": "Motif",
+    "contentBy": "Contenu publié par",
+    "excerptUnavailable": "Aperçu indisponible — le contenu a peut-être été modifié ou supprimé.",
+    "adminNotesLabel": "Notes internes (optionnelles)",
+    "adminNotesPlaceholder": "Contexte, décision, référence ticket...",
+    "dismiss": "Rejeter le signalement",
+    "markActionTaken": "Action prise",
+    "createStrike": "Créer une sanction",
+    "toastDismissed": "Signalement rejeté",
+    "toastActionTaken": "Action prise — signalement clôturé",
+    "resolvedDismissed": "Rejeté",
+    "resolvedActionTaken": "Action prise",
+    "emptyHelper": "Les signalements apparaissent ici quand un utilisateur signale du contenu.",
+    "tabs": {
+      "pending": "À traiter",
+      "action_taken": "Action prise",
+      "dismissed": "Rejetés",
+      "reviewed": "Examinés"
+    },
+    "empty": {
+      "pending": "Aucun signalement à traiter.",
+      "action_taken": "Aucune action enregistrée.",
+      "dismissed": "Aucun signalement rejeté.",
+      "reviewed": "Aucun signalement examiné."
+    }
+  },
   "adminOverview": {
     "greeting": "Bonjour {name} 👋",
     "allClear": "Tout est à jour ✓",

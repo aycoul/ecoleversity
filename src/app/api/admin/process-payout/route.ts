@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { canAccess, type AdminScope } from "@/lib/admin/scopes";
+import { logAdminAction } from "@/lib/admin/audit";
 
 const payoutSchema = z.object({
   teacherId: z.string().uuid(),
@@ -22,17 +24,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
     }
 
-    // Verify admin role
+    // Verify admin scope — payouts require finance or founder
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role")
+      .select("role, admin_scope")
       .eq("id", user.id)
       .single();
 
-    if (
-      !profile ||
-      (profile.role !== "admin" && profile.role !== "school_admin")
-    ) {
+    const scope = (profile?.admin_scope as AdminScope | null) ?? null;
+    if (!profile || profile.role !== "admin" || !canAccess(scope, "payouts")) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
     }
 
@@ -119,6 +119,21 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    await logAdminAction({
+      actorId: user.id,
+      actorScope: scope,
+      action: "payout.process",
+      targetTable: "teacher_payouts",
+      targetId: payout.id as string,
+      before: null,
+      after: {
+        teacher_id: teacherId,
+        amount_xof: amountXof,
+        period_start: periodStart,
+        period_end: periodEnd,
+      },
+    });
 
     return NextResponse.json({
       data: { payoutId: payout.id, status: "completed" },

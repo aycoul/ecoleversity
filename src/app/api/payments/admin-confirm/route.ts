@@ -3,6 +3,8 @@ import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendNotification } from "@/lib/notifications/service";
+import { canAccess, type AdminScope } from "@/lib/admin/scopes";
+import { logAdminAction } from "@/lib/admin/audit";
 
 const adminConfirmSchema = z.object({
   transactionId: z.string().uuid(),
@@ -21,17 +23,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
     }
 
-    // Verify admin role
+    // Verify admin scope — must have payments access
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role")
+      .select("role, admin_scope")
       .eq("id", user.id)
       .single();
 
-    if (
-      !profile ||
-      (profile.role !== "admin" && profile.role !== "school_admin")
-    ) {
+    const scope = (profile?.admin_scope as AdminScope | null) ?? null;
+    if (!profile || profile.role !== "admin" || !canAccess(scope, "payments")) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
     }
 
@@ -69,18 +69,30 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const { error: updateError } = await adminSupabase
+    const { data: after, error: updateError } = await adminSupabase
       .from("transactions")
       .update({ status: "confirmed" })
-      .eq("id", transactionId);
+      .eq("id", transactionId)
+      .select("*")
+      .maybeSingle();
 
-    if (updateError) {
+    if (updateError || !after) {
       console.error("Error confirming transaction:", updateError);
       return NextResponse.json(
         { error: "Erreur lors de la confirmation" },
         { status: 500 }
       );
     }
+
+    await logAdminAction({
+      actorId: user.id,
+      actorScope: scope,
+      action: "payment.admin_confirm",
+      targetTable: "transactions",
+      targetId: transactionId,
+      before: transaction,
+      after,
+    });
 
     // Fire notification asynchronously
     if (transaction.parent_id) {

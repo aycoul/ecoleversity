@@ -790,6 +790,98 @@
     "emptyUpcomingKid": "No classes scheduled",
     "join": "Join"
   },
+  "adminTickets": {
+    "title": "Support tickets",
+    "subtitle": "User help requests — handle or resolve.",
+    "escalatedFromAma": "Escalated by Ama",
+    "openedSince": "Open for {age}",
+    "noConversation": "No conversation recorded.",
+    "replyLabel": "Your reply",
+    "replyPlaceholder": "Write a reply to the user...",
+    "sendReply": "Send",
+    "startProgress": "Mark in progress",
+    "resolve": "Resolve",
+    "emptyHelper": "Tickets show up here when Ama hands off or a user opens one.",
+    "tabs": {
+      "open": "Open",
+      "in_progress": "In progress",
+      "escalated_from_ama": "From Ama",
+      "resolved": "Resolved"
+    },
+    "empty": {
+      "open": "No open tickets.",
+      "in_progress": "No tickets in progress.",
+      "escalated_from_ama": "Ama is handling everything 🙌",
+      "resolved": "No resolved tickets."
+    },
+    "toast": {
+      "resolve": "Ticket resolved",
+      "start_progress": "Ticket in progress",
+      "reply": "Reply sent",
+      "close": "Ticket closed"
+    }
+  },
+  "adminStrikes": {
+    "title": "Strikes",
+    "subtitle": "Warnings and restrictions applied to teachers.",
+    "empty": "No strikes on record",
+    "emptyHelper": "Strikes appear here when a teacher violates the rules.",
+    "activeCount": "{count, plural, =0 {None active} one {# active strike} other {# active strikes}}",
+    "totalCount": "{count, plural, one {# in history} other {# in history}}",
+    "historyLabel": "Full history",
+    "markAppealed": "Appeal received",
+    "revoke": "Revoke strike",
+    "issuedBy": "Issued by {name}",
+    "issuedOn": "on {date}",
+    "expires": "Expires: {date}",
+    "permanent": "Permanent",
+    "stats": {
+      "activeTotal": "Active strikes",
+      "appeals": "Pending appeals",
+      "restricted": "Banned teachers"
+    },
+    "status": {
+      "active": "Active",
+      "expired": "Expired",
+      "appealed": "In appeal",
+      "revoked": "Revoked"
+    },
+    "toast": {
+      "revoke": "Strike revoked",
+      "mark_appealed": "Marked in appeal",
+      "mark_expired": "Marked expired"
+    }
+  },
+  "adminReports": {
+    "title": "Reports",
+    "subtitle": "Content flagged by users — review and decide.",
+    "flagged": "flagged",
+    "reason": "Reason",
+    "contentBy": "Content posted by",
+    "excerptUnavailable": "Preview unavailable — the content may have been edited or removed.",
+    "adminNotesLabel": "Internal notes (optional)",
+    "adminNotesPlaceholder": "Context, decision, ticket reference...",
+    "dismiss": "Dismiss report",
+    "markActionTaken": "Action taken",
+    "createStrike": "Create strike",
+    "toastDismissed": "Report dismissed",
+    "toastActionTaken": "Action taken — report closed",
+    "resolvedDismissed": "Dismissed",
+    "resolvedActionTaken": "Action taken",
+    "emptyHelper": "Reports show up here when a user flags content.",
+    "tabs": {
+      "pending": "To review",
+      "action_taken": "Action taken",
+      "dismissed": "Dismissed",
+      "reviewed": "Reviewed"
+    },
+    "empty": {
+      "pending": "No reports to review.",
+      "action_taken": "No actions on record.",
+      "dismissed": "No dismissed reports.",
+      "reviewed": "No reviewed reports."
+    }
+  },
   "adminOverview": {
     "greeting": "Hi {name} 👋",
     "allClear": "All clear ✓",
