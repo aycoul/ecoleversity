@@ -7,6 +7,7 @@ import { getAuthRedirect } from "@/lib/auth-redirect";
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
+  const next = searchParams.get("next");
 
   if (!code) {
     return NextResponse.redirect(`${origin}/fr/login`);
@@ -51,7 +52,13 @@ export async function GET(request: NextRequest) {
   // Clear the role cookie
   cookieStore.set("ev_register_role", "", { path: "/", maxAge: 0 });
 
-  // Determine where to redirect based on user role/status
+  // Honor explicit ?next= (password reset, magic link flows) — only allow
+  // same-origin relative paths to prevent open redirect
+  if (next && next.startsWith("/") && !next.startsWith("//")) {
+    return NextResponse.redirect(`${origin}/fr${next}`);
+  }
+
+  // Default: role-based redirect after OAuth / signup
   const { path } = await getAuthRedirect(supabase);
   return NextResponse.redirect(`${origin}/fr${path}`);
 }

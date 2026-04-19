@@ -303,7 +303,7 @@ export function LoginForm() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="login-password">{t("password")}</Label>
-                <Link href="/login" className="text-xs text-[var(--ev-blue)]">
+                <Link href="/forgot-password" className="text-xs text-[var(--ev-blue)]">
                   {t("forgotPassword")}
                 </Link>
               </div>
