@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
         rating_avg,
         rating_count,
         follower_count,
-        profiles!teacher_profiles_user_id_fkey (
+        profiles!teacher_profiles_id_fkey (
           id,
           display_name,
           avatar_url,

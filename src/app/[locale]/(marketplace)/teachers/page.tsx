@@ -29,7 +29,7 @@ export default async function TeacherCatalogPage({
       rating_avg,
       rating_count,
       follower_count,
-      profiles!teacher_profiles_user_id_fkey (
+      profiles!teacher_profiles_id_fkey (
         id,
         display_name,
         avatar_url,

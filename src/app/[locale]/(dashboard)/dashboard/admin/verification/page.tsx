@@ -40,7 +40,7 @@ export default async function VerificationPage() {
       diploma_url,
       video_url,
       created_at,
-      profiles!teacher_profiles_user_id_fkey (
+      profiles!teacher_profiles_id_fkey (
         display_name,
         city,
         avatar_url
