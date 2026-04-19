@@ -116,7 +116,6 @@ export async function POST(request: NextRequest) {
       .update({
         status: "confirmed",
         payment_provider: provider.toLowerCase(),
-        updated_at: new Date().toISOString(),
       })
       .eq("id", transaction.id)
       .eq("status", "pending")

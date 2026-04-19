@@ -71,10 +71,7 @@ export async function POST(request: NextRequest) {
 
     const { error: updateError } = await adminSupabase
       .from("transactions")
-      .update({
-        status: "confirmed",
-        updated_at: new Date().toISOString(),
-      })
+      .update({ status: "confirmed" })
       .eq("id", transactionId);
 
     if (updateError) {
