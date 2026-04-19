@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { PendingPayments } from "@/components/admin/pending-payments";
 import { Wallet } from "lucide-react";
+import { canAccess, type AdminScope } from "@/lib/admin/scopes";
 
 export default async function AdminPaymentsPage() {
   const supabase = await createServerSupabaseClient();
@@ -14,15 +15,16 @@ export default async function AdminPaymentsPage() {
     redirect("/login");
   }
 
-  // Verify admin role
+  // Verify admin scope — payments requires finance or founder
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, admin_scope")
     .eq("id", user.id)
     .single();
 
-  if (!profile || (profile.role !== "admin" && profile.role !== "school_admin")) {
-    redirect("/login");
+  const scope = (profile?.admin_scope as AdminScope | null) ?? null;
+  if (!profile || profile.role !== "admin" || !canAccess(scope, "payments")) {
+    redirect("/dashboard/admin");
   }
 
   const t = await getTranslations("payment");

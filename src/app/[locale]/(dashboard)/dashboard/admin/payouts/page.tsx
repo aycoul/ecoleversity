@@ -3,7 +3,8 @@ import { getTranslations } from "next-intl/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { PayoutProcessor } from "@/components/admin/payout-processor";
-import { Wallet } from "lucide-react";
+import { Banknote, CircleCheck } from "lucide-react";
+import { canAccess, type AdminScope } from "@/lib/admin/scopes";
 
 export default async function AdminPayoutsPage() {
   const supabase = await createServerSupabaseClient();
@@ -19,15 +20,13 @@ export default async function AdminPayoutsPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, admin_scope")
     .eq("id", user.id)
     .single();
 
-  if (
-    !profile ||
-    (profile.role !== "admin" && profile.role !== "school_admin")
-  ) {
-    redirect("/login");
+  const scope = (profile?.admin_scope as AdminScope | null) ?? null;
+  if (!profile || profile.role !== "admin" || !canAccess(scope, "payouts")) {
+    redirect("/dashboard/admin");
   }
 
   const adminSupabase = createAdminClient();
@@ -100,20 +99,32 @@ export default async function AdminPayoutsPage() {
   );
 
   return (
-    <div className="pb-20 md:pb-0">
-      <div className="mb-8 flex items-center gap-3">
-        <Wallet className="size-7 text-[var(--ev-blue)]" />
+    <div className="space-y-6 pb-16">
+      <div className="flex items-center gap-3">
+        <Banknote className="size-7 text-violet-600" />
         <div>
           <h1 className="text-2xl font-bold text-slate-900">{t("title")}</h1>
           <p className="text-sm text-slate-500">
             {enriched.length > 0
               ? `${enriched.length} enseignant(s) en attente`
-              : ""}
+              : "Versements enseignants — manuels pour l'instant."}
           </p>
         </div>
       </div>
 
-      <PayoutProcessor teachers={enriched} />
+      {enriched.length === 0 ? (
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-16 text-center">
+          <CircleCheck className="mb-3 size-12 text-[var(--ev-green)]" />
+          <p className="text-sm font-semibold text-slate-700">
+            Aucun versement en attente
+          </p>
+          <p className="mt-1 text-xs text-slate-400">
+            Les enseignants avec des gains confirmés apparaîtront ici.
+          </p>
+        </div>
+      ) : (
+        <PayoutProcessor teachers={enriched} />
+      )}
     </div>
   );
 }

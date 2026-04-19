@@ -65,8 +65,11 @@ export default async function VerificationPage() {
 
       {!teachers || teachers.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-16 text-center">
-          <ShieldCheck className="mb-4 size-12 text-slate-300" />
-          <p className="text-sm text-slate-500">{t("noPending")}</p>
+          <ShieldCheck className="mb-4 size-12 text-[var(--ev-green)]" />
+          <p className="text-sm font-semibold text-slate-700">{t("noPending")}</p>
+          <p className="mt-1 text-xs text-slate-400">
+            Les nouveaux dossiers enseignants apparaîtront ici automatiquement.
+          </p>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
