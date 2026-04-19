@@ -133,7 +133,7 @@ export function ReportActionCard({ report }: Props) {
         </div>
       </div>
 
-      {!resolved && (
+      {!resolved && report.status === "pending" && (
         <div className="mt-4 space-y-3 border-t border-slate-100 pt-4">
           <label className="block">
             <span className="text-xs font-medium text-slate-600">
@@ -192,10 +192,12 @@ export function ReportActionCard({ report }: Props) {
         </div>
       )}
 
-      {resolved && (
+      {(resolved || report.status !== "pending") && (
         <div className="mt-4 flex items-center gap-2 border-t border-slate-100 pt-4 text-xs text-[var(--ev-green)]">
           <CheckCircle2 className="size-4" />
-          {resolved === "dismissed" ? t("resolvedDismissed") : t("resolvedActionTaken")}
+          {(resolved === "dismissed" || report.status === "dismissed")
+            ? t("resolvedDismissed")
+            : t("resolvedActionTaken")}
         </div>
       )}
     </div>
