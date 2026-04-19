@@ -1,18 +1,20 @@
 import { getWhatsAppProvider, type SendResult } from './providers';
 
 /**
- * Formats the OTP code into a French user-facing sentence that slots
- * into the AILead `ecoleversity_notification` UTILITY template's {{1}}.
+ * Build the user-facing OTP WhatsApp message in French.
  *
- * The template body:
- *   "Bonjour! Voici une notification de EcoleVersity pour vous: {{1}}.
- *    Rendez-vous sur ecoleversity.com pour plus de details."
+ * We're using freeform text (not a Meta template) until AILead's shared
+ * WABA completes Business Verification (2-7 days) and can submit an
+ * AUTHENTICATION-category template. Freeform works for:
+ *   - Phones on AILead's Meta test allowlist (current testing path)
+ *   - Any recipient within the 24h service window (i.e. they messaged
+ *     the shared WABA number at least once in the last 24 hours)
  *
- * Once AILead graduates to an AUTHENTICATION template (post Meta WABA
- * verification), this can be simplified back to passing just `code`.
+ * This is a bootstrap limitation — post Business Verification we can
+ * send templates to any recipient without the 24h window requirement.
  */
 function formatOtpMessage(code: string): string {
-  return `votre code de vérification est ${code} (expire dans 5 minutes)`;
+  return `EcoleVersity: Votre code de connexion est ${code}. Il expire dans 5 minutes. Ne le partagez avec personne.`;
 }
 
 /**
@@ -33,11 +35,8 @@ export async function sendOtpViaWhatsApp(
   code: string,
 ): Promise<SendResult> {
   const provider = getWhatsAppProvider();
-  const templateName =
-    process.env.AILEAD_OTP_TEMPLATE_NAME ?? 'ecoleversity_notification';
 
-  return provider.sendTemplate(phone, templateName, [formatOtpMessage(code)], {
+  return provider.sendText(phone, formatOtpMessage(code), {
     idempotencyKey: `otp_${userId}_${code}`,
-    language: 'fr',
   });
 }
