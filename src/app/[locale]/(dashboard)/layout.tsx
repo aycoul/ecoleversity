@@ -4,6 +4,12 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { UserRole, GradeLevel } from "@/types/domain";
 import { DashboardShell } from "@/components/admin/dashboard-shell";
 import type { AvatarSwitcherLearner } from "@/components/nav/avatar-switcher";
+import {
+  PAGE_PATHS,
+  SCOPE_PAGES,
+  type AdminPage,
+  type AdminScope,
+} from "@/lib/admin/scopes";
 
 export default async function DashboardLayout({
   children,
@@ -21,7 +27,7 @@ export default async function DashboardLayout({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role, display_name, avatar_url, active_learner_id")
+    .select("role, display_name, avatar_url, active_learner_id, admin_scope")
     .eq("id", user.id)
     .single();
 
@@ -30,6 +36,7 @@ export default async function DashboardLayout({
   }
 
   const role = profile.role as UserRole;
+  const adminScope = (profile.admin_scope as AdminScope | null) ?? null;
 
   // For parents, fetch learners for the AvatarSwitcher dropdown
   let learners: AvatarSwitcherLearner[] = [];
@@ -48,15 +55,44 @@ export default async function DashboardLayout({
   }
   const t = await getTranslations("dashboard.sidebar");
 
+  // Admin nav is driven by admin_scope (SCOPE_PAGES). Each scope sees only
+  // the pages relevant to their responsibilities. Founder sees all.
+  const ADMIN_PAGE_LABEL: Record<AdminPage, string> = {
+    overview: t("overview"),
+    verification: t("verification"),
+    payments: t("payments"),
+    payouts: t("payouts"),
+    reports: t("reports"),
+    strikes: t("strikes"),
+    tickets: t("supportTickets"),
+    agents: t("agents"),
+    analytics: t("analytics"),
+  };
+  const ADMIN_PAGE_ICON: Record<AdminPage, string> = {
+    overview: "layout-dashboard",
+    verification: "shield-check",
+    payments: "wallet",
+    payouts: "banknote",
+    reports: "flag",
+    strikes: "alert-octagon",
+    tickets: "ticket",
+    agents: "cpu",
+    analytics: "bar-chart",
+  };
+  const adminPages = adminScope ? SCOPE_PAGES[adminScope] : [];
+  const adminNav = adminPages.map((page) => ({
+    href: PAGE_PATHS[page],
+    label: ADMIN_PAGE_LABEL[page],
+    icon: ADMIN_PAGE_ICON[page],
+  }));
+  adminNav.push({
+    href: "/dashboard/settings/notifications",
+    label: t("settings"),
+    icon: "settings",
+  });
+
   const navConfig: Record<UserRole, Array<{ href: string; label: string; icon: string }>> = {
-    admin: [
-      { href: "/dashboard/admin/verification", label: t("verification"), icon: "shield-check" },
-      { href: "/dashboard/admin/payments", label: t("payments"), icon: "wallet" },
-      { href: "/dashboard/admin/payouts", label: t("payouts"), icon: "banknote" },
-      { href: "/dashboard/admin/tickets", label: t("supportTickets"), icon: "ticket" },
-      { href: "/dashboard/admin/reports", label: t("reports"), icon: "bar-chart" },
-      { href: "/dashboard/settings/notifications", label: t("settings"), icon: "settings" },
-    ],
+    admin: adminNav,
     teacher: [
       { href: "/dashboard/teacher", label: t("myProfile"), icon: "user" },
       { href: "/dashboard/teacher/availability", label: t("schedule"), icon: "calendar" },

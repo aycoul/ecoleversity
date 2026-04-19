@@ -20,6 +20,10 @@ import {
   Banknote,
   Settings,
   PlayCircle,
+  LayoutDashboard,
+  Flag,
+  AlertOctagon,
+  Cpu,
 } from "lucide-react";
 
 type NavLink = {
@@ -53,6 +57,10 @@ const iconMap: Record<string, React.ElementType> = {
   banknote: Banknote,
   settings: Settings,
   "play-circle": PlayCircle,
+  "layout-dashboard": LayoutDashboard,
+  flag: Flag,
+  "alert-octagon": AlertOctagon,
+  cpu: Cpu,
 };
 
 export function DashboardShell({

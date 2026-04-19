@@ -2,6 +2,7 @@ import createMiddleware from "next-intl/middleware";
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 import { routing } from "@/i18n/routing";
+import { canAccess, pageForPath, type AdminScope } from "@/lib/admin/scopes";
 
 const intlMiddleware = createMiddleware(routing);
 
@@ -68,14 +69,15 @@ export async function middleware(request: NextRequest) {
   }
 
   if (user && needsAuth) {
-    // Fetch profile role — shared across all gate checks below
+    // Fetch profile role + admin_scope — shared across all gate checks below
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role")
+      .select("role, admin_scope")
       .eq("id", user.id)
       .maybeSingle();
 
     const role = profile?.role ?? "parent";
+    const adminScope = (profile?.admin_scope as AdminScope | null) ?? null;
 
     // Role gates for /dashboard/{admin,school,teacher}
     if (isDashboardRoute) {
@@ -86,6 +88,18 @@ export async function middleware(request: NextRequest) {
             request.url
           );
           return NextResponse.redirect(fallbackUrl);
+        }
+      }
+
+      // Admin scope gate — within /dashboard/admin/*, each sub-admin only
+      // sees the pages their scope grants. Out-of-scope → redirect to the
+      // Overview hub (which every scope can access).
+      if (role === "admin" && localeStripped.startsWith("/dashboard/admin")) {
+        const page = pageForPath(localeStripped);
+        if (page && !canAccess(adminScope, page)) {
+          return NextResponse.redirect(
+            new URL(`/${locale}/dashboard/admin`, request.url)
+          );
         }
       }
     }
