@@ -14,12 +14,40 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { LocaleSwitcher } from "./locale-switcher";
 import Image from "next/image";
-import { Search, BookOpen, GraduationCap, Zap, HelpCircle } from "lucide-react";
+import {
+  Search,
+  BookOpen,
+  GraduationCap,
+  Zap,
+  HelpCircle,
+  LayoutDashboard,
+  LogOut,
+} from "lucide-react";
+import type { UserRole } from "@/types/domain";
 
 type MobileNavProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  user: {
+    id: string;
+    displayName: string;
+    role: UserRole;
+  } | null;
 };
+
+function dashboardHref(role: UserRole): string {
+  switch (role) {
+    case "admin":
+      return "/dashboard/admin/verification";
+    case "teacher":
+      return "/dashboard/teacher";
+    case "school_admin":
+      return "/dashboard/admin/verification";
+    case "parent":
+    default:
+      return "/dashboard/parent/overview";
+  }
+}
 
 const navLinks = [
   { href: "/teachers", key: "findTeacher", icon: Search },
@@ -29,9 +57,10 @@ const navLinks = [
   { href: "/help", key: "help", icon: HelpCircle },
 ] as const;
 
-export function MobileNav({ open, onOpenChange }: MobileNavProps) {
+export function MobileNav({ open, onOpenChange, user }: MobileNavProps) {
   const t = useTranslations("navigation");
   const tc = useTranslations("common");
+  const initial = (user?.displayName?.[0] ?? "?").toUpperCase();
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -74,16 +103,49 @@ export function MobileNav({ open, onOpenChange }: MobileNavProps) {
           <div className="flex justify-center">
             <LocaleSwitcher />
           </div>
-          <Link href="/login" onClick={() => onOpenChange(false)}>
-            <Button variant="outline" className="w-full text-base font-semibold">
-              {tc("login")}
-            </Button>
-          </Link>
-          <Link href="/register" onClick={() => onOpenChange(false)}>
-            <Button className="w-full rounded-full bg-[var(--ev-amber)] text-base font-bold text-white hover:bg-[var(--ev-amber-light)]">
-              {tc("register")}
-            </Button>
-          </Link>
+          {user ? (
+            <>
+              <div className="flex items-center gap-3 rounded-lg bg-slate-50 px-3 py-2">
+                <div className="flex size-9 items-center justify-center rounded-full bg-[var(--ev-blue)] text-sm font-bold text-white">
+                  {initial}
+                </div>
+                <div className="min-w-0 flex-1 truncate text-sm font-medium text-slate-800">
+                  {user.displayName}
+                </div>
+              </div>
+              <Link
+                href={dashboardHref(user.role)}
+                onClick={() => onOpenChange(false)}
+              >
+                <Button className="w-full gap-2 bg-[var(--ev-blue)] text-base font-bold text-white hover:bg-[var(--ev-blue-light)]">
+                  <LayoutDashboard className="size-4" />
+                  Mon espace
+                </Button>
+              </Link>
+              <Link href="/logout" onClick={() => onOpenChange(false)}>
+                <Button
+                  variant="outline"
+                  className="w-full gap-2 text-base font-semibold text-red-600 hover:bg-red-50 hover:text-red-700"
+                >
+                  <LogOut className="size-4" />
+                  Se déconnecter
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link href="/login" onClick={() => onOpenChange(false)}>
+                <Button variant="outline" className="w-full text-base font-semibold">
+                  {tc("login")}
+                </Button>
+              </Link>
+              <Link href="/register" onClick={() => onOpenChange(false)}>
+                <Button className="w-full rounded-full bg-[var(--ev-amber)] text-base font-bold text-white hover:bg-[var(--ev-amber-light)]">
+                  {tc("register")}
+                </Button>
+              </Link>
+            </>
+          )}
         </SheetFooter>
       </SheetContent>
     </Sheet>

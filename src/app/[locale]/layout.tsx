@@ -8,6 +8,8 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Toaster } from "@/components/ui/sonner";
 import { ServiceWorkerRegister } from "@/components/common/sw-register";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+import type { UserRole } from "@/types/domain";
 import "../globals.css";
 
 const nunito = Nunito({
@@ -49,6 +51,31 @@ export default async function LocaleLayout({
 
   const messages = await getMessages();
 
+  // Resolve current user for the top nav (hides Log in/Sign up when authed)
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user: authUser },
+  } = await supabase.auth.getUser();
+
+  let navUser:
+    | { id: string; displayName: string; role: UserRole }
+    | null = null;
+  if (authUser) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role, display_name")
+      .eq("id", authUser.id)
+      .maybeSingle();
+    navUser = {
+      id: authUser.id,
+      displayName:
+        (profile?.display_name as string | null) ??
+        authUser.email ??
+        "Utilisateur",
+      role: ((profile?.role as UserRole | null) ?? "parent") as UserRole,
+    };
+  }
+
   return (
     <html
       lang={locale}
@@ -63,7 +90,7 @@ export default async function LocaleLayout({
       </head>
       <body className="flex min-h-full flex-col bg-white text-slate-900">
         <NextIntlClientProvider messages={messages}>
-          <Header />
+          <Header user={navUser} />
           <main className="flex-1">{children}</main>
           <Footer />
           <Toaster position="top-center" richColors />

@@ -5,13 +5,37 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { MobileNav } from "./mobile-nav";
-import { Menu } from "lucide-react";
+import { LayoutDashboard, LogOut, Menu } from "lucide-react";
 import Image from "next/image";
+import type { UserRole } from "@/types/domain";
 
-export function Header() {
+type HeaderProps = {
+  user: {
+    id: string;
+    displayName: string;
+    role: UserRole;
+  } | null;
+};
+
+function dashboardHref(role: UserRole): string {
+  switch (role) {
+    case "admin":
+      return "/dashboard/admin/verification";
+    case "teacher":
+      return "/dashboard/teacher";
+    case "school_admin":
+      return "/dashboard/admin/verification";
+    case "parent":
+    default:
+      return "/dashboard/parent/overview";
+  }
+}
+
+export function Header({ user = null }: HeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const t = useTranslations("navigation");
   const tc = useTranslations("common");
+  const initial = (user?.displayName?.[0] ?? "?").toUpperCase();
 
   return (
     <header className="sticky top-0 z-40 w-full bg-white shadow-sm">
@@ -56,21 +80,53 @@ export function Header() {
           </Link>
         </nav>
 
-        {/* Desktop actions */}
+        {/* Desktop actions — conditional on auth state */}
         <div className="hidden items-center gap-2 lg:flex">
-          <Link href="/login">
-            <Button
-              variant="ghost"
-              className="text-[15px] font-semibold text-slate-600 hover:text-[var(--ev-blue)]"
-            >
-              {tc("login")}
-            </Button>
-          </Link>
-          <Link href="/register">
-            <Button className="rounded-full bg-[var(--ev-amber)] px-6 text-[15px] font-bold text-white shadow-md shadow-[var(--ev-amber)]/20 hover:bg-[var(--ev-amber-light)] hover:shadow-lg">
-              {tc("register")}
-            </Button>
-          </Link>
+          {user ? (
+            <>
+              <Link href={dashboardHref(user.role)}>
+                <Button
+                  variant="ghost"
+                  className="gap-2 text-[15px] font-semibold text-slate-700 hover:text-[var(--ev-blue)]"
+                >
+                  <LayoutDashboard className="size-4" />
+                  Mon espace
+                </Button>
+              </Link>
+              <Link href={dashboardHref(user.role)} className="flex items-center gap-2">
+                <div className="flex size-9 items-center justify-center rounded-full bg-[var(--ev-blue)] text-sm font-bold text-white">
+                  {initial}
+                </div>
+              </Link>
+              <Link href="/logout">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-slate-400 hover:text-slate-700"
+                  aria-label="Se déconnecter"
+                  title="Se déconnecter"
+                >
+                  <LogOut className="size-4" />
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link href="/login">
+                <Button
+                  variant="ghost"
+                  className="text-[15px] font-semibold text-slate-600 hover:text-[var(--ev-blue)]"
+                >
+                  {tc("login")}
+                </Button>
+              </Link>
+              <Link href="/register">
+                <Button className="rounded-full bg-[var(--ev-amber)] px-6 text-[15px] font-bold text-white shadow-md shadow-[var(--ev-amber)]/20 hover:bg-[var(--ev-amber-light)] hover:shadow-lg">
+                  {tc("register")}
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile hamburger */}
@@ -82,7 +138,7 @@ export function Header() {
           <Menu className="size-6" />
         </button>
 
-        <MobileNav open={mobileOpen} onOpenChange={setMobileOpen} />
+        <MobileNav open={mobileOpen} onOpenChange={setMobileOpen} user={user} />
       </div>
     </header>
   );
