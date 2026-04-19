@@ -10,6 +10,7 @@ import {
   GRADE_LEVELS,
   GRADE_LEVEL_LABELS,
   GRADE_GROUPS,
+  GRADE_GROUP_LABELS,
   IVORIAN_CITIES,
 } from "@/types/domain";
 import type { Subject, GradeLevel, IvorianCity } from "@/types/domain";
@@ -221,7 +222,7 @@ export function ProfileStep({ onSaved }: ProfileStepProps) {
           ([group, grades]) => (
             <div key={group}>
               <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-slate-400">
-                {group === "primaire" ? "Primaire" : group === "college" ? "Coll\u00e8ge" : "Lyc\u00e9e"}
+                {GRADE_GROUP_LABELS[group as keyof typeof GRADE_GROUP_LABELS]}
               </p>
               <div className="flex flex-wrap gap-2">
                 {grades.map((grade) => (

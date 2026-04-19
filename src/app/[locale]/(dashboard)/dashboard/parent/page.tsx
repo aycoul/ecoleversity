@@ -1,18 +1,5 @@
-import { getTranslations } from "next-intl/server";
-import { Users } from "lucide-react";
+import { redirect } from "next/navigation";
 
-export default async function ParentDashboardPage() {
-  const t = await getTranslations("dashboard.sidebar");
-
-  return (
-    <div className="flex flex-col items-center justify-center py-24 text-center">
-      <Users className="mb-4 size-16 text-slate-300" />
-      <h1 className="text-2xl font-bold text-slate-900">
-        {t("dashboard")}
-      </h1>
-      <p className="mt-2 text-sm text-slate-500">
-        {t("comingSoon")}
-      </p>
-    </div>
-  );
+export default function ParentDashboardRoot() {
+  redirect("/dashboard/parent/overview");
 }
