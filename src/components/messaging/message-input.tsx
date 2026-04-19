@@ -122,13 +122,18 @@ export function MessageInput({
 
       const data = await res.json();
 
-      if (!res.ok) {
-        toast.error(data.error ?? "Erreur");
+      if (res.status === 422 && data.error === "pii_blocked") {
+        // Moderation blocked — show the server-provided French message
+        toast.error(
+          data.message ??
+            "Votre message contient des informations personnelles interdites."
+        );
         return;
       }
 
-      if (data.contactDetected) {
-        toast.warning(t("contactDetected"));
+      if (!res.ok) {
+        toast.error(data.error ?? "Erreur");
+        return;
       }
 
       setContent("");

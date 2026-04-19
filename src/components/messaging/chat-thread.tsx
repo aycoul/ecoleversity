@@ -11,7 +11,11 @@ type Message = {
   id: string;
   sender_id: string;
   content: string;
-  content_flagged: boolean;
+  // content_flagged kept for backward compat — old rows still have it
+  content_flagged?: boolean;
+  // Phase A moderation fields
+  moderation_status?: "clean" | "blocked" | "flagged";
+  blocked_reason?: string | null;
   attachments: { name: string; url: string; size: number }[];
   read_at: string | null;
   created_at: string;
