@@ -17,10 +17,11 @@ export async function getAuthRedirect(
     return { path: "/login", role: null };
   }
 
-  // Fetch profile to determine role and status
+  // Fetch profile role — verification_status lives on teacher_profiles,
+  // not profiles (schema was refactored).
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role, verification_status")
+    .select("role")
     .eq("id", user.id)
     .single();
 
@@ -41,7 +42,13 @@ export async function getAuthRedirect(
       return { path: "/dashboard/admin", role };
 
     case "teacher": {
-      if (profile.verification_status === "pending" || profile.verification_status === "submitted") {
+      const { data: tp } = await supabase
+        .from("teacher_profiles")
+        .select("verification_status")
+        .eq("id", user.id)
+        .single();
+      const vs = tp?.verification_status;
+      if (!vs || vs === "pending" || vs === "id_submitted" || vs === "diploma_submitted" || vs === "video_submitted") {
         return { path: "/onboarding/teacher", role };
       }
       return { path: "/dashboard/teacher", role };
