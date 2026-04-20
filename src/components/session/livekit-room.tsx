@@ -72,6 +72,38 @@ export function LiveKitRoomEmbed({
     };
   }, [liveClassId, userRole]);
 
+  // When the teacher leaves (or the page unmounts), stop the egress so
+  // LiveKit Cloud isn't billed for a recording after the class ends.
+  // Fires beacon-style so the request survives a page-close.
+  useEffect(() => {
+    if (userRole !== "teacher") return;
+    const stop = () => {
+      const body = JSON.stringify({ liveClassId });
+      const blob = new Blob([body], { type: "application/json" });
+      try {
+        if (typeof navigator !== "undefined" && navigator.sendBeacon) {
+          navigator.sendBeacon("/api/livekit/stop-recording", blob);
+        } else {
+          fetch("/api/livekit/stop-recording", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body,
+            keepalive: true,
+          }).catch(() => {});
+        }
+      } catch {
+        // Best-effort only — egress also auto-stops when the room empties.
+      }
+    };
+
+    const handlePageHide = () => stop();
+    window.addEventListener("pagehide", handlePageHide);
+    return () => {
+      window.removeEventListener("pagehide", handlePageHide);
+      if (userRole === "teacher") stop();
+    };
+  }, [liveClassId, userRole]);
+
   if (error) {
     return (
       <div className="flex flex-col items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-6 text-center">

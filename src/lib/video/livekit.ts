@@ -1,4 +1,4 @@
-import { AccessToken } from "livekit-server-sdk";
+import { AccessToken, TrackSource } from "livekit-server-sdk";
 
 type UserRole = "teacher" | "parent" | "admin";
 
@@ -42,12 +42,22 @@ export async function generateAccessToken({
     ttl: "1h",
   });
 
+  // Explicitly enumerate publish sources so SCREEN_SHARE is granted —
+  // default canPublish + no sources list _usually_ allows everything,
+  // but LiveKit clients have been observed rejecting screen share
+  // when canPublishSources is empty. Being explicit avoids that.
   at.addGrant({
     room: roomName,
     roomJoin: true,
     canPublish: true,
+    canPublishSources: [
+      TrackSource.CAMERA,
+      TrackSource.MICROPHONE,
+      TrackSource.SCREEN_SHARE,
+      TrackSource.SCREEN_SHARE_AUDIO,
+    ],
     canSubscribe: true,
-    canPublishData: true,
+    canPublishData: true, // chat + custom data channels
     roomAdmin: isTeacher,
     roomRecord: isTeacher,
   });
