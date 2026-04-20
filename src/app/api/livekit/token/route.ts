@@ -57,12 +57,23 @@ export async function POST(request: NextRequest) {
     if (role === "teacher" && liveClass.teacher_id === user.id) {
       authorized = true;
     } else if (role === "parent") {
-      const { count } = await supabase
+      // enrollments hangs off learner_id, not parent_id. Authorize if any
+      // of this parent's learners is enrolled in this live_class.
+      const { data: enrolledRows } = await supabase
         .from("enrollments")
-        .select("id", { count: "exact", head: true })
-        .eq("live_class_id", liveClassId)
-        .eq("parent_id", user.id);
-      authorized = (count ?? 0) > 0;
+        .select("learner_id")
+        .eq("live_class_id", liveClassId);
+      const learnerIds = (enrolledRows ?? [])
+        .map((e) => e.learner_id as string | null)
+        .filter((lid): lid is string => !!lid);
+      if (learnerIds.length > 0) {
+        const { count } = await supabase
+          .from("learner_profiles")
+          .select("id", { count: "exact", head: true })
+          .in("id", learnerIds)
+          .eq("parent_id", user.id);
+        authorized = (count ?? 0) > 0;
+      }
     } else if (role === "admin") {
       authorized = true;
     }

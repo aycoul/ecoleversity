@@ -65,15 +65,27 @@ export default async function SessionPage({
   }
 
   if (role === "parent") {
-    // Check if this parent has an enrollment for this class
-    const { count } = await supabase
+    // Parents are authorized when any of their learners is enrolled.
+    // enrollments.learner_id → learner_profiles.parent_id → user.id
+    const { data: enrolledRows } = await supabase
       .from("enrollments")
-      .select("id", { count: "exact", head: true })
-      .eq("live_class_id", id)
-      .eq("parent_id", user.id);
+      .select("learner_id")
+      .eq("live_class_id", id);
 
-    if (count && count > 0) {
-      authorized = true;
+    const learnerIds = (enrolledRows ?? [])
+      .map((e) => e.learner_id as string | null)
+      .filter((id): id is string => !!id);
+
+    if (learnerIds.length > 0) {
+      const { count } = await supabase
+        .from("learner_profiles")
+        .select("id", { count: "exact", head: true })
+        .in("id", learnerIds)
+        .eq("parent_id", user.id);
+
+      if (count && count > 0) {
+        authorized = true;
+      }
     }
   }
 
