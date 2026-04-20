@@ -56,7 +56,7 @@ export default async function ParentOverviewPage() {
   // via the `in(learner_id)` clause against children this parent owns.
   const childIds = children.map((c) => c.id);
   const adminRead = createAdminClient();
-  const { data: enrollments } =
+  const { data: enrollments, error: enrErr } =
     childIds.length > 0
       ? await adminRead
           .from("enrollments")
@@ -64,7 +64,16 @@ export default async function ParentOverviewPage() {
             "id, learner_id, course_id, live_class_id, progress_pct, completed_at, last_lesson_id"
           )
           .in("learner_id", childIds)
-      : { data: [] };
+      : { data: [], error: null };
+
+  console.log(
+    "[parent/overview]",
+    "user=", user.id,
+    "children=", childIds.length,
+    "childIds=", JSON.stringify(childIds),
+    "enrollments=", (enrollments ?? []).length,
+    "err=", enrErr?.message ?? "none",
+  );
 
   // 3. Upcoming live sessions (next 7 days, enrolled classes only)
   const enrolledClassIds = (enrollments ?? [])
