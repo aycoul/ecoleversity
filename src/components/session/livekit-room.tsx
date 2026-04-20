@@ -7,12 +7,12 @@ import {
   GridLayout,
   ParticipantTile,
   ControlBar,
-  Chat,
   useTracks,
 } from "@livekit/components-react";
 import { Track } from "livekit-client";
 import "@livekit/components-styles";
 import { useTranslations } from "next-intl";
+import { ModeratedChat } from "./moderated-chat";
 
 type LiveKitRoomEmbedProps = {
   liveClassId: string;
@@ -139,7 +139,7 @@ export function LiveKitRoomEmbed({
         onDisconnected={onClose}
         style={{ height: "100%" }}
       >
-        <RoomLayout />
+        <RoomLayout liveClassId={liveClassId} />
         <RoomAudioRenderer />
       </LiveKitRoom>
     </div>
@@ -152,7 +152,7 @@ export function LiveKitRoomEmbed({
  * local state and wired to the ControlBar's chat toggle via the standard
  * LayoutContext that ControlBar reads from.
  */
-function RoomLayout() {
+function RoomLayout({ liveClassId }: { liveClassId: string }) {
   const [chatOpen, setChatOpen] = useState(false);
 
   // Camera + screen share tile refs for GridLayout
@@ -191,7 +191,7 @@ function RoomLayout() {
               </button>
             </div>
             <div className="flex-1 overflow-hidden">
-              <Chat style={{ height: "100%" }} />
+              <ModeratedChat liveClassId={liveClassId} />
             </div>
           </aside>
         ) : null}

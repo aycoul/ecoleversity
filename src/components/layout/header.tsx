@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/routing";
+import { Link, usePathname } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { MobileNav } from "./mobile-nav";
 import { LayoutDashboard, LogOut, Menu } from "lucide-react";
@@ -36,6 +36,17 @@ export function Header({ user = null }: HeaderProps) {
   const t = useTranslations("navigation");
   const tc = useTranslations("common");
   const initial = (user?.displayName?.[0] ?? "?").toUpperCase();
+  const pathname = usePathname();
+
+  // Hide public marketing nav on pages where the sidebar handles
+  // navigation. Without this the header competes with the dashboard
+  // left-nav, which confused users into thinking they'd logged out.
+  // We also drop the "Enseigner" link once the user is logged in —
+  // becoming a teacher from an already-signed-in account is a
+  // dashboard-level action, not a marketing CTA.
+  const isAppShell = pathname.startsWith("/dashboard") || pathname.startsWith("/k/");
+  const showPublicNav = !isAppShell;
+  const showTeachCta = !user && showPublicNav;
 
   return (
     <header className="sticky top-0 z-40 w-full bg-white shadow-sm">
@@ -52,33 +63,38 @@ export function Header({ user = null }: HeaderProps) {
           />
         </Link>
 
-        {/* Desktop nav — clean 4 items */}
-        <nav className="hidden items-center gap-1 lg:flex">
-          <Link
-            href="/teachers"
-            className="rounded-lg px-4 py-2 text-[15px] font-semibold text-slate-700 transition-all hover:bg-[var(--ev-blue-50)] hover:text-[var(--ev-blue)]"
-          >
-            {t("findTeacher")}
-          </Link>
-          <Link
-            href="/courses"
-            className="rounded-lg px-4 py-2 text-[15px] font-semibold text-slate-700 transition-all hover:bg-[var(--ev-blue-50)] hover:text-[var(--ev-blue)]"
-          >
-            {t("ourCourses")}
-          </Link>
-          <Link
-            href="/exams"
-            className="rounded-lg px-4 py-2 text-[15px] font-semibold text-slate-700 transition-all hover:bg-[var(--ev-blue-50)] hover:text-[var(--ev-blue)]"
-          >
-            {t("examPrep")}
-          </Link>
-          <Link
-            href="/register?role=teacher"
-            className="rounded-lg px-4 py-2 text-[15px] font-semibold text-[var(--ev-green-dark)] transition-all hover:bg-[var(--ev-green-50)]"
-          >
-            {t("teach")}
-          </Link>
-        </nav>
+        {/* Desktop nav — only shown on public pages. On dashboard/kid
+            pages the sidebar handles navigation. */}
+        {showPublicNav && (
+          <nav className="hidden items-center gap-1 lg:flex">
+            <Link
+              href="/teachers"
+              className="rounded-lg px-4 py-2 text-[15px] font-semibold text-slate-700 transition-all hover:bg-[var(--ev-blue-50)] hover:text-[var(--ev-blue)]"
+            >
+              {t("findTeacher")}
+            </Link>
+            <Link
+              href="/courses"
+              className="rounded-lg px-4 py-2 text-[15px] font-semibold text-slate-700 transition-all hover:bg-[var(--ev-blue-50)] hover:text-[var(--ev-blue)]"
+            >
+              {t("ourCourses")}
+            </Link>
+            <Link
+              href="/exams"
+              className="rounded-lg px-4 py-2 text-[15px] font-semibold text-slate-700 transition-all hover:bg-[var(--ev-blue-50)] hover:text-[var(--ev-blue)]"
+            >
+              {t("examPrep")}
+            </Link>
+            {showTeachCta && (
+              <Link
+                href="/register?role=teacher"
+                className="rounded-lg px-4 py-2 text-[15px] font-semibold text-[var(--ev-green-dark)] transition-all hover:bg-[var(--ev-green-50)]"
+              >
+                {t("teach")}
+              </Link>
+            )}
+          </nav>
+        )}
 
         {/* Desktop actions — conditional on auth state */}
         <div className="hidden items-center gap-2 lg:flex">

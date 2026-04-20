@@ -76,7 +76,9 @@ export function MobileNav({ open, onOpenChange, user }: MobileNavProps) {
         <Separator />
 
         <nav className="flex flex-1 flex-col gap-1 px-4">
-          {navLinks.map((link) => {
+          {navLinks
+            .filter((link) => !(user && link.key === "teach"))
+            .map((link) => {
             const Icon = link.icon;
             return (
               <SheetClose key={link.key} render={<div />}>

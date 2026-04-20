@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { Link, useRouter } from "@/i18n/routing";
+import { Link, useRouter, usePathname } from "@/i18n/routing";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
@@ -15,6 +15,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { GRADE_LEVEL_LABELS, type GradeLevel } from "@/types/domain";
+import { cn } from "@/lib/utils";
 
 type KidShellLearner = {
   id: string;
@@ -34,6 +35,7 @@ export function KidShell({ learners, children }: KidShellProps) {
   const activeLearnerId = params?.learner_id;
   const activeLearner = learners.find((l) => l.id === activeLearnerId);
   const router = useRouter();
+  const pathname = usePathname();
   const [switching, setSwitching] = useState(false);
 
   const returnToParent = async () => {
@@ -87,11 +89,18 @@ export function KidShell({ learners, children }: KidShellProps) {
     },
   ];
 
+  const isActive = (href: string) => {
+    const clean = pathname.replace(/^\/(fr|en)(?=\/|$)/, "");
+    // Exact match for home route, otherwise startsWith
+    if (href === `/k/${activeLearner.id}`) return clean === href;
+    return clean.startsWith(href);
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-b from-[var(--ev-blue-50)]/30 to-white">
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-slate-100 bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           <Link href={`/k/${activeLearner.id}`} className="flex items-center gap-2">
             <Image
               src="/logo.png"
@@ -133,21 +142,57 @@ export function KidShell({ learners, children }: KidShellProps) {
         </div>
       </header>
 
-      {/* Content */}
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 pb-24 md:pb-8">
-        {children}
-      </main>
+      {/* Desktop sidebar + main content */}
+      <div className="mx-auto flex w-full max-w-7xl flex-1">
+        {/* Left sidebar (desktop only) — mirrors adult dashboard shell
+            so kids never feel lost: always know where they are + how
+            to go back to parent mode (top-right). */}
+        <aside className="hidden w-56 shrink-0 border-r border-slate-200 bg-white/60 md:block">
+          <nav className="sticky top-[73px] p-4">
+            <ul className="space-y-1">
+              {navLinks.map((link) => {
+                const Icon = link.icon;
+                const active = isActive(link.href);
+                return (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className={cn(
+                        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                        active
+                          ? "bg-[var(--ev-blue-50)] text-[var(--ev-blue)]"
+                          : "text-slate-700 hover:bg-slate-100"
+                      )}
+                    >
+                      <Icon className="size-4 shrink-0" />
+                      <span>{link.label}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+        </aside>
+
+        <main className="w-full flex-1 px-4 py-6 pb-24 md:px-8 md:pb-8">
+          {children}
+        </main>
+      </div>
 
       {/* Bottom nav (mobile) */}
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white md:hidden">
         <ul className="flex items-center justify-around">
           {navLinks.map((link) => {
             const Icon = link.icon;
+            const active = isActive(link.href);
             return (
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className="flex flex-col items-center gap-0.5 px-3 py-2 text-[0.65rem] text-slate-500 hover:text-[var(--ev-blue)]"
+                  className={cn(
+                    "flex flex-col items-center gap-0.5 px-3 py-2 text-[0.65rem]",
+                    active ? "text-[var(--ev-blue)]" : "text-slate-500 hover:text-[var(--ev-blue)]"
+                  )}
                 >
                   <Icon className="size-5" />
                   <span>{link.label}</span>
