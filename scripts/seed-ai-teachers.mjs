@@ -4,16 +4,41 @@
 // page's DB-driven featured section has diverse, clickable content.
 // Idempotent: re-running upserts existing teachers by email.
 
-const PAT = 'sbp_ecd84be8165c4a9ee837a0ac73b38bc3610a46da';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT = 'vhivhqfhpwhrlinjjfwa';
 const SUPABASE_URL = 'https://' + PROJECT + '.supabase.co';
 
-async function fetchServiceKey() {
-  const r = await fetch('https://api.supabase.com/v1/projects/' + PROJECT + '/api-keys?reveal=true', {
-    headers: { Authorization: 'Bearer ' + PAT },
-  });
-  const keys = await r.json();
-  return keys.find((k) => k.name === 'service_role').api_key;
+function fetchServiceKey() {
+  const envPath = resolve(__dirname, '..', '.env.local');
+  const env = readFileSync(envPath, 'utf8');
+  const match = env.match(/^SUPABASE_SERVICE_ROLE_KEY=(.+)$/m);
+  if (!match) throw new Error('SUPABASE_SERVICE_ROLE_KEY not in .env.local');
+  return match[1].trim();
+}
+
+async function lookupUserIdByEmail(serviceKey, email) {
+  // /auth/v1/admin/users ?email= is ignored, and PostgREST blocks auth
+  // schema. Paginate the admin list and match by email in JS. Fine for
+  // seeds (only hundreds of users) — do not use at runtime.
+  const target = email.toLowerCase();
+  for (let page = 1; page < 50; page++) {
+    const res = await fetch(
+      SUPABASE_URL + '/auth/v1/admin/users?page=' + page + '&per_page=100',
+      { headers: { apikey: serviceKey, Authorization: 'Bearer ' + serviceKey } },
+    );
+    if (!res.ok) throw new Error('lookupUserIdByEmail page ' + page + ': ' + res.status);
+    const body = await res.json();
+    const users = body.users || [];
+    if (users.length === 0) return null;
+    const hit = users.find((u) => (u.email || '').toLowerCase() === target);
+    if (hit) return hit.id;
+    if (users.length < 100) return null;
+  }
+  return null;
 }
 
 async function createOrGetUser(serviceKey, email, name) {
@@ -33,14 +58,9 @@ async function createOrGetUser(serviceKey, email, name) {
   });
   const body = await createRes.json();
   if (createRes.ok) return body.id;
-  if (body.msg && body.msg.toLowerCase().includes('already')) {
-    const list = await fetch(
-      SUPABASE_URL + '/auth/v1/admin/users?email=' + encodeURIComponent(email),
-      { headers: { apikey: serviceKey, Authorization: 'Bearer ' + serviceKey } },
-    );
-    const out = await list.json();
-    return out.users && out.users[0] ? out.users[0].id : null;
-  }
+  // Already-exists response varies by version; fall back to email lookup.
+  const existingId = await lookupUserIdByEmail(serviceKey, email);
+  if (existingId) return existingId;
   throw new Error('createOrGetUser failed: ' + JSON.stringify(body));
 }
 
@@ -117,8 +137,8 @@ function futureDate(hoursFromNow) {
 }
 
 async function main() {
-  const serviceKey = await fetchServiceKey();
-  console.log('✓ service_role fetched');
+  const serviceKey = fetchServiceKey();
+  console.log('✓ service_role loaded from .env.local');
 
   for (const t of AI_TEACHERS) {
     console.log('\n--- ' + t.name + ' ---');
@@ -153,9 +173,40 @@ async function main() {
     ]);
     console.log('  ✓ teacher_profile');
 
+    // Clear previously seeded classes + courses for this teacher to keep
+    // the script idempotent without accumulating duplicates.
+    await sbRest(serviceKey, '/live_classes?teacher_id=eq.' + id, null, 'DELETE', 'return=minimal');
+    await sbRest(serviceKey, '/courses?teacher_id=eq.' + id, null, 'DELETE', 'return=minimal');
+    console.log('  ✓ cleared previous classes + courses');
+
     const classOffsets = [
-      { hours: 24 + Math.floor(Math.random() * 24), grade: '3eme', titleSuffix: 'Préparation BEPC' },
-      { hours: 24 * 5 + Math.floor(Math.random() * 48), grade: 'Terminale', titleSuffix: 'Stage BAC intensif' },
+      {
+        hours: 24 + Math.floor(Math.random() * 24),
+        grade: '3eme',
+        titleSuffix: 'Préparation BEPC (hebdomadaire)',
+        format: 'group',
+        maxStudents: 12,
+        price: 2500,
+        recurrence: 'weekly',
+      },
+      {
+        hours: 24 * 3 + Math.floor(Math.random() * 24),
+        grade: 'Terminale',
+        titleSuffix: 'Cours particulier BAC',
+        format: 'one_on_one',
+        maxStudents: 1,
+        price: 5000,
+        recurrence: 'one_time',
+      },
+      {
+        hours: 24 * 5 + Math.floor(Math.random() * 48),
+        grade: 'Terminale',
+        titleSuffix: 'Stage BAC intensif',
+        format: 'group',
+        maxStudents: 12,
+        price: 2500,
+        recurrence: 'one_time',
+      },
     ];
     for (const o of classOffsets) {
       const subject = t.subjects[0];
@@ -170,19 +221,19 @@ async function main() {
             description: 'Cours en direct animé par ' + t.name + '. ' + t.bio.slice(0, 120),
             subject,
             grade_level: o.grade,
-            format: 'group',
-            max_students: 12,
-            price_xof: 2500,
+            format: o.format,
+            max_students: o.maxStudents,
+            price_xof: o.price,
             scheduled_at: futureDate(o.hours),
             duration_minutes: 60,
-            recurrence: 'one_time',
+            recurrence: o.recurrence,
             status: 'scheduled',
           },
         ],
         'POST',
         'return=minimal',
       );
-      console.log('  ✓ class ' + label + ' / ' + o.titleSuffix);
+      console.log('  ✓ class ' + label + ' / ' + o.titleSuffix + ' (' + o.format + ', ' + o.recurrence + ')');
     }
 
     const courseSubject = t.subjects[0];

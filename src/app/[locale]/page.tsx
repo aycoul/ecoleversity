@@ -78,16 +78,20 @@ async function loadFeaturedCards(): Promise<FeaturedCard[]> {
   const admin = createAdminClient();
 
   const earliestWindow = new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString();
+  // Fetch more than we need: the end-time > now filter below runs in JS,
+  // so classes already over still count against the limit. Bump to 12 and
+  // slice after the filter to guarantee up to 4 truly upcoming classes.
+  // Include both group and 1-to-1 classes — the marketplace shows both.
   const { data: classRows } = await admin
     .from("live_classes")
     .select(
-      "id, title, subject, scheduled_at, duration_minutes, max_students, price_xof, teacher_id"
+      "id, title, subject, scheduled_at, duration_minutes, max_students, price_xof, teacher_id, format, recurrence"
     )
-    .eq("format", "group")
+    .in("format", ["group", "one_on_one"])
     .eq("status", "scheduled")
     .gte("scheduled_at", earliestWindow)
     .order("scheduled_at", { ascending: true })
-    .limit(4);
+    .limit(12);
 
   const classTeacherIds = [
     ...new Set((classRows ?? []).map((c) => c.teacher_id as string)),
@@ -118,15 +122,18 @@ async function loadFeaturedCards(): Promise<FeaturedCard[]> {
         SUBJECT_LABELS[c.subject as Subject] ?? (c.subject as string) ?? "—";
       const teacher = teacherNameById.get(c.teacher_id as string) ?? "Enseignant";
       const price = c.price_xof as number;
+      const formatLabel = c.format === "one_on_one" ? "1-à-1" : "Groupe";
+      const recurrenceLabel = c.recurrence === "weekly" ? " · hebdo" : "";
       return {
         href: `/classes/${c.id}`,
         title: (c.title as string) ?? subjectLabel,
         subtitle: teacher,
         image: imageForSubject(c.subject as string | null, idx),
-        meta: `${c.duration_minutes} min · ${price ? `${price.toLocaleString("fr-FR")} FCFA` : "Gratuit"}`,
+        meta: `${formatLabel}${recurrenceLabel} · ${c.duration_minutes} min · ${price ? `${price.toLocaleString("fr-FR")} FCFA` : "Gratuit"}`,
         badge: subjectLabel,
       };
-    });
+    })
+    .slice(0, 4);
 
   // Pad with verified teachers if we have fewer than 4 live classes.
   if (cards.length < 4) {
