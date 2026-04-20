@@ -75,6 +75,8 @@ export default async function ParentOverviewPage() {
     "err=", enrErr?.message ?? "none",
   );
 
+  const debugLine = `user=${user.id.slice(0, 8)} children=${childIds.length} enrolls=${(enrollments ?? []).length} err=${enrErr?.message ?? "-"}`;
+
   // 3. Upcoming live sessions (next 7 days, enrolled classes only)
   const enrolledClassIds = (enrollments ?? [])
     .map((e) => e.live_class_id as string | null)
@@ -182,6 +184,10 @@ export default async function ParentOverviewPage() {
 
   return (
     <div className="space-y-8">
+      {/* TEMP DIAGNOSTIC */}
+      <div className="rounded-md bg-rose-50 px-3 py-2 font-mono text-[11px] text-rose-700">
+        DEBUG: {debugLine}
+      </div>
       {/* Greeting banner */}
       <div className="rounded-2xl bg-gradient-to-br from-[var(--ev-blue)] to-[var(--ev-blue-light)] p-6 text-white md:p-8">
         <h1 className="text-2xl font-bold md:text-3xl">
