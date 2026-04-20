@@ -27,16 +27,24 @@ type Conversation = {
 type ConversationListProps = {
   activeId: string | null;
   onSelect: (conversation: Conversation) => void;
+  learnerId?: string;
 };
 
-export function ConversationList({ activeId, onSelect }: ConversationListProps) {
+export function ConversationList({
+  activeId,
+  onSelect,
+  learnerId,
+}: ConversationListProps) {
   const t = useTranslations("messaging");
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchConversations = useCallback(async () => {
     try {
-      const res = await fetch("/api/conversations");
+      const url = learnerId
+        ? `/api/conversations?learnerId=${learnerId}`
+        : "/api/conversations";
+      const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
         setConversations(data);
@@ -44,7 +52,7 @@ export function ConversationList({ activeId, onSelect }: ConversationListProps) 
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [learnerId]);
 
   useEffect(() => {
     fetchConversations();

@@ -25,6 +25,7 @@ import {
   AlertOctagon,
   Cpu,
   TrendingUp,
+  Award,
 } from "lucide-react";
 
 type NavLink = {
@@ -63,6 +64,7 @@ const iconMap: Record<string, React.ElementType> = {
   "alert-octagon": AlertOctagon,
   cpu: Cpu,
   "trending-up": TrendingUp,
+  award: Award,
 };
 
 export function DashboardShell({

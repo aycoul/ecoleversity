@@ -6,7 +6,7 @@ const createConversationSchema = z.object({
   participantId: z.string().uuid(),
 });
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const supabase = await createServerSupabaseClient();
     const {
@@ -17,14 +17,19 @@ export async function GET() {
       return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
     }
 
-    // Fetch conversations where user is participant
-    const { data: conversations, error } = await supabase
+    // Kid mode passes ?learnerId=... so we only return conversations
+    // tagged with that learner. Parent mode omits it and sees every
+    // conversation they're a participant in.
+    const learnerId = new URL(request.url).searchParams.get("learnerId");
+
+    let query = supabase
       .from("conversations")
       .select(
         `
         id,
         participant_1,
         participant_2,
+        learner_id,
         updated_at,
         p1:profiles!conversations_participant_1_fkey(id, display_name, avatar_url, role),
         p2:profiles!conversations_participant_2_fkey(id, display_name, avatar_url, role)
@@ -32,6 +37,12 @@ export async function GET() {
       )
       .or(`participant_1.eq.${user.id},participant_2.eq.${user.id}`)
       .order("updated_at", { ascending: false });
+
+    if (learnerId) {
+      query = query.eq("learner_id", learnerId);
+    }
+
+    const { data: conversations, error } = await query;
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });

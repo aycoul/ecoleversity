@@ -26,7 +26,11 @@ type Conversation = {
   updatedAt: string;
 };
 
-export function Inbox() {
+type InboxProps = {
+  learnerId?: string;
+};
+
+export function Inbox({ learnerId }: InboxProps = {}) {
   const t = useTranslations("messaging");
   const searchParams = useSearchParams();
   const [active, setActive] = useState<Conversation | null>(null);
@@ -45,7 +49,10 @@ export function Inbox() {
     const convId = searchParams.get("conversationId");
     if (convId && !active) {
       // Fetch the conversation to populate the active state
-      fetch("/api/conversations")
+      const url = learnerId
+        ? `/api/conversations?learnerId=${learnerId}`
+        : "/api/conversations";
+      fetch(url)
         .then((res) => res.json())
         .then((conversations: Conversation[]) => {
           const found = conversations.find(
@@ -54,7 +61,7 @@ export function Inbox() {
           if (found) setActive(found);
         });
     }
-  }, [searchParams, active]);
+  }, [searchParams, active, learnerId]);
 
   function handleSelect(conv: Conversation) {
     setActive(conv);
@@ -78,7 +85,11 @@ export function Inbox() {
           </h2>
         </div>
         <div className="overflow-y-auto" style={{ height: "calc(100% - 53px)" }}>
-          <ConversationList activeId={active?.id ?? null} onSelect={handleSelect} />
+          <ConversationList
+            activeId={active?.id ?? null}
+            onSelect={handleSelect}
+            learnerId={learnerId}
+          />
         </div>
       </div>
 
