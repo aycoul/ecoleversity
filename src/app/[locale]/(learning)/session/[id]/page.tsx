@@ -37,7 +37,6 @@ export default async function SessionPage({
       status,
       subject,
       teacher_id,
-      recording_url,
       profiles!live_classes_teacher_id_fkey(display_name)
     `
     )
@@ -97,6 +96,16 @@ export default async function SessionPage({
     redirect("/dashboard");
   }
 
+  // Is there at least one completed recording for this class?
+  // We only surface the "Revoir l'enregistrement" CTA when true;
+  // the actual playable URL is minted on-demand by /api/recordings/:id/play.
+  const { count: completedRecordings } = await supabase
+    .from("session_recordings")
+    .select("id", { count: "exact", head: true })
+    .eq("live_class_id", id)
+    .eq("status", "completed");
+  const hasRecording = !!completedRecordings && completedRecordings > 0;
+
   const profiles = liveClass.profiles as unknown as
     | { display_name: string | null }[]
     | { display_name: string | null }
@@ -141,7 +150,7 @@ export default async function SessionPage({
           teacherName={teacherName}
           subjectLabel={subjectLabel}
           userRole={role === "teacher" ? "teacher" : "parent"}
-          recordingUrl={liveClass.recording_url}
+          hasRecording={hasRecording}
         />
       </div>
     </div>

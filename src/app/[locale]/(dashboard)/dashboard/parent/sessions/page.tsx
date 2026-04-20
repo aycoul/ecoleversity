@@ -4,7 +4,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { SUBJECT_LABELS, type Subject } from "@/types/domain";
 import { Link } from "@/i18n/routing";
-import { Calendar, Clock, User, Video } from "lucide-react";
+import { Calendar, Clock, User, Video, PlayCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -109,6 +109,62 @@ export default async function ParentSessionsPage() {
 
   const now = Date.now();
 
+  // Past sessions with a completed recording — separate section below
+  // the upcoming list. Joined via session_recordings so we only surface
+  // classes that actually have something playable.
+  const { data: recRows } =
+    classIds.length > 0
+      ? await admin
+          .from("session_recordings")
+          .select("id, live_class_id, duration_seconds, ended_at")
+          .in("live_class_id", classIds)
+          .eq("status", "completed")
+          .order("ended_at", { ascending: false })
+          .limit(30)
+      : { data: [] };
+
+  const pastClassIds = Array.from(
+    new Set((recRows ?? []).map((r) => r.live_class_id as string))
+  );
+  const { data: pastClassRows } =
+    pastClassIds.length > 0
+      ? await admin
+          .from("live_classes")
+          .select("id, title, subject, teacher_id, scheduled_at, duration_minutes")
+          .in("id", pastClassIds)
+      : { data: [] };
+  const pastClassById = new Map(
+    (pastClassRows ?? []).map((c) => [c.id as string, c])
+  );
+
+  // Collect any teacher IDs we haven't already resolved
+  for (const c of pastClassRows ?? []) {
+    const tid = c.teacher_id as string;
+    if (!teacherName.has(tid)) teacherName.set(tid, "—");
+  }
+  const missingTeacherIds = (pastClassRows ?? [])
+    .map((c) => c.teacher_id as string)
+    .filter((tid) => teacherName.get(tid) === "—");
+  if (missingTeacherIds.length > 0) {
+    const { data: extraTeachers } = await admin
+      .from("profiles")
+      .select("id, display_name")
+      .in("id", missingTeacherIds);
+    for (const p of extraTeachers ?? []) {
+      teacherName.set(
+        p.id as string,
+        (p.display_name as string | null) ?? "—"
+      );
+    }
+  }
+
+  const formatDuration = (seconds: number | null): string => {
+    if (!seconds || seconds <= 0) return "—";
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m} min ${s.toString().padStart(2, "0")}s`;
+  };
+
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-slate-900">{t("upcoming")}</h1>
@@ -184,6 +240,68 @@ export default async function ParentSessionsPage() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {recRows && recRows.length > 0 && (
+        <div className="space-y-4 pt-6">
+          <h2 className="text-lg font-semibold text-slate-900">
+            Séances passées
+          </h2>
+          <div className="space-y-3">
+            {recRows.map((rec) => {
+              const cls = pastClassById.get(rec.live_class_id as string);
+              if (!cls) return null;
+              const scheduledAt = new Date(cls.scheduled_at as string);
+              const subjectLabel =
+                SUBJECT_LABELS[cls.subject as Subject] ??
+                cls.subject ??
+                "—";
+              const teacher =
+                teacherName.get(cls.teacher_id as string) ?? "—";
+              return (
+                <div
+                  key={rec.id as number}
+                  className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+                >
+                  <div className="space-y-1.5">
+                    <div className="text-sm font-semibold text-slate-900">
+                      {(cls.title as string) ?? subjectLabel}
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                      <User className="size-3" />
+                      {t("sessionWith", { teacher })}
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                      <Calendar className="size-3" />
+                      {scheduledAt.toLocaleDateString("fr-FR", {
+                        weekday: "short",
+                        day: "numeric",
+                        month: "short",
+                        timeZone: "Africa/Abidjan",
+                      })}
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                      <Clock className="size-3" />
+                      {formatDuration(rec.duration_seconds as number | null)}
+                      {" · "}
+                      {subjectLabel}
+                    </div>
+                  </div>
+
+                  <a
+                    href={`/api/recordings/${cls.id}/play?recordingId=${rec.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 rounded-lg bg-[var(--ev-blue)] px-4 py-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[var(--ev-blue-light)]"
+                  >
+                    <PlayCircle className="size-3" />
+                    Revoir
+                  </a>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>

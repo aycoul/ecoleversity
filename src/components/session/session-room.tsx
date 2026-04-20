@@ -25,7 +25,7 @@ type SessionRoomProps = {
   teacherName: string;
   subjectLabel: string;
   userRole: "parent" | "teacher";
-  recordingUrl?: string | null;
+  hasRecording?: boolean;
 };
 
 function computeState(
@@ -50,7 +50,7 @@ export function SessionRoom({
   teacherName,
   subjectLabel,
   userRole,
-  recordingUrl,
+  hasRecording,
 }: SessionRoomProps) {
   const t = useTranslations("session");
   const scheduledDate = new Date(scheduledAt);
@@ -288,9 +288,9 @@ export function SessionRoom({
           <p className="mt-1 text-sm text-slate-500">{t("endedMessage")}</p>
         </div>
 
-        {recordingUrl && (
+        {hasRecording && (
           <a
-            href={recordingUrl}
+            href={`/api/recordings/${sessionId}/play`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex w-full items-center justify-center gap-2 rounded-lg border border-[var(--ev-blue)]/20 bg-[var(--ev-blue-50)] px-6 py-3 text-sm font-semibold text-[var(--ev-blue)] transition-colors hover:bg-[var(--ev-blue)]/10"
