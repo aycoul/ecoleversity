@@ -99,16 +99,21 @@ export function SessionRoom({
     setShowRoom(false);
   };
 
+  // Display session time in Abidjan (GMT+0) regardless of viewer's
+  // browser TZ. A diaspora parent and a teacher in Abidjan must see the
+  // same clock time for the same booking.
   const formattedDate = scheduledDate.toLocaleDateString("fr-FR", {
     weekday: "long",
     day: "numeric",
     month: "long",
     year: "numeric",
+    timeZone: "Africa/Abidjan",
   });
 
   const formattedTime = scheduledDate.toLocaleTimeString("fr-FR", {
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "Africa/Abidjan",
   });
 
   const formatElapsed = (seconds: number): string => {

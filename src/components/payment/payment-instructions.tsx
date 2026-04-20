@@ -27,15 +27,22 @@ type PaymentInstructionsProps = {
 const EXPIRY_HOURS = 2;
 const POLL_INTERVAL_MS = 15_000;
 
+// Sessions are scheduled + displayed in Abidjan time (GMT+0, no DST).
+// Pin the timeZone so a diaspora parent viewing on a Paris or NYC device
+// still sees the same session time the teacher would see.
+const CI_TZ = "Africa/Abidjan";
+
 function formatDateTime(isoString: string): string {
   const d = new Date(isoString);
   return d.toLocaleDateString("fr-CI", {
     weekday: "long",
     day: "numeric",
     month: "long",
+    timeZone: CI_TZ,
   }) + ", " + d.toLocaleTimeString("fr-CI", {
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: CI_TZ,
   });
 }
 
@@ -45,6 +52,7 @@ function formatEndTime(isoString: string, durationMinutes: number): string {
   return end.toLocaleTimeString("fr-CI", {
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: CI_TZ,
   });
 }
 
