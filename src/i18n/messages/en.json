@@ -386,6 +386,7 @@
     "join": "Join session",
     "joinExternal": "Open session",
     "live": "Live session",
+    "liveNow": "The session is live — join when you're ready.",
     "elapsed": "Elapsed time",
     "ended": "Session ended",
     "endedMessage": "Thank you for participating!",

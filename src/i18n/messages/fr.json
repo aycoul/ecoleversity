@@ -386,6 +386,7 @@
     "join": "Rejoindre le cours",
     "joinExternal": "Ouvrir le cours",
     "live": "Cours en direct",
+    "liveNow": "Le cours est en cours — rejoignez quand vous êtes prêt.",
     "elapsed": "Temps écoulé",
     "ended": "Cours terminé",
     "endedMessage": "Merci d'avoir participé !",

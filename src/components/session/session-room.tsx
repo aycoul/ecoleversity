@@ -205,7 +205,42 @@ export function SessionRoom({
     );
   }
 
-  // LIVE state (or READY with Jitsi open)
+  // LIVE state — user just arrived, hasn't hit Join yet. Show info +
+  // big green Rejoindre button. This covers the "I landed on the
+  // session page before/during the class and want to enter" flow.
+  if (state === "LIVE" && !showRoom) {
+    return (
+      <div className="mx-auto max-w-lg space-y-6">
+        {sessionInfoCard}
+
+        <div className="rounded-xl border border-rose-200 bg-rose-50 p-6 text-center">
+          <div className="mb-2 inline-flex items-center gap-2 text-sm font-semibold text-rose-700">
+            <span className="relative flex size-2.5">
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-rose-400 opacity-75" />
+              <span className="relative inline-flex size-2.5 rounded-full bg-rose-500" />
+            </span>
+            {t("live")}
+          </div>
+          <p className="text-sm text-rose-900/80">{t("liveNow")}</p>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleJoinClick}
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--ev-blue)] px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[var(--ev-blue-light)]"
+        >
+          <Video className="size-4" />
+          {t("join")}
+        </button>
+
+        <p className="text-center text-xs text-slate-400">
+          {t("prepareTips")}
+        </p>
+      </div>
+    );
+  }
+
+  // LIVE / READY state with the LiveKit embed open
   if ((state === "LIVE" || state === "READY") && showRoom) {
     return (
       <div className="space-y-4">
