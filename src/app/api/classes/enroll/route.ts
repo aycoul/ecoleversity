@@ -88,7 +88,12 @@ export async function POST(request: NextRequest) {
     if (enrollRpcError) {
       console.error("Enrollment RPC error:", enrollRpcError);
       return NextResponse.json(
-        { error: "Erreur lors de l'inscription" },
+        {
+          error: "Erreur lors de l'inscription",
+          hint: enrollRpcError.message,
+          code: enrollRpcError.code,
+          details: enrollRpcError.details,
+        },
         { status: 500 }
       );
     }
