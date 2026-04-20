@@ -83,10 +83,12 @@ export default async function ClassDetailPage({
     day: "numeric",
     month: "long",
     year: "numeric",
+    timeZone: "Africa/Abidjan",
   });
   const timeStr = date.toLocaleTimeString("fr-CI", {
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "Africa/Abidjan",
   });
 
   return (

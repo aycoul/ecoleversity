@@ -6,10 +6,18 @@ import { AvailabilityDisplay } from "@/components/teacher/availability-display";
 import { SUBJECT_LABELS, GRADE_LEVEL_LABELS } from "@/types/domain";
 import type { Subject, GradeLevel } from "@/types/domain";
 import { Badge } from "@/components/ui/badge";
-import { Star, BookOpen, GraduationCap, MessageSquare } from "lucide-react";
+import {
+  Star,
+  BookOpen,
+  GraduationCap,
+  MessageSquare,
+  Video,
+} from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { buttonVariants } from "@/components/ui/button";
 import { SendMessageButton } from "@/components/messaging/send-message-button";
+import { loadGroupClasses } from "@/lib/marketplace/group-classes-data";
+import { GroupClassListCard } from "@/components/marketplace/group-class-card";
 
 export default async function TeacherProfilePage({
   params,
@@ -52,6 +60,9 @@ export default async function TeacherProfilePage({
     .eq("is_active", true)
     .order("day_of_week")
     .order("start_time");
+
+  // Fetch upcoming group classes this teacher has published
+  const groupClasses = await loadGroupClasses({ teacherId: id, limit: 12 });
 
   // Fetch recent reviews
   const { data: reviews } = await supabase
@@ -162,6 +173,21 @@ export default async function TeacherProfilePage({
           </div>
         )}
       </div>
+
+      {/* Upcoming group classes */}
+      {groupClasses.length > 0 && (
+        <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-700">
+            <Video className="size-4" />
+            Prochains cours de groupe
+          </h2>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {groupClasses.map((c) => (
+              <GroupClassListCard key={c.id} card={c} compact />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Availability */}
       <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">

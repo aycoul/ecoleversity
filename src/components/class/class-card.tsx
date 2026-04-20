@@ -24,15 +24,20 @@ export type ClassCardData = {
 export function ClassCard({ cls }: { cls: ClassCardData }) {
   const t = useTranslations("groupClass");
 
+  // Pin to Abidjan (GMT+0) so all parents + teachers see the same clock time,
+  // regardless of browser TZ (diaspora users in Paris/NYC would otherwise
+  // see times shifted by hours from the actual class schedule).
   const date = new Date(cls.scheduled_at);
   const dateStr = date.toLocaleDateString("fr-CI", {
     weekday: "short",
     day: "numeric",
     month: "short",
+    timeZone: "Africa/Abidjan",
   });
   const timeStr = date.toLocaleTimeString("fr-CI", {
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "Africa/Abidjan",
   });
 
   const spotsRemaining = cls.max_students - cls.enrolled_count;
