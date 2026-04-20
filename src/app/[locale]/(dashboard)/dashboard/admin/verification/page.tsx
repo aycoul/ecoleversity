@@ -37,12 +37,20 @@ export default async function VerificationPage() {
   // only fully_verified rows. Admins need to see every status.
   const adminSupabase = createAdminClient();
 
+  // Show every teacher whose docs are still in flight — the 4 intermediate
+  // enum values. Excluded: fully_verified (done), rejected (already refused),
+  // banned (strike_3 removed them post-verification).
   const { data: teacherRows } = await adminSupabase
     .from("teacher_profiles")
     .select(
       "id, verification_status, subjects, grade_levels, id_document_url, diploma_url, video_intro_url, created_at, rejection_reason"
     )
-    .not("verification_status", "in", '("fully_verified","rejected","banned")')
+    .in("verification_status", [
+      "pending",
+      "id_submitted",
+      "diploma_submitted",
+      "video_submitted",
+    ])
     .order("created_at", { ascending: true });
 
   const teachers = teacherRows ?? [];
