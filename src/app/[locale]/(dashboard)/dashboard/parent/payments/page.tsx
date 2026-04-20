@@ -1,14 +1,18 @@
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { Receipt } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+
+export const dynamic = "force-dynamic";
 
 function formatDate(isoString: string): string {
   return new Date(isoString).toLocaleDateString("fr-CI", {
     day: "numeric",
     month: "short",
     year: "numeric",
+    timeZone: "Africa/Abidjan",
   });
 }
 
@@ -41,8 +45,9 @@ export default async function ParentPaymentsPage() {
     redirect("/dashboard");
   }
 
-  // Fetch parent's transactions
-  const { data: transactions } = await supabase
+  // Admin client for RLS-safe reads; parent_id filter scopes to the caller.
+  const admin = createAdminClient();
+  const { data: transactions } = await admin
     .from("transactions")
     .select(
       "id, amount_xof, status, payment_reference, created_at, teacher_id"
@@ -50,21 +55,28 @@ export default async function ParentPaymentsPage() {
     .eq("parent_id", user.id)
     .order("created_at", { ascending: false });
 
-  // Enrich with teacher names
-  const enriched = await Promise.all(
-    (transactions ?? []).map(async (tx) => {
-      const { data: teacherProfile } = await supabase
-        .from("profiles")
-        .select("display_name")
-        .eq("id", tx.teacher_id)
-        .single();
-
-      return {
-        ...tx,
-        teacherName: teacherProfile?.display_name ?? "—",
-      };
-    })
+  // Batch teacher display names (no N+1)
+  const teacherIds = Array.from(
+    new Set((transactions ?? []).map((tx) => tx.teacher_id as string))
   );
+  const { data: teacherRows } =
+    teacherIds.length > 0
+      ? await admin
+          .from("profiles")
+          .select("id, display_name")
+          .in("id", teacherIds)
+      : { data: [] };
+  const nameById = new Map(
+    (teacherRows ?? []).map((p) => [
+      p.id as string,
+      (p.display_name as string | null) ?? "—",
+    ])
+  );
+
+  const enriched = (transactions ?? []).map((tx) => ({
+    ...tx,
+    teacherName: nameById.get(tx.teacher_id as string) ?? "—",
+  }));
 
   const statusLabel = (status: string): string => {
     const key = `status${status.charAt(0).toUpperCase()}${status.slice(1)}` as
