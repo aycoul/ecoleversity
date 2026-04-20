@@ -56,7 +56,10 @@ export default async function KidHomePage({ params }: PageProps) {
     .map((e) => e.live_class_id as string | null)
     .filter((id): id is string => !!id);
 
-  const { data: liveClasses } =
+  const earliestWindow = new Date(
+    Date.now() - 8 * 60 * 60 * 1000
+  ).toISOString();
+  const { data: liveClassesRaw } =
     enrolledClassIds.length > 0
       ? await admin
           .from("live_classes")
@@ -65,10 +68,16 @@ export default async function KidHomePage({ params }: PageProps) {
           )
           .in("id", enrolledClassIds)
           .in("status", ["scheduled"])
-          .gte("scheduled_at", new Date().toISOString())
+          .gte("scheduled_at", earliestWindow)
           .order("scheduled_at", { ascending: true })
           .limit(5)
       : { data: [] };
+  const nowMs = Date.now();
+  const liveClasses = (liveClassesRaw ?? []).filter((c) => {
+    const start = new Date(c.scheduled_at as string).getTime();
+    const end = start + (c.duration_minutes as number) * 60 * 1000;
+    return end > nowMs;
+  });
 
   const teacherIds = Array.from(
     new Set((liveClasses ?? []).map((c) => c.teacher_id as string))

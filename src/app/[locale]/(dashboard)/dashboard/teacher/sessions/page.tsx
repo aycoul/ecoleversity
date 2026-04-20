@@ -25,14 +25,26 @@ export default async function TeacherSessionsPage() {
   // enforced by the .eq("teacher_id", user.id) filter below.
   const adminSupabase = createAdminClient();
 
-  const { data: sessions } = await adminSupabase
+  // Upcoming + in-progress only — a class that started up to 8h ago
+  // but whose duration still covers "now" must still show a Rejoindre.
+  const earliestWindow = new Date(
+    Date.now() - 8 * 60 * 60 * 1000
+  ).toISOString();
+  const { data: sessionsRaw } = await adminSupabase
     .from("live_classes")
     .select(
       "id, scheduled_at, duration_minutes, status, subject, title"
     )
     .eq("teacher_id", user.id)
     .in("status", ["scheduled", "live"])
+    .gte("scheduled_at", earliestWindow)
     .order("scheduled_at", { ascending: true });
+  const nowMs = Date.now();
+  const sessions = (sessionsRaw ?? []).filter((s) => {
+    const start = new Date(s.scheduled_at as string).getTime();
+    const end = start + (s.duration_minutes as number) * 60 * 1000;
+    return end > nowMs;
+  });
 
   const sessionIds = (sessions ?? []).map((s) => s.id as string);
   const { data: enrollmentRows } =

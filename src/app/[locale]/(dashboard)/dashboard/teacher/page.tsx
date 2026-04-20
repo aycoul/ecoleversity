@@ -61,18 +61,27 @@ export default async function TeacherDashboardPage() {
 
   const admin = createAdminClient();
 
-  // Upcoming scheduled sessions for this teacher (next 10)
-  const nowIso = new Date().toISOString();
-  const { data: sessions } = await admin
+  // Upcoming + in-progress sessions. scheduled_at up to 8h in the past
+  // still counts if end time is still in the future; JS filter narrows.
+  const earliestWindow = new Date(
+    Date.now() - 8 * 60 * 60 * 1000
+  ).toISOString();
+  const { data: sessionsRaw } = await admin
     .from("live_classes")
     .select(
       "id, title, subject, scheduled_at, duration_minutes, status, format"
     )
     .eq("teacher_id", user.id)
     .in("status", ["scheduled", "live"])
-    .gte("scheduled_at", nowIso)
+    .gte("scheduled_at", earliestWindow)
     .order("scheduled_at", { ascending: true })
     .limit(10);
+  const nowMs = Date.now();
+  const sessions = (sessionsRaw ?? []).filter((s) => {
+    const start = new Date(s.scheduled_at as string).getTime();
+    const end = start + (s.duration_minutes as number) * 60 * 1000;
+    return end > nowMs;
+  });
 
   const sessionIds = (sessions ?? []).map((s) => s.id as string);
 

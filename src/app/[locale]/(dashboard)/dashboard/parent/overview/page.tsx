@@ -66,11 +66,17 @@ export default async function ParentOverviewPage() {
           .in("learner_id", childIds)
       : { data: [] };
 
-  // 3. Upcoming live sessions (next 7 days, enrolled classes only)
+  // 3. Upcoming + currently-in-progress sessions.
+  // gte(scheduled_at, now-8h) lets us catch a class that started in the
+  // past but is still within its duration window; JS filter below drops
+  // classes whose end time has already passed.
   const enrolledClassIds = (enrollments ?? [])
     .map((e) => e.live_class_id as string | null)
     .filter((id): id is string => !!id);
-  const { data: liveClasses } =
+  const earliestWindow = new Date(
+    Date.now() - 8 * 60 * 60 * 1000
+  ).toISOString();
+  const { data: liveClassesRaw } =
     enrolledClassIds.length > 0
       ? await adminRead
           .from("live_classes")
@@ -79,10 +85,16 @@ export default async function ParentOverviewPage() {
           )
           .in("id", enrolledClassIds)
           .in("status", ["scheduled"])
-          .gte("scheduled_at", new Date().toISOString())
+          .gte("scheduled_at", earliestWindow)
           .order("scheduled_at", { ascending: true })
           .limit(10)
       : { data: [] };
+  const nowMs = Date.now();
+  const liveClasses = (liveClassesRaw ?? []).filter((c) => {
+    const start = new Date(c.scheduled_at as string).getTime();
+    const end = start + (c.duration_minutes as number) * 60 * 1000;
+    return end > nowMs;
+  });
 
   // Teachers for sessions
   const teacherIds = Array.from(

@@ -50,8 +50,13 @@ export default async function ParentSessionsPage() {
     )
   );
 
-  const nowIso = new Date().toISOString();
-  const { data: sessions } =
+  // Fetch classes scheduled any time in the past 8 hours forward —
+  // we need to show a session that's currently in progress (scheduled_at
+  // is in the past, but end time is in the future). JS filter below
+  // narrows to "upcoming OR in-progress" so past-and-done classes are
+  // hidden without excluding an active session.
+  const earliestWindow = new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString();
+  const { data: sessionsRaw } =
     classIds.length > 0
       ? await admin
           .from("live_classes")
@@ -60,9 +65,16 @@ export default async function ParentSessionsPage() {
           )
           .in("id", classIds)
           .eq("status", "scheduled")
-          .gte("scheduled_at", nowIso)
+          .gte("scheduled_at", earliestWindow)
           .order("scheduled_at", { ascending: true })
       : { data: [] };
+
+  const nowMs = Date.now();
+  const sessions = (sessionsRaw ?? []).filter((s) => {
+    const start = new Date(s.scheduled_at as string).getTime();
+    const end = start + (s.duration_minutes as number) * 60 * 1000;
+    return end > nowMs;
+  });
 
   // Batch teacher display names
   const teacherIds = Array.from(
