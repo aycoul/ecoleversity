@@ -63,9 +63,16 @@ export default async function VerificationPage() {
     teacherRows?.length ?? "null",
     "err:",
     queryError?.message ?? "none",
+    "code:",
+    queryError?.code,
+    "details:",
+    queryError?.details,
+    "hint:",
+    queryError?.hint,
   );
 
   const teachers = teacherRows ?? [];
+  const debugLine = `rows=${teacherRows?.length ?? "null"} err=${queryError?.message ?? "none"} code=${queryError?.code ?? "-"} details=${queryError?.details ?? "-"} hint=${queryError?.hint ?? "-"}`;
 
   // Batch profile lookup (name, city, avatar)
   const ids = teachers.map((t) => t.id as string);
@@ -100,6 +107,11 @@ export default async function VerificationPage() {
           <p className="mt-1 text-xs text-slate-400">
             Les nouveaux dossiers enseignants apparaîtront ici automatiquement.
           </p>
+          {queryError && (
+            <p className="mt-2 font-mono text-[10px] text-rose-500">
+              DEBUG: {debugLine}
+            </p>
+          )}
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
