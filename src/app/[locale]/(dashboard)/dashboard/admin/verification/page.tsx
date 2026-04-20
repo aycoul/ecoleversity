@@ -45,7 +45,7 @@ export default async function VerificationPage() {
   // Show every teacher whose docs are still in flight — the 4 intermediate
   // enum values. Excluded: fully_verified (done), rejected (already refused),
   // banned (strike_3 removed them post-verification).
-  const { data: teacherRows } = await adminSupabase
+  const { data: teacherRows, error: queryError } = await adminSupabase
     .from("teacher_profiles")
     .select(
       "id, verification_status, subjects, grade_levels, id_document_url, diploma_url, video_intro_url, created_at, rejection_reason"
@@ -57,6 +57,13 @@ export default async function VerificationPage() {
       "video_submitted",
     ])
     .order("created_at", { ascending: true });
+
+  console.log(
+    "[verification] rows:",
+    teacherRows?.length ?? "null",
+    "err:",
+    queryError?.message ?? "none",
+  );
 
   const teachers = teacherRows ?? [];
 
