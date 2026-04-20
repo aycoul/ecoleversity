@@ -18,13 +18,132 @@ import {
   Clock,
   PlayCircle,
   PenTool,
-  Star,
   X,
 } from "lucide-react";
 import { AnimateOnScroll } from "@/components/common/animate-on-scroll";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { SUBJECT_LABELS, type Subject } from "@/types/domain";
+
+export const dynamic = "force-dynamic";
+
+type FeaturedCard = {
+  href: string;
+  title: string;
+  subtitle: string;
+  image: string;
+  meta: string;
+  badge?: string;
+};
+
+/**
+ * Build up to 4 real "featured" cards for the home page.
+ * Priority:
+ *   1. Upcoming / in-progress group classes (teacher + subject + time)
+ *   2. Fill remaining slots with verified teachers so the section never
+ *      feels empty — bouncing visitors from the marketing page is the
+ *      worst outcome.
+ */
+async function loadFeaturedCards(): Promise<FeaturedCard[]> {
+  const admin = createAdminClient();
+
+  const earliestWindow = new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString();
+  const { data: classRows } = await admin
+    .from("live_classes")
+    .select(
+      "id, title, subject, scheduled_at, duration_minutes, max_students, price_xof, teacher_id"
+    )
+    .eq("format", "group")
+    .eq("status", "scheduled")
+    .gte("scheduled_at", earliestWindow)
+    .order("scheduled_at", { ascending: true })
+    .limit(4);
+
+  const classTeacherIds = [
+    ...new Set((classRows ?? []).map((c) => c.teacher_id as string)),
+  ];
+  const { data: classTeacherRows } =
+    classTeacherIds.length > 0
+      ? await admin
+          .from("profiles")
+          .select("id, display_name, avatar_url")
+          .in("id", classTeacherIds)
+      : { data: [] };
+  const teacherNameById = new Map(
+    (classTeacherRows ?? []).map((t) => [
+      t.id as string,
+      (t.display_name as string | null) ?? "Enseignant vérifié",
+    ])
+  );
+
+  const nowMs = Date.now();
+  const cards: FeaturedCard[] = (classRows ?? [])
+    .filter((c) => {
+      const start = new Date(c.scheduled_at as string).getTime();
+      const end = start + (c.duration_minutes as number) * 60 * 1000;
+      return end > nowMs;
+    })
+    .map((c) => {
+      const subjectLabel =
+        SUBJECT_LABELS[c.subject as Subject] ?? (c.subject as string) ?? "—";
+      const teacher = teacherNameById.get(c.teacher_id as string) ?? "Enseignant";
+      const price = c.price_xof as number;
+      return {
+        href: `/classes/${c.id}`,
+        title: (c.title as string) ?? subjectLabel,
+        subtitle: teacher,
+        image: "/illustrations/featured-maths.webp",
+        meta: `${c.duration_minutes} min · ${price ? `${price.toLocaleString("fr-FR")} FCFA` : "Gratuit"}`,
+        badge: subjectLabel,
+      };
+    });
+
+  // Pad with verified teachers if we have fewer than 4 live classes
+  if (cards.length < 4) {
+    const { data: teacherRows } = await admin
+      .from("teacher_profiles")
+      .select("id, hourly_rate_xof, subjects, verification_status")
+      .eq("verification_status", "approved")
+      .limit(8);
+
+    const teacherIds = (teacherRows ?? []).map((t) => t.id as string);
+    const { data: profileRows } =
+      teacherIds.length > 0
+        ? await admin
+            .from("profiles")
+            .select("id, display_name, avatar_url, city")
+            .in("id", teacherIds)
+        : { data: [] };
+    const profileById = new Map(
+      (profileRows ?? []).map((p) => [p.id as string, p])
+    );
+
+    for (const tr of teacherRows ?? []) {
+      if (cards.length >= 4) break;
+      const prof = profileById.get(tr.id as string);
+      if (!prof) continue;
+      const subjects = (tr.subjects as string[] | null) ?? [];
+      const firstSubject = subjects[0];
+      const subjectLabel = firstSubject
+        ? SUBJECT_LABELS[firstSubject as Subject] ?? firstSubject
+        : "Plusieurs matières";
+      const rate = tr.hourly_rate_xof as number | null;
+      cards.push({
+        href: `/teachers/${tr.id}`,
+        title: (prof.display_name as string | null) ?? "Enseignant vérifié",
+        subtitle: (prof.city as string | null) ?? "Côte d'Ivoire",
+        image: "/illustrations/featured-french.webp",
+        meta: rate ? `${rate.toLocaleString("fr-FR")} FCFA / h` : "Tarif sur demande",
+        badge: subjectLabel,
+      });
+    }
+  }
+
+  return cards;
+}
 
 export default async function Home() {
   const t = await getTranslations("landing");
+  const featuredCards = await loadFeaturedCards();
 
   const steps = [
     { icon: Search, titleKey: "step1Title" as const, descKey: "step1Desc" as const, num: "01" },
@@ -46,14 +165,6 @@ export default async function Home() {
     { icon: Clock, titleKey: "onDemand" as const, descKey: "onDemandDesc" as const, src: "/illustrations/on-demand.webp" },
     { icon: PlayCircle, titleKey: "courses" as const, descKey: "coursesDesc" as const, src: "/illustrations/courses.webp" },
     { icon: PenTool, titleKey: "homeworkHelp" as const, descKey: "homeworkHelpDesc" as const, src: "/illustrations/homework-help.webp" },
-  ];
-
-  // Featured classes (placeholder data — will come from DB later)
-  const featuredClasses = [
-    { title: "Maths — Préparation BEPC", teacher: "M. Diallo Moussa", rating: 4.9, reviews: 47, age: "13-16", duration: "60 min", image: "/illustrations/featured-maths.webp" },
-    { title: "Français — Rédaction CE2-CM2", teacher: "Mme Koné Aminata", rating: 4.8, reviews: 32, age: "8-12", duration: "45 min", image: "/illustrations/featured-french.webp" },
-    { title: "Anglais — Conversation Lycée", teacher: "M. N'Guessan Paul", rating: 5.0, reviews: 18, age: "15-18", duration: "30 min", image: "/illustrations/featured-english.webp" },
-    { title: "Sciences — SVT Terminale D", teacher: "Mme Touré Fatou", rating: 4.7, reviews: 56, age: "16-18", duration: "60 min", image: "/illustrations/featured-science.webp" },
   ];
 
   return (
@@ -180,37 +291,56 @@ export default async function Home() {
             </div>
           </AnimateOnScroll>
 
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {featuredClasses.map((cls, i) => (
-              <AnimateOnScroll key={i} delay={i * 80}>
-                <Link href="/classes" className="group block overflow-hidden rounded-2xl border border-slate-100 bg-white transition-all hover:shadow-lg hover:shadow-[var(--ev-blue)]/5">
-                  <div className="aspect-[4/3] overflow-hidden">
-                    <Image
-                      src={cls.image}
-                      alt=""
-                      width={300}
-                      height={225}
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  </div>
-                  <div className="p-4">
-                    <h3 className="text-sm font-bold text-slate-900 line-clamp-2">{cls.title}</h3>
-                    <p className="mt-1 text-xs text-slate-500">{cls.teacher}</p>
-                    <div className="mt-2 flex items-center gap-1">
-                      <Star className="size-3.5 fill-[var(--ev-amber)] text-[var(--ev-amber)]" />
-                      <span className="text-xs font-semibold text-slate-800">{cls.rating}</span>
-                      <span className="text-xs text-slate-400">({cls.reviews})</span>
+          {featuredCards.length > 0 ? (
+            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {featuredCards.map((card, i) => (
+                <AnimateOnScroll key={i} delay={i * 80}>
+                  <Link
+                    href={card.href}
+                    className="group block overflow-hidden rounded-2xl border border-slate-100 bg-white transition-all hover:shadow-lg hover:shadow-[var(--ev-blue)]/5"
+                  >
+                    <div className="relative aspect-[4/3] overflow-hidden">
+                      <Image
+                        src={card.image}
+                        alt=""
+                        width={300}
+                        height={225}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      {card.badge && (
+                        <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold text-[var(--ev-blue)] shadow-sm">
+                          {card.badge}
+                        </span>
+                      )}
                     </div>
-                    <div className="mt-2 flex items-center gap-3 text-xs text-slate-500">
-                      <span>{cls.age} ans</span>
-                      <span>·</span>
-                      <span>{cls.duration}</span>
+                    <div className="p-4">
+                      <h3 className="text-sm font-bold text-slate-900 line-clamp-2">
+                        {card.title}
+                      </h3>
+                      <p className="mt-1 text-xs text-slate-500">{card.subtitle}</p>
+                      <div className="mt-2 flex items-center gap-3 text-xs text-slate-500">
+                        <span>{card.meta}</span>
+                      </div>
                     </div>
-                  </div>
+                  </Link>
+                </AnimateOnScroll>
+              ))}
+            </div>
+          ) : (
+            <AnimateOnScroll>
+              <div className="mt-8 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-10 text-center">
+                <p className="text-sm text-slate-600">
+                  De nouveaux cours sont ajoutés chaque semaine.
+                </p>
+                <Link
+                  href="/teachers"
+                  className="mt-4 inline-flex items-center gap-1 rounded-full bg-[var(--ev-blue)] px-5 py-2 text-sm font-semibold text-white hover:bg-[var(--ev-blue-light)]"
+                >
+                  Parcourir les enseignants <ArrowRight className="size-4" />
                 </Link>
-              </AnimateOnScroll>
-            ))}
-          </div>
+              </div>
+            </AnimateOnScroll>
+          )}
 
           <div className="mt-8 text-center sm:hidden">
             <Link
