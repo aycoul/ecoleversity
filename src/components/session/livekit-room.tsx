@@ -122,9 +122,14 @@ export function LiveKitRoomEmbed({
   }
 
   return (
+    // Fill most of the viewport below the back-bar + give the chat panel
+    // room to slide in on the right. overflow-hidden was clipping chat
+    // when the user opened it — 720px min-height is tall enough for chat
+    // stacked below video on narrow screens, and the flex layout lets
+    // LiveKit's grid + side panel share horizontal space on wider ones.
     <div
-      className="relative overflow-hidden rounded-xl border border-slate-200"
-      style={{ height: "600px" }}
+      className="relative rounded-xl border border-slate-200"
+      style={{ height: "min(80vh, 720px)", minHeight: "480px" }}
       data-lk-theme="default"
     >
       <LiveKitRoom
