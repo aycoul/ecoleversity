@@ -1,8 +1,12 @@
 import { redirect, notFound } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getTranslations } from "next-intl/server";
 import { SUBJECT_LABELS, type Subject } from "@/types/domain";
 import { SessionRoom } from "@/components/session/session-room";
+
+export const dynamic = "force-dynamic";
 
 export default async function SessionPage({
   params,
@@ -103,17 +107,43 @@ export default async function SessionPage({
   const subjectLabel =
     SUBJECT_LABELS[liveClass.subject as Subject] ?? liveClass.subject ?? "—";
 
+  // Back-to-dashboard depends on role so the user lands where they started.
+  const backHref =
+    role === "teacher"
+      ? "/dashboard/teacher"
+      : role === "admin"
+        ? "/dashboard/admin"
+        : "/dashboard/parent/overview";
+
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
-      <SessionRoom
-        sessionId={liveClass.id}
-        scheduledAt={liveClass.scheduled_at}
-        durationMinutes={liveClass.duration_minutes}
-        teacherName={teacherName}
-        subjectLabel={subjectLabel}
-        userRole={role === "teacher" ? "teacher" : "parent"}
-        recordingUrl={liveClass.recording_url}
-      />
+    <div>
+      {/* Back bar — gives the user an obvious way out of the video room */}
+      <div className="sticky top-0 z-10 border-b border-slate-200 bg-white/90 backdrop-blur">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
+          <Link
+            href={backHref}
+            className="inline-flex items-center gap-2 rounded-md px-2 py-1 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+          >
+            <ArrowLeft className="size-4" />
+            Retour au tableau de bord
+          </Link>
+          <div className="hidden text-xs text-slate-500 sm:block">
+            {subjectLabel} · {teacherName}
+          </div>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-3xl px-4 py-8">
+        <SessionRoom
+          sessionId={liveClass.id}
+          scheduledAt={liveClass.scheduled_at}
+          durationMinutes={liveClass.duration_minutes}
+          teacherName={teacherName}
+          subjectLabel={subjectLabel}
+          userRole={role === "teacher" ? "teacher" : "parent"}
+          recordingUrl={liveClass.recording_url}
+        />
+      </div>
     </div>
   );
 }

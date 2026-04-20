@@ -2,6 +2,9 @@ import { redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+
+export const dynamic = "force-dynamic";
 import {
   UpcomingSessionList,
   type UpcomingSession,
@@ -38,22 +41,24 @@ export default async function KidHomePage({ params }: PageProps) {
 
   if (!learner) redirect("/dashboard/parent/overview");
 
-  // Enrollments for this learner
-  const { data: enrollments } = await supabase
+  // Parent ownership of learner was verified above via the maybeSingle()
+  // with parent_id=user.id. Switch to admin client for downstream reads
+  // so RLS quirks can't silently return empty data.
+  const admin = createAdminClient();
+  const { data: enrollments } = await admin
     .from("enrollments")
     .select(
       "id, course_id, live_class_id, progress_pct, completed_at"
     )
     .eq("learner_id", learner_id);
 
-  // Live classes enrolled
   const enrolledClassIds = (enrollments ?? [])
     .map((e) => e.live_class_id as string | null)
     .filter((id): id is string => !!id);
 
   const { data: liveClasses } =
     enrolledClassIds.length > 0
-      ? await supabase
+      ? await admin
           .from("live_classes")
           .select(
             "id, title, scheduled_at, duration_minutes, subject, teacher_id"
@@ -65,19 +70,17 @@ export default async function KidHomePage({ params }: PageProps) {
           .limit(5)
       : { data: [] };
 
-  // Teachers
   const teacherIds = Array.from(
     new Set((liveClasses ?? []).map((c) => c.teacher_id as string))
   );
   const { data: teachers } =
     teacherIds.length > 0
-      ? await supabase
+      ? await admin
           .from("profiles")
           .select("id, display_name")
           .in("id", teacherIds)
       : { data: [] };
 
-  // Courses in progress
   const courseIds = Array.from(
     new Set(
       (enrollments ?? [])
@@ -87,7 +90,7 @@ export default async function KidHomePage({ params }: PageProps) {
   );
   const { data: courses } =
     courseIds.length > 0
-      ? await supabase
+      ? await admin
           .from("courses")
           .select("id, title, cover_url")
           .in("id", courseIds)
@@ -103,7 +106,9 @@ export default async function KidHomePage({ params }: PageProps) {
       (teachers ?? []).find((t) => t.id === (c.teacher_id as string))
         ?.display_name ?? undefined,
     subject: c.subject as string,
-    join_url: `/k/${learner_id}/class/${c.id}/room`,
+    // Direct link to the LiveKit room — skips the intermediate redirect
+    // wrapper that used to forward here anyway.
+    join_url: `/session/${c.id}`,
   }));
 
   // Continue watching
