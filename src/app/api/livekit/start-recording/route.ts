@@ -115,9 +115,10 @@ export async function POST(request: NextRequest) {
       status: "starting",
     });
   } catch (err) {
-    console.error("LiveKit start-recording error:", err);
+    const e = err as Error;
+    console.error("LiveKit start-recording error:", e.name, e.message, e.stack);
     return NextResponse.json(
-      { error: "Erreur interne du serveur" },
+      { error: "Erreur interne du serveur", hint: e.message },
       { status: 500 }
     );
   }
