@@ -9,18 +9,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { SUBJECT_LABELS, GRADE_LEVEL_LABELS } from "@/types/domain";
 import type { Subject, GradeLevel } from "@/types/domain";
-import { Loader2, CheckCircle } from "lucide-react";
+import { Loader2, CheckCircle, Users, User } from "lucide-react";
 
 type GroupClassFormProps = {
   subjects: string[];
   gradeLevels: string[];
 };
 
+type ClassFormat = "group" | "one_on_one";
+type Recurrence = "one_time" | "weekly";
+
 export function GroupClassForm({ subjects, gradeLevels }: GroupClassFormProps) {
   const t = useTranslations("groupClass");
   const tCommon = useTranslations("common");
   const router = useRouter();
 
+  const [format, setFormat] = useState<ClassFormat>("group");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [subject, setSubject] = useState(subjects[0] ?? "");
@@ -29,12 +33,14 @@ export function GroupClassForm({ subjects, gradeLevels }: GroupClassFormProps) {
   const [priceXof, setPriceXof] = useState(3000);
   const [scheduledAt, setScheduledAt] = useState("");
   const [durationMinutes, setDurationMinutes] = useState<number>(60);
-  const [recurrence, setRecurrence] = useState<"one_time" | "weekly">(
-    "one_time"
-  );
+  const [recurrence, setRecurrence] = useState<Recurrence>("one_time");
+  const [sessionsCount, setSessionsCount] = useState<number>(4);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  const effectiveMaxStudents = format === "one_on_one" ? 1 : maxStudents;
+  const effectiveSessionsCount = recurrence === "weekly" ? sessionsCount : 1;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -46,15 +52,17 @@ export function GroupClassForm({ subjects, gradeLevels }: GroupClassFormProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          format,
           title,
           description: description || undefined,
           subject,
           gradeLevel,
-          maxStudents,
+          maxStudents: effectiveMaxStudents,
           priceXof,
           scheduledAt: new Date(scheduledAt).toISOString(),
           durationMinutes,
           recurrence,
+          sessionsCount: effectiveSessionsCount,
         }),
       });
 
@@ -83,7 +91,7 @@ export function GroupClassForm({ subjects, gradeLevels }: GroupClassFormProps) {
         <p className="text-lg font-semibold text-[var(--ev-blue)]">{t("created")}</p>
         {recurrence === "weekly" && (
           <p className="mt-2 text-sm text-slate-500">
-            {t("weeklySessions")}
+            {t("weeklySessionsDynamic", { count: effectiveSessionsCount })}
           </p>
         )}
       </div>
@@ -95,6 +103,40 @@ export function GroupClassForm({ subjects, gradeLevels }: GroupClassFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Format picker — group vs 1-to-1 */}
+      <div className="space-y-2">
+        <Label>{t("format")}</Label>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {([
+            { value: "group", icon: Users, titleKey: "formatGroup" as const, descKey: "formatGroupDesc" as const },
+            { value: "one_on_one", icon: User, titleKey: "formatOneOnOne" as const, descKey: "formatOneOnOneDesc" as const },
+          ] as const).map((opt) => {
+            const Icon = opt.icon;
+            const selected = format === opt.value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setFormat(opt.value)}
+                className={`rounded-lg border-2 p-4 text-left transition-all ${
+                  selected
+                    ? "border-[var(--ev-green)] bg-[var(--ev-green-50)]"
+                    : "border-slate-200 bg-white hover:border-slate-300"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Icon className={`size-4 ${selected ? "text-[var(--ev-green)]" : "text-slate-500"}`} />
+                  <span className={`text-sm font-semibold ${selected ? "text-[var(--ev-blue)]" : "text-slate-700"}`}>
+                    {t(opt.titleKey)}
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-slate-500">{t(opt.descKey)}</p>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Title */}
       <div className="space-y-2">
         <Label htmlFor="title">{t("className")}</Label>
@@ -157,22 +199,33 @@ export function GroupClassForm({ subjects, gradeLevels }: GroupClassFormProps) {
         </div>
       </div>
 
-      {/* Max students + Price row */}
+      {/* Max students (group only) + Price row */}
       <div className="grid gap-4 sm:grid-cols-2">
+        {format === "group" ? (
+          <div className="space-y-2">
+            <Label htmlFor="maxStudents">{t("maxStudents")}</Label>
+            <Input
+              id="maxStudents"
+              type="number"
+              min={2}
+              max={15}
+              value={maxStudents}
+              onChange={(e) => setMaxStudents(Number(e.target.value))}
+              required
+            />
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <Label>{t("maxStudents")}</Label>
+            <div className="flex h-9 items-center rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-600">
+              {t("oneStudentFixed")}
+            </div>
+          </div>
+        )}
         <div className="space-y-2">
-          <Label htmlFor="maxStudents">{t("maxStudents")}</Label>
-          <Input
-            id="maxStudents"
-            type="number"
-            min={2}
-            max={15}
-            value={maxStudents}
-            onChange={(e) => setMaxStudents(Number(e.target.value))}
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="priceXof">{t("pricePerStudent")}</Label>
+          <Label htmlFor="priceXof">
+            {format === "one_on_one" ? t("pricePerSession") : t("pricePerStudent")}
+          </Label>
           <Input
             id="priceXof"
             type="number"
@@ -237,10 +290,51 @@ export function GroupClassForm({ subjects, gradeLevels }: GroupClassFormProps) {
             </button>
           ))}
         </div>
-        {recurrence === "weekly" && (
-          <p className="text-xs text-slate-500">{t("weeklySessions")}</p>
-        )}
       </div>
+
+      {/* Weekly-only: sessions count */}
+      {recurrence === "weekly" && (
+        <div className="space-y-2 rounded-lg border border-[var(--ev-green)]/20 bg-[var(--ev-green-50)]/40 p-4">
+          <Label htmlFor="sessionsCount">{t("sessionsCount")}</Label>
+          <div className="flex items-center gap-3">
+            <div className="flex gap-2">
+              {[4, 8, 12].map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => setSessionsCount(n)}
+                  className={`rounded-lg border-2 px-4 py-2 text-sm font-medium transition-all ${
+                    sessionsCount === n
+                      ? "border-[var(--ev-green)] bg-white text-[var(--ev-blue)]"
+                      : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                  }`}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
+            <Input
+              id="sessionsCount"
+              type="number"
+              min={1}
+              max={52}
+              value={sessionsCount}
+              onChange={(e) =>
+                setSessionsCount(
+                  Math.max(1, Math.min(52, Number(e.target.value) || 1)),
+                )
+              }
+              className="w-20"
+            />
+            <span className="text-xs text-slate-500">
+              {t("sessionsOver", { count: sessionsCount })}
+            </span>
+          </div>
+          <p className="text-xs text-slate-600">
+            {t("weeklySessionsDynamic", { count: sessionsCount })}
+          </p>
+        </div>
+      )}
 
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -253,9 +347,7 @@ export function GroupClassForm({ subjects, gradeLevels }: GroupClassFormProps) {
         disabled={isSubmitting}
         className="w-full bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]"
       >
-        {isSubmitting ? (
-          <Loader2 className="mr-2 size-4 animate-spin" />
-        ) : null}
+        {isSubmitting ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
         {t("createClass")}
       </Button>
     </form>

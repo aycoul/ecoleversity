@@ -502,7 +502,17 @@
     "classDetails": "Détails du cours",
     "spotsRemaining": "{count} place(s) restante(s)",
     "noSpotsRemaining": "Aucune place disponible",
-    "weeklySessions": "4 séances créées automatiquement"
+    "weeklySessions": "4 séances créées automatiquement",
+    "weeklySessionsDynamic": "{count} séances créées automatiquement, une par semaine",
+    "format": "Format du cours",
+    "formatGroup": "Cours de groupe",
+    "formatGroupDesc": "Jusqu'à 15 élèves, prix partagé",
+    "formatOneOnOne": "Cours particulier (1-à-1)",
+    "formatOneOnOneDesc": "Un élève, attention personnalisée",
+    "oneStudentFixed": "1 élève (fixé)",
+    "pricePerSession": "Prix par séance (FCFA)",
+    "sessionsCount": "Nombre de séances",
+    "sessionsOver": "sur {count} semaines"
   },
   "course": {
     "title": "Mes cours",

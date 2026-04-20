@@ -4,17 +4,21 @@ import { z } from "zod";
 import { generateJitsiRoomId } from "@/lib/booking";
 
 const createClassSchema = z.object({
+  format: z.enum(["group", "one_on_one"]).default("group"),
   title: z.string().min(3).max(200),
   description: z.string().max(2000).optional(),
   subject: z.string().min(1),
   gradeLevel: z.string().min(1),
-  maxStudents: z.number().int().min(2).max(15),
+  maxStudents: z.number().int().min(1).max(15),
   priceXof: z.number().int().min(500),
   scheduledAt: z.string().datetime(),
   durationMinutes: z.number().refine((v) => [30, 60, 90].includes(v), {
     message: "Duration must be 30, 60, or 90 minutes",
   }),
   recurrence: z.enum(["one_time", "weekly"]),
+  // How many weekly sessions to generate when recurrence=weekly.
+  // Ignored for one_time. Capped at 52 to prevent runaway series.
+  sessionsCount: z.number().int().min(1).max(52).default(4),
 });
 
 export async function POST(request: NextRequest) {
@@ -30,6 +34,7 @@ export async function POST(request: NextRequest) {
     }
 
     const {
+      format,
       title,
       description,
       subject,
@@ -39,7 +44,11 @@ export async function POST(request: NextRequest) {
       scheduledAt,
       durationMinutes,
       recurrence,
+      sessionsCount,
     } = parsed.data;
+
+    // Enforce invariant: 1-to-1 format = exactly 1 student slot
+    const effectiveMaxStudents = format === "one_on_one" ? 1 : maxStudents;
 
     const supabase = await createServerSupabaseClient();
 
@@ -51,7 +60,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Non authentifie" }, { status: 401 });
     }
 
-    // Verify user is a teacher
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
@@ -65,11 +73,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Build the classes to insert (1 for one_time, 4 for weekly)
-    const sessionsCount = recurrence === "weekly" ? 4 : 1;
+    // Build the classes to insert. For weekly: N sessions spaced 7 days apart.
+    // For one_time: exactly 1 session.
+    const totalSessions = recurrence === "weekly" ? sessionsCount : 1;
     const baseDate = new Date(scheduledAt);
 
-    const classRecords = Array.from({ length: sessionsCount }, (_, i) => {
+    const classRecords = Array.from({ length: totalSessions }, (_, i) => {
       const sessionDate = new Date(baseDate);
       sessionDate.setDate(sessionDate.getDate() + i * 7);
 
@@ -79,8 +88,8 @@ export async function POST(request: NextRequest) {
         description: description ?? null,
         subject,
         grade_level: gradeLevel,
-        format: "group" as const,
-        max_students: maxStudents,
+        format,
+        max_students: effectiveMaxStudents,
         price_xof: priceXof,
         scheduled_at: sessionDate.toISOString(),
         duration_minutes: durationMinutes,
@@ -96,7 +105,7 @@ export async function POST(request: NextRequest) {
       .select("id, scheduled_at");
 
     if (insertError || !classes) {
-      console.error("Error creating group class:", insertError);
+      console.error("Error creating class:", insertError);
       return NextResponse.json(
         { error: "Erreur lors de la creation du cours" },
         { status: 500 }

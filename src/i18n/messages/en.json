@@ -502,7 +502,17 @@
     "classDetails": "Class details",
     "spotsRemaining": "{count} spot(s) remaining",
     "noSpotsRemaining": "No spots available",
-    "weeklySessions": "4 sessions created automatically"
+    "weeklySessions": "4 sessions created automatically",
+    "weeklySessionsDynamic": "{count} sessions created automatically, one per week",
+    "format": "Class format",
+    "formatGroup": "Group class",
+    "formatGroupDesc": "Up to 15 students, price shared",
+    "formatOneOnOne": "Private lesson (1-on-1)",
+    "formatOneOnOneDesc": "One student, personalized attention",
+    "oneStudentFixed": "1 student (fixed)",
+    "pricePerSession": "Price per session (FCFA)",
+    "sessionsCount": "Number of sessions",
+    "sessionsOver": "over {count} weeks"
   },
   "course": {
     "title": "My Courses",
