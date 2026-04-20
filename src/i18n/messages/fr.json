@@ -260,7 +260,8 @@
       "dashboard": "Tableau de bord",
       "payouts": "Versements",
       "comingSoon": "Bientôt disponible",
-      "recordedCourses": "Cours enregistrés",
+      "recordedCourses": "Cours vidéo",
+      "wallet": "Portefeuille",
       "settings": "Paramètres"
     }
   },
@@ -601,6 +602,7 @@
   "messaging": {
     "title": "Messages",
     "noConversations": "Aucune conversation",
+    "selectConversation": "Sélectionnez une conversation",
     "startConversation": "Envoyer un message",
     "typeMessage": "Écrivez votre message...",
     "send": "Envoyer",

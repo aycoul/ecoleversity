@@ -121,7 +121,7 @@ export function Inbox() {
         ) : (
           <div className="flex flex-1 flex-col items-center justify-center text-center">
             <MessageSquare className="mb-4 size-12 text-slate-200" />
-            <p className="text-sm text-slate-400">{t("noConversations")}</p>
+            <p className="text-sm text-slate-400">{t("selectConversation")}</p>
           </div>
         )}
       </div>

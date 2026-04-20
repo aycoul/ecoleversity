@@ -260,7 +260,8 @@
       "dashboard": "Dashboard",
       "payouts": "Payouts",
       "comingSoon": "Coming soon",
-      "recordedCourses": "Recorded courses",
+      "recordedCourses": "Video courses",
+      "wallet": "Wallet",
       "settings": "Settings"
     }
   },
@@ -601,6 +602,7 @@
   "messaging": {
     "title": "Messages",
     "noConversations": "No conversations",
+    "selectConversation": "Select a conversation",
     "startConversation": "Send a message",
     "typeMessage": "Type your message...",
     "send": "Send",

@@ -106,11 +106,12 @@ export default async function DashboardLayout({
     ],
     parent: [
       { href: "/dashboard/parent", label: t("myChildren"), icon: "users" },
-      { href: "/dashboard/parent/courses", label: t("recordedCourses"), icon: "play-circle" },
       { href: "/dashboard/parent/sessions", label: t("upcomingSessions"), icon: "calendar" },
-      { href: "/dashboard/parent/payments", label: t("payments"), icon: "receipt" },
-      { href: "/dashboard/parent/spending", label: t("spending"), icon: "wallet" },
+      { href: "/dashboard/parent/courses", label: t("recordedCourses"), icon: "play-circle" },
       { href: "/dashboard/parent/messages", label: t("messages"), icon: "message-circle" },
+      { href: "/dashboard/parent/payments", label: t("payments"), icon: "receipt" },
+      { href: "/dashboard/parent/spending", label: t("spending"), icon: "trending-up" },
+      { href: "/dashboard/parent/wallet", label: t("wallet"), icon: "wallet" },
       { href: "/dashboard/settings/notifications", label: t("settings"), icon: "settings" },
     ],
     school_admin: [
