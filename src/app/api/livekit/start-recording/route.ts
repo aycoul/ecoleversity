@@ -117,6 +117,19 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     const e = err as Error;
     console.error("LiveKit start-recording error:", e.name, e.message, e.stack);
+    // LiveKit throws this when no one has joined — the room materializes on
+    // first participant connect. Surface a teacher-friendly 409 instead of
+    // a generic 500.
+    if (e.message?.includes("room does not exist")) {
+      return NextResponse.json(
+        {
+          error: "no_room",
+          message:
+            "La salle n'est pas encore ouverte. Démarrez l'enregistrement après avoir rejoint le cours.",
+        },
+        { status: 409 }
+      );
+    }
     return NextResponse.json(
       { error: "Erreur interne du serveur", hint: e.message },
       { status: 500 }
