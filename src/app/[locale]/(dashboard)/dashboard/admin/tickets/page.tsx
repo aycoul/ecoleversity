@@ -11,6 +11,8 @@ import {
 import { canAccess, type AdminScope } from "@/lib/admin/scopes";
 import { TicketRow } from "@/components/admin/ticket-row";
 
+export const dynamic = "force-dynamic";
+
 const TAB_ORDER: Array<TicketStatus | "escalated_from_ama"> = [
   "open",
   "in_progress",

@@ -6,6 +6,11 @@ import { TeacherVerificationCard } from "@/components/admin/teacher-verification
 import { ShieldCheck } from "lucide-react";
 import { canAccess, type AdminScope } from "@/lib/admin/scopes";
 
+// Don't prerender — the teacher queue changes every time a new teacher
+// submits docs. Always hit the DB at request time.
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function VerificationPage() {
   const supabase = await createServerSupabaseClient();
   const {

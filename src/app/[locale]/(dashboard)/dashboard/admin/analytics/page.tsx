@@ -18,6 +18,8 @@ import { formatXof } from "@/lib/admin/overview-data";
 import { canAccess, type AdminScope } from "@/lib/admin/scopes";
 import { MiniChart } from "@/components/admin/mini-chart";
 
+export const dynamic = "force-dynamic";
+
 const TAB_KEYS = [
   "today",
   "acquisition",

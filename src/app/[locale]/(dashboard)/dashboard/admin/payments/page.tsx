@@ -5,6 +5,8 @@ import { PendingPayments } from "@/components/admin/pending-payments";
 import { Wallet } from "lucide-react";
 import { canAccess, type AdminScope } from "@/lib/admin/scopes";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminPaymentsPage() {
   const supabase = await createServerSupabaseClient();
   const {

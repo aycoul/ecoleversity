@@ -6,6 +6,8 @@ import { PayoutProcessor } from "@/components/admin/payout-processor";
 import { Banknote, CircleCheck } from "lucide-react";
 import { canAccess, type AdminScope } from "@/lib/admin/scopes";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminPayoutsPage() {
   const supabase = await createServerSupabaseClient();
   const t = await getTranslations("payout");

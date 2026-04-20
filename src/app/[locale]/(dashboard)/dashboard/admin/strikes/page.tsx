@@ -9,6 +9,8 @@ import {
 import { canAccess, type AdminScope } from "@/lib/admin/scopes";
 import { StrikeTimeline } from "@/components/admin/strike-timeline";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminStrikesPage() {
   const supabase = await createServerSupabaseClient();
   const {

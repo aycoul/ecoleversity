@@ -11,6 +11,8 @@ import {
 import { canAccess, type AdminScope } from "@/lib/admin/scopes";
 import { ReportActionCard } from "@/components/admin/report-action-card";
 
+export const dynamic = "force-dynamic";
+
 const STATUS_ORDER: ReportStatus[] = [
   "pending",
   "action_taken",

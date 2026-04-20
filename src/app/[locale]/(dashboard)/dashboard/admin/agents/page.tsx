@@ -10,6 +10,8 @@ import {
 import { canAccess, type AdminScope } from "@/lib/admin/scopes";
 import { AgentCard } from "@/components/admin/agent-card";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminAgentsPage() {
   const supabase = await createServerSupabaseClient();
   const {

@@ -26,6 +26,8 @@ import {
   type AdminScope,
 } from "@/lib/admin/scopes";
 
+export const dynamic = "force-dynamic";
+
 type Tone = "blue" | "green" | "amber" | "rose" | "violet" | "slate";
 
 type AttentionCard = {
