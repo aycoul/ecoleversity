@@ -172,7 +172,7 @@ export default async function Home() {
                 </h2>
               </div>
               <Link
-                href="/teachers"
+                href="/classes"
                 className="hidden items-center gap-1 text-sm font-semibold text-[var(--ev-blue)] hover:underline sm:flex"
               >
                 {t("featured.viewAll")} <ArrowRight className="size-4" />
@@ -183,7 +183,7 @@ export default async function Home() {
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {featuredClasses.map((cls, i) => (
               <AnimateOnScroll key={i} delay={i * 80}>
-                <Link href="/teachers" className="group block overflow-hidden rounded-2xl border border-slate-100 bg-white transition-all hover:shadow-lg hover:shadow-[var(--ev-blue)]/5">
+                <Link href="/classes" className="group block overflow-hidden rounded-2xl border border-slate-100 bg-white transition-all hover:shadow-lg hover:shadow-[var(--ev-blue)]/5">
                   <div className="aspect-[4/3] overflow-hidden">
                     <Image
                       src={cls.image}
@@ -214,7 +214,7 @@ export default async function Home() {
 
           <div className="mt-8 text-center sm:hidden">
             <Link
-              href="/teachers"
+              href="/classes"
               className="inline-flex items-center gap-1 rounded-full bg-[var(--ev-blue-50)] px-6 py-2.5 text-sm font-semibold text-[var(--ev-blue)] hover:bg-[var(--ev-blue)]/10"
             >
               {t("featured.viewAll")} <ArrowRight className="size-4" />

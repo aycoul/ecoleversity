@@ -17,9 +17,13 @@ export default async function GroupClassCatalogPage({
   const params = await searchParams;
   const supabase = await createServerSupabaseClient();
 
-  const now = new Date().toISOString();
+  // Include classes that started up to 8h ago — some group classes run
+  // for 60–90 min, so a class whose start time is in the past but whose
+  // end time is still in the future should still appear as bookable.
+  // The JS filter after the query narrows this properly.
+  const earliestWindow = new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString();
 
-  // Fetch upcoming group classes with teacher info
+  // Fetch group classes that are still upcoming or currently running
   let query = supabase
     .from("live_classes")
     .select(
@@ -27,7 +31,7 @@ export default async function GroupClassCatalogPage({
     )
     .eq("format", "group")
     .eq("status", "scheduled")
-    .gt("scheduled_at", now)
+    .gte("scheduled_at", earliestWindow)
     .order("scheduled_at", { ascending: true });
 
   if (params.subject) {
@@ -37,9 +41,19 @@ export default async function GroupClassCatalogPage({
     query = query.eq("grade_level", params.grade);
   }
 
-  const { data: classes } = await query;
+  const { data: classesRaw } = await query;
 
-  if (!classes || classes.length === 0) {
+  // JS filter — keep classes whose end time is still in the future.
+  // A class scheduled 2h ago with duration_minutes=60 is already done,
+  // but a class scheduled 2h ago with duration_minutes=90 is still live.
+  const nowMs = Date.now();
+  const classes = (classesRaw ?? []).filter((c) => {
+    const start = new Date(c.scheduled_at as string).getTime();
+    const end = start + (c.duration_minutes as number) * 60 * 1000;
+    return end > nowMs;
+  });
+
+  if (classes.length === 0) {
     return (
       <div className="mx-auto max-w-6xl px-4 py-8">
         <h1 className="mb-6 text-2xl font-bold text-slate-900">{t("title")}</h1>
