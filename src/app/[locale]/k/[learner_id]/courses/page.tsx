@@ -29,7 +29,7 @@ export default async function KidCoursesPage({ params }: PageProps) {
   const { data: enrollments } = await supabase
     .from("enrollments")
     .select(
-      "id, course_id, progress_pct, completed_at, last_lesson_id, enrolled_at"
+      "id, course_id, progress_pct, completed_at, enrolled_at"
     )
     .eq("learner_id", learner_id)
     .not("course_id", "is", null)
@@ -65,9 +65,9 @@ export default async function KidCoursesPage({ params }: PageProps) {
             );
             const pct = Math.max(0, Math.min(100, (e.progress_pct as number) ?? 0));
             const completed = !!e.completed_at;
-            const href = `/k/${learner_id}/course/${e.course_id}${
-              e.last_lesson_id ? `/lesson/${e.last_lesson_id}` : ""
-            }`;
+            // Lesson-level resume requires joining lesson_progress;
+            // deferred — link to course root, player picks up state.
+            const href = `/k/${learner_id}/course/${e.course_id}`;
             return (
               <Link
                 key={e.id as string}

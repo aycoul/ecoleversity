@@ -56,26 +56,15 @@ export default async function ParentOverviewPage() {
   // via the `in(learner_id)` clause against children this parent owns.
   const childIds = children.map((c) => c.id);
   const adminRead = createAdminClient();
-  const { data: enrollments, error: enrErr } =
+  const { data: enrollments } =
     childIds.length > 0
       ? await adminRead
           .from("enrollments")
           .select(
-            "id, learner_id, course_id, live_class_id, progress_pct, completed_at, last_lesson_id"
+            "id, learner_id, course_id, live_class_id, progress_pct, completed_at"
           )
           .in("learner_id", childIds)
-      : { data: [], error: null };
-
-  console.log(
-    "[parent/overview]",
-    "user=", user.id,
-    "children=", childIds.length,
-    "childIds=", JSON.stringify(childIds),
-    "enrollments=", (enrollments ?? []).length,
-    "err=", enrErr?.message ?? "none",
-  );
-
-  const debugLine = `user=${user.id.slice(0, 8)} children=${childIds.length} enrolls=${(enrollments ?? []).length} err=${enrErr?.message ?? "-"}`;
+      : { data: [] };
 
   // 3. Upcoming live sessions (next 7 days, enrolled classes only)
   const enrolledClassIds = (enrollments ?? [])
@@ -176,7 +165,9 @@ export default async function ParentOverviewPage() {
         course_title: (course?.title as string) ?? "Cours",
         course_cover_url: (course?.cover_url as string | null) ?? null,
         progress_pct: (e.progress_pct as number) ?? 0,
-        last_lesson_id: (e.last_lesson_id as string | null) ?? null,
+        // lesson-level resume link requires joining lesson_progress;
+        // deferred — link to course root for now.
+        last_lesson_id: null as string | null,
         learner_id: e.learner_id as string,
         learner_first_name: learner?.first_name,
       };
@@ -184,10 +175,6 @@ export default async function ParentOverviewPage() {
 
   return (
     <div className="space-y-8">
-      {/* TEMP DIAGNOSTIC */}
-      <div className="rounded-md bg-rose-50 px-3 py-2 font-mono text-[11px] text-rose-700">
-        DEBUG: {debugLine}
-      </div>
       {/* Greeting banner */}
       <div className="rounded-2xl bg-gradient-to-br from-[var(--ev-blue)] to-[var(--ev-blue-light)] p-6 text-white md:p-8">
         <h1 className="text-2xl font-bold md:text-3xl">

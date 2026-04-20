@@ -42,7 +42,7 @@ export default async function KidHomePage({ params }: PageProps) {
   const { data: enrollments } = await supabase
     .from("enrollments")
     .select(
-      "id, course_id, live_class_id, progress_pct, completed_at, last_lesson_id"
+      "id, course_id, live_class_id, progress_pct, completed_at"
     )
     .eq("learner_id", learner_id);
 
@@ -120,7 +120,7 @@ export default async function KidHomePage({ params }: PageProps) {
         course_title: (course?.title as string) ?? "Cours",
         course_cover_url: (course?.cover_url as string | null) ?? null,
         progress_pct: (e.progress_pct as number) ?? 0,
-        last_lesson_id: (e.last_lesson_id as string | null) ?? null,
+        last_lesson_id: null as string | null,
         learner_id: learner_id,
       };
     });
