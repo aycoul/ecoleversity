@@ -3,9 +3,14 @@
 import { useEffect, useState } from "react";
 import {
   LiveKitRoom,
-  VideoConference,
   RoomAudioRenderer,
+  GridLayout,
+  ParticipantTile,
+  ControlBar,
+  Chat,
+  useTracks,
 } from "@livekit/components-react";
+import { Track } from "livekit-client";
 import "@livekit/components-styles";
 import { useTranslations } from "next-intl";
 
@@ -72,9 +77,7 @@ export function LiveKitRoomEmbed({
     };
   }, [liveClassId, userRole]);
 
-  // When the teacher leaves (or the page unmounts), stop the egress so
-  // LiveKit Cloud isn't billed for a recording after the class ends.
-  // Fires beacon-style so the request survives a page-close.
+  // Teacher leave → stop egress so we don't bill for a phantom recording.
   useEffect(() => {
     if (userRole !== "teacher") return;
     const stop = () => {
@@ -92,7 +95,7 @@ export function LiveKitRoomEmbed({
           }).catch(() => {});
         }
       } catch {
-        // Best-effort only — egress also auto-stops when the room empties.
+        // Best-effort; egress auto-stops when the room empties anyway.
       }
     };
 
@@ -100,7 +103,7 @@ export function LiveKitRoomEmbed({
     window.addEventListener("pagehide", handlePageHide);
     return () => {
       window.removeEventListener("pagehide", handlePageHide);
-      if (userRole === "teacher") stop();
+      stop();
     };
   }, [liveClassId, userRole]);
 
@@ -122,14 +125,9 @@ export function LiveKitRoomEmbed({
   }
 
   return (
-    // Fill most of the viewport below the back-bar + give the chat panel
-    // room to slide in on the right. overflow-hidden was clipping chat
-    // when the user opened it — 720px min-height is tall enough for chat
-    // stacked below video on narrow screens, and the flex layout lets
-    // LiveKit's grid + side panel share horizontal space on wider ones.
     <div
-      className="relative rounded-xl border border-slate-200"
-      style={{ height: "min(80vh, 720px)", minHeight: "480px" }}
+      className="relative overflow-hidden rounded-xl border border-slate-200 bg-black"
+      style={{ height: "min(82vh, 760px)", minHeight: "520px" }}
       data-lk-theme="default"
     >
       <LiveKitRoom
@@ -141,9 +139,90 @@ export function LiveKitRoomEmbed({
         onDisconnected={onClose}
         style={{ height: "100%" }}
       >
-        <VideoConference />
+        <RoomLayout />
         <RoomAudioRenderer />
       </LiveKitRoom>
+    </div>
+  );
+}
+
+/**
+ * Custom room layout — explicit grid + chat panel so chat can't be hidden
+ * by VideoConference's opaque internal CSS. Chat visibility is driven by
+ * local state and wired to the ControlBar's chat toggle via the standard
+ * LayoutContext that ControlBar reads from.
+ */
+function RoomLayout() {
+  const [chatOpen, setChatOpen] = useState(false);
+
+  // Camera + screen share tile refs for GridLayout
+  const tracks = useTracks(
+    [
+      { source: Track.Source.Camera, withPlaceholder: true },
+      { source: Track.Source.ScreenShare, withPlaceholder: false },
+    ],
+    { onlySubscribed: false }
+  );
+
+  return (
+    <div className="flex h-full w-full flex-col">
+      {/* Video + chat row — flex so chat panel gets guaranteed space */}
+      <div className="flex min-h-0 flex-1">
+        <div className="relative min-w-0 flex-1">
+          <GridLayout tracks={tracks} style={{ height: "100%" }}>
+            <ParticipantTile />
+          </GridLayout>
+        </div>
+
+        {chatOpen ? (
+          <aside
+            className="flex w-80 flex-col border-l border-white/10 bg-[var(--lk-bg,#111)] sm:w-96"
+            style={{ minWidth: "288px" }}
+          >
+            <div className="flex items-center justify-between border-b border-white/10 px-3 py-2 text-sm font-medium text-white">
+              <span>Discussion</span>
+              <button
+                type="button"
+                onClick={() => setChatOpen(false)}
+                className="rounded p-1 text-white/70 hover:bg-white/10 hover:text-white"
+                aria-label="Fermer la discussion"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <Chat style={{ height: "100%" }} />
+            </div>
+          </aside>
+        ) : null}
+      </div>
+
+      {/* Control bar pinned at the bottom. We hide the built-in chat toggle
+          and render our own so it wires into our local chatOpen state. */}
+      <div className="flex items-center justify-center gap-2 border-t border-white/10 bg-[var(--lk-bg,#111)] px-2 py-2">
+        <ControlBar
+          variation="verbose"
+          controls={{
+            microphone: true,
+            camera: true,
+            screenShare: true,
+            chat: false,
+            leave: true,
+          }}
+        />
+        <button
+          type="button"
+          onClick={() => setChatOpen((v) => !v)}
+          className={`lk-button rounded-md px-3 py-2 text-sm font-medium ${
+            chatOpen
+              ? "bg-white text-slate-900"
+              : "bg-white/10 text-white hover:bg-white/20"
+          }`}
+          aria-pressed={chatOpen}
+        >
+          {chatOpen ? "Fermer le chat" : "Ouvrir le chat"}
+        </button>
+      </div>
     </div>
   );
 }
