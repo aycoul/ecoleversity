@@ -98,13 +98,11 @@ async function loadFeaturedCards(): Promise<FeaturedCard[]> {
     });
 
   // Pad with verified teachers if we have fewer than 4 live classes.
-  // verification_status on teacher_profiles has two "approved" values
-  // depending on which flow completed — accept either.
   if (cards.length < 4) {
     const { data: teacherRows } = await admin
       .from("teacher_profiles")
-      .select("id, subjects, rating_avg, rating_count, verification_status")
-      .in("verification_status", ["approved", "fully_verified"])
+      .select("id, subjects, rating_avg, rating_count")
+      .eq("verification_status", "fully_verified")
       .limit(8);
 
     const teacherIds = (teacherRows ?? []).map((t) => t.id as string);
