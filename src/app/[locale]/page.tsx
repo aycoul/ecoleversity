@@ -97,12 +97,14 @@ async function loadFeaturedCards(): Promise<FeaturedCard[]> {
       };
     });
 
-  // Pad with verified teachers if we have fewer than 4 live classes
+  // Pad with verified teachers if we have fewer than 4 live classes.
+  // verification_status on teacher_profiles has two "approved" values
+  // depending on which flow completed — accept either.
   if (cards.length < 4) {
     const { data: teacherRows } = await admin
       .from("teacher_profiles")
-      .select("id, hourly_rate_xof, subjects, verification_status")
-      .eq("verification_status", "approved")
+      .select("id, subjects, rating_avg, rating_count, verification_status")
+      .in("verification_status", ["approved", "fully_verified"])
       .limit(8);
 
     const teacherIds = (teacherRows ?? []).map((t) => t.id as string);
@@ -126,13 +128,17 @@ async function loadFeaturedCards(): Promise<FeaturedCard[]> {
       const subjectLabel = firstSubject
         ? SUBJECT_LABELS[firstSubject as Subject] ?? firstSubject
         : "Plusieurs matières";
-      const rate = tr.hourly_rate_xof as number | null;
+      const ratingCount = (tr.rating_count as number | null) ?? 0;
+      const meta =
+        ratingCount > 0
+          ? `★ ${(tr.rating_avg as number).toFixed(1)} · ${ratingCount} avis`
+          : "Enseignant vérifié";
       cards.push({
         href: `/teachers/${tr.id}`,
         title: (prof.display_name as string | null) ?? "Enseignant vérifié",
         subtitle: (prof.city as string | null) ?? "Côte d'Ivoire",
         image: "/illustrations/featured-french.webp",
-        meta: rate ? `${rate.toLocaleString("fr-FR")} FCFA / h` : "Tarif sur demande",
+        meta,
         badge: subjectLabel,
       });
     }
