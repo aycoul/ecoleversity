@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { z } from "zod";
 import {
   generatePaymentReference,
@@ -71,8 +72,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // User-auth'd client is blocked by RLS from writing enrollments /
+    // transactions even though we've already verified learner ownership
+    // + teacher + class above. Use the admin client as the authorization
+    // boundary from here on, same pattern as /api/bookings/create.
+    const adminSupabase = createAdminClient();
+
     // Atomic enrollment — prevents TOCTOU race condition via DB-level lock
-    const { data: enrollResult, error: enrollRpcError } = await supabase
+    const { data: enrollResult, error: enrollRpcError } = await adminSupabase
       .rpc("enroll_learner_atomic", {
         p_learner_id: learnerId,
         p_live_class_id: classId,
@@ -105,7 +112,7 @@ export async function POST(request: NextRequest) {
     // If full, add to waitlist
     if (result.error === "class_full") {
       // Get current max waitlist position
-      const { data: maxPos } = await supabase
+      const { data: maxPos } = await adminSupabase
         .from("waitlists")
         .select("position")
         .eq("live_class_id", classId)
@@ -115,7 +122,7 @@ export async function POST(request: NextRequest) {
 
       const nextPosition = (maxPos?.position ?? 0) + 1;
 
-      const { error: waitlistError } = await supabase
+      const { error: waitlistError } = await adminSupabase
         .from("waitlists")
         .insert({
           live_class_id: classId,
@@ -148,7 +155,7 @@ export async function POST(request: NextRequest) {
     // Enrollment succeeded via RPC — now create the transaction
 
     // Get teacher commission rate
-    const { data: teacherProfile } = await supabase
+    const { data: teacherProfile } = await adminSupabase
       .from("teacher_profiles")
       .select("commission_rate")
       .eq("id", liveClass.teacher_id)
@@ -161,8 +168,8 @@ export async function POST(request: NextRequest) {
     );
     const paymentReference = generatePaymentReference();
 
-    // Create transaction
-    const { data: transaction, error: txError } = await supabase
+    // Create transaction (pending — admin confirms later via Mark as Paid)
+    const { data: transaction, error: txError } = await adminSupabase
       .from("transactions")
       .insert({
         parent_id: user.id,
@@ -182,7 +189,7 @@ export async function POST(request: NextRequest) {
     if (txError || !transaction) {
       console.error("Error creating transaction:", txError);
       // Clean up enrollment
-      await supabase
+      await adminSupabase
         .from("enrollments")
         .delete()
         .eq("live_class_id", classId)
