@@ -111,11 +111,19 @@ async function loadFeaturedCards(): Promise<FeaturedCard[]> {
   );
 
   const nowMs = Date.now();
+  // De-duplicate by subject so featured cards showcase distinct topics
+  // (a visitor sees Français + Anglais + Maths + Sciences rather than
+  // four Math classes in a row). Keep the earliest class per subject.
+  const seenSubjects = new Set<string>();
   const cards: FeaturedCard[] = (classRows ?? [])
     .filter((c) => {
       const start = new Date(c.scheduled_at as string).getTime();
       const end = start + (c.duration_minutes as number) * 60 * 1000;
-      return end > nowMs;
+      if (end <= nowMs) return false;
+      const subj = c.subject as string;
+      if (seenSubjects.has(subj)) return false;
+      seenSubjects.add(subj);
+      return true;
     })
     .map((c, idx) => {
       const subjectLabel =
