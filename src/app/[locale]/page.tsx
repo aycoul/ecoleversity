@@ -36,6 +36,37 @@ type FeaturedCard = {
 };
 
 /**
+ * Per-subject illustrations for the featured section.
+ * We only have 4 hand-picked images; other subjects cycle through them
+ * via FEATURED_FALLBACK so cards still look visually varied even when
+ * DB inventory covers many subjects.
+ */
+const SUBJECT_ILLUSTRATIONS: Record<string, string> = {
+  francais: "/illustrations/featured-french.webp",
+  mathematiques: "/illustrations/featured-maths.webp",
+  maths_financieres: "/illustrations/featured-maths.webp",
+  anglais: "/illustrations/featured-english.webp",
+  espagnol: "/illustrations/featured-english.webp",
+  allemand: "/illustrations/featured-english.webp",
+  sciences: "/illustrations/featured-science.webp",
+  physique_chimie: "/illustrations/featured-science.webp",
+  physique_appliquee: "/illustrations/featured-science.webp",
+  svt: "/illustrations/featured-science.webp",
+};
+
+const FEATURED_FALLBACK = [
+  "/illustrations/featured-maths.webp",
+  "/illustrations/featured-french.webp",
+  "/illustrations/featured-english.webp",
+  "/illustrations/featured-science.webp",
+];
+
+function imageForSubject(subject: string | null, idx: number): string {
+  if (subject && SUBJECT_ILLUSTRATIONS[subject]) return SUBJECT_ILLUSTRATIONS[subject];
+  return FEATURED_FALLBACK[idx % FEATURED_FALLBACK.length];
+}
+
+/**
  * Build up to 4 real "featured" cards for the home page.
  * Priority:
  *   1. Upcoming / in-progress group classes (teacher + subject + time)
@@ -82,7 +113,7 @@ async function loadFeaturedCards(): Promise<FeaturedCard[]> {
       const end = start + (c.duration_minutes as number) * 60 * 1000;
       return end > nowMs;
     })
-    .map((c) => {
+    .map((c, idx) => {
       const subjectLabel =
         SUBJECT_LABELS[c.subject as Subject] ?? (c.subject as string) ?? "—";
       const teacher = teacherNameById.get(c.teacher_id as string) ?? "Enseignant";
@@ -91,7 +122,7 @@ async function loadFeaturedCards(): Promise<FeaturedCard[]> {
         href: `/classes/${c.id}`,
         title: (c.title as string) ?? subjectLabel,
         subtitle: teacher,
-        image: "/illustrations/featured-maths.webp",
+        image: imageForSubject(c.subject as string | null, idx),
         meta: `${c.duration_minutes} min · ${price ? `${price.toLocaleString("fr-FR")} FCFA` : "Gratuit"}`,
         badge: subjectLabel,
       };
@@ -135,7 +166,7 @@ async function loadFeaturedCards(): Promise<FeaturedCard[]> {
         href: `/teachers/${tr.id}`,
         title: (prof.display_name as string | null) ?? "Enseignant vérifié",
         subtitle: (prof.city as string | null) ?? "Côte d'Ivoire",
-        image: "/illustrations/featured-french.webp",
+        image: imageForSubject(firstSubject ?? null, cards.length),
         meta,
         badge: subjectLabel,
       });
