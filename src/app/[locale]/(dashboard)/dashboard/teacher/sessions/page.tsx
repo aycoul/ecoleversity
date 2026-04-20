@@ -1,9 +1,12 @@
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { SUBJECT_LABELS, type Subject } from "@/types/domain";
 import { Link } from "@/i18n/routing";
 import { Calendar, Clock, Users, Video } from "lucide-react";
+
+export const dynamic = "force-dynamic";
 
 export default async function TeacherSessionsPage() {
   const supabase = await createServerSupabaseClient();
@@ -17,27 +20,52 @@ export default async function TeacherSessionsPage() {
     redirect("/login");
   }
 
-  // Fetch upcoming live classes for this teacher
-  const { data: sessions } = await supabase
+  // Use admin client — enrollments/profiles read across learner→parent
+  // needs joins that weren't in the RLS policy. Teacher ownership is
+  // enforced by the .eq("teacher_id", user.id) filter below.
+  const adminSupabase = createAdminClient();
+
+  const { data: sessions } = await adminSupabase
     .from("live_classes")
     .select(
-      `
-      id,
-      jitsi_room_id,
-      scheduled_at,
-      duration_minutes,
-      status,
-      subject,
-      enrollments(
-        id,
-        parent_id,
-        profiles!enrollments_parent_id_fkey(display_name)
-      )
-    `
+      "id, scheduled_at, duration_minutes, status, subject, title"
     )
     .eq("teacher_id", user.id)
-    .eq("status", "scheduled")
+    .in("status", ["scheduled", "live"])
     .order("scheduled_at", { ascending: true });
+
+  const sessionIds = (sessions ?? []).map((s) => s.id as string);
+  const { data: enrollmentRows } =
+    sessionIds.length > 0
+      ? await adminSupabase
+          .from("enrollments")
+          .select("live_class_id, learner_id")
+          .in("live_class_id", sessionIds)
+      : { data: [] };
+
+  const enrolledByClass = new Map<string, number>();
+  const learnerIdsByClass = new Map<string, string[]>();
+  for (const e of enrollmentRows ?? []) {
+    const k = e.live_class_id as string;
+    enrolledByClass.set(k, (enrolledByClass.get(k) ?? 0) + 1);
+    const list = learnerIdsByClass.get(k) ?? [];
+    list.push(e.learner_id as string);
+    learnerIdsByClass.set(k, list);
+  }
+
+  const allLearnerIds = Array.from(
+    new Set((enrollmentRows ?? []).map((e) => e.learner_id as string))
+  );
+  const { data: learnerRows } =
+    allLearnerIds.length > 0
+      ? await adminSupabase
+          .from("learner_profiles")
+          .select("id, first_name")
+          .in("id", allLearnerIds)
+      : { data: [] };
+  const learnerName = new Map(
+    (learnerRows ?? []).map((l) => [l.id as string, l.first_name as string])
+  );
 
   const now = Date.now();
 
@@ -53,23 +81,31 @@ export default async function TeacherSessionsPage() {
       ) : (
         <div className="space-y-4">
           {sessions.map((session) => {
-            const scheduledAt = new Date(session.scheduled_at);
+            const scheduledAt = new Date(session.scheduled_at as string);
             const startMs = scheduledAt.getTime();
             const isJoinable = now >= startMs - 15 * 60 * 1000;
             const subjectLabel =
               SUBJECT_LABELS[session.subject as Subject] ??
               session.subject ??
               "—";
-            const enrollmentCount = session.enrollments?.length ?? 0;
+            const enrollmentCount =
+              enrolledByClass.get(session.id as string) ?? 0;
+            const learners = (
+              learnerIdsByClass.get(session.id as string) ?? []
+            )
+              .map((lid) => learnerName.get(lid))
+              .filter(Boolean)
+              .slice(0, 3)
+              .join(", ");
 
             return (
               <div
-                key={session.id}
+                key={session.id as string}
                 className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
               >
                 <div className="space-y-1.5">
-                  <div className="flex items-center gap-2 text-sm font-medium text-slate-900">
-                    {subjectLabel}
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                    {(session.title as string) ?? subjectLabel}
                   </div>
                   <div className="flex items-center gap-2 text-xs text-slate-500">
                     <Calendar className="size-3" />
@@ -77,24 +113,26 @@ export default async function TeacherSessionsPage() {
                       weekday: "short",
                       day: "numeric",
                       month: "short",
+                      timeZone: "Africa/Abidjan",
                     })}
                     {" — "}
                     {scheduledAt.toLocaleTimeString("fr-FR", {
                       hour: "2-digit",
                       minute: "2-digit",
+                      timeZone: "Africa/Abidjan",
                     })}
+                    {" GMT"}
                   </div>
                   <div className="flex items-center gap-4 text-xs text-slate-500">
                     <span className="flex items-center gap-1">
                       <Clock className="size-3" />
-                      {t("duration", {
-                        duration: String(session.duration_minutes),
-                      })}
+                      {session.duration_minutes as number} min
                     </span>
                     <span className="flex items-center gap-1">
                       <Users className="size-3" />
                       {enrollmentCount}{" "}
                       {enrollmentCount === 1 ? "inscrit" : "inscrits"}
+                      {learners && ` · ${learners}`}
                     </span>
                   </div>
                 </div>

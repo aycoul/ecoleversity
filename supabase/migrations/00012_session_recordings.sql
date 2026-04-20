@@ -37,14 +37,17 @@ create policy "Teachers view own session recordings"
     )
   );
 
--- Parents see recordings of classes their children are enrolled in
+-- Parents see recordings of classes their children are enrolled in.
+-- enrollments hangs off learner_id; resolve parent via learner_profiles.
 create policy "Parents view enrolled session recordings"
   on session_recordings for select
   using (
     exists (
-      select 1 from enrollments
-      where enrollments.live_class_id = session_recordings.live_class_id
-        and enrollments.parent_id = auth.uid()
+      select 1
+      from enrollments e
+      join learner_profiles lp on lp.id = e.learner_id
+      where e.live_class_id = session_recordings.live_class_id
+        and lp.parent_id = auth.uid()
     )
   );
 

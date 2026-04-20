@@ -790,6 +790,40 @@
     "emptyUpcomingKid": "No classes scheduled",
     "join": "Join"
   },
+  "teacherDashboard": {
+    "greeting": "Hi {name} 👋",
+    "verifiedTagline": "Your teacher home — manage classes, availability, and earnings.",
+    "pendingTagline": "Your application is being reviewed. You'll be able to publish once approved.",
+    "imminentTitle": "Your class is starting soon",
+    "joinNow": "Join now",
+    "joinSoon": "Join soon",
+    "upcomingTitle": "Upcoming classes",
+    "viewAll": "View all",
+    "noUpcoming": "No classes scheduled",
+    "noUpcomingHelper": "Set your availability or publish a group class to start receiving enrollments.",
+    "setAvailability": "Set availability",
+    "createClass": "Create a class",
+    "groupTag": "Group",
+    "soloTag": "1-on-1",
+    "enrolled": "{count, plural, =0 {No students} one {1 student} other {# students}}",
+    "stats": {
+      "owedNow": "Pending payout",
+      "owedHelper": "Confirmed earnings not yet paid out",
+      "upcomingSessions": "Upcoming classes",
+      "upcomingHelper": "On your schedule",
+      "rating": "Average rating",
+      "ratingHelper": "{count, plural, one {# review} other {# reviews}}",
+      "ratingNone": "No reviews yet"
+    },
+    "shortcut": {
+      "availability": "Availability",
+      "availabilityHelper": "Set your recurring weekly slots",
+      "classes": "My group classes",
+      "classesHelper": "Create or edit a class",
+      "messages": "Messages",
+      "messagesHelper": "Conversations with parents"
+    }
+  },
   "adminAnalytics": {
     "title": "Analytics",
     "subtitle": "Business health at a glance — numbers, trends, and acquisition-readiness.",

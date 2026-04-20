@@ -790,6 +790,40 @@
     "emptyUpcomingKid": "Aucun cours prévu",
     "join": "Rejoindre"
   },
+  "teacherDashboard": {
+    "greeting": "Bonjour {name} 👋",
+    "verifiedTagline": "Votre espace enseignant — gérez vos cours, disponibilités et revenus.",
+    "pendingTagline": "Votre dossier est en cours de vérification. Vous pourrez publier dès l'approbation.",
+    "imminentTitle": "Votre cours commence bientôt",
+    "joinNow": "Rejoindre maintenant",
+    "joinSoon": "Rejoindre bientôt",
+    "upcomingTitle": "Prochains cours",
+    "viewAll": "Voir tout",
+    "noUpcoming": "Aucun cours programmé",
+    "noUpcomingHelper": "Définissez vos disponibilités ou publiez un cours de groupe pour commencer à recevoir des inscriptions.",
+    "setAvailability": "Définir les disponibilités",
+    "createClass": "Créer un cours",
+    "groupTag": "Groupe",
+    "soloTag": "Particulier",
+    "enrolled": "{count, plural, =0 {Aucun inscrit} one {1 inscrit} other {# inscrits}}",
+    "stats": {
+      "owedNow": "En attente de versement",
+      "owedHelper": "Gains confirmés non encore versés",
+      "upcomingSessions": "Cours à venir",
+      "upcomingHelper": "Programmés dans votre calendrier",
+      "rating": "Note moyenne",
+      "ratingHelper": "{count, plural, one {# avis} other {# avis}}",
+      "ratingNone": "Aucun avis pour le moment"
+    },
+    "shortcut": {
+      "availability": "Disponibilités",
+      "availabilityHelper": "Définissez vos créneaux récurrents",
+      "classes": "Mes cours de groupe",
+      "classesHelper": "Créer ou modifier un cours",
+      "messages": "Messagerie",
+      "messagesHelper": "Conversations avec les parents"
+    }
+  },
   "adminAnalytics": {
     "title": "Analytique",
     "subtitle": "Santé du business en un coup d'œil — chiffres, tendances, et état de préparation à une acquisition.",

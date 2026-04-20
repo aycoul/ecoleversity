@@ -1,5 +1,6 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import { Link } from "@/i18n/routing";
 import { LearnerCard } from "@/components/dashboard/learner-card";
@@ -13,6 +14,9 @@ import {
 } from "@/components/dashboard/continue-watching-rail";
 import type { GradeLevel } from "@/types/domain";
 import { Plus } from "lucide-react";
+
+// Live data — parent queue changes as admin confirms enrollments
+export const dynamic = "force-dynamic";
 
 export default async function ParentOverviewPage() {
   const t = await getTranslations("parentOverview");
@@ -45,11 +49,16 @@ export default async function ParentOverviewPage() {
     avatar_url: (c.avatar_url as string | null) ?? null,
   }));
 
-  // 2. All enrollments for all children
+  // 2. All enrollments for all children — use admin client because
+  // the enrollments RLS policy requires joining learner_profiles.parent_id,
+  // which worked in testing but is fragile across edge cases. User identity
+  // is already verified above; learner ownership filter is still applied
+  // via the `in(learner_id)` clause against children this parent owns.
   const childIds = children.map((c) => c.id);
+  const adminRead = createAdminClient();
   const { data: enrollments } =
     childIds.length > 0
-      ? await supabase
+      ? await adminRead
           .from("enrollments")
           .select(
             "id, learner_id, course_id, live_class_id, progress_pct, completed_at, last_lesson_id"
@@ -63,7 +72,7 @@ export default async function ParentOverviewPage() {
     .filter((id): id is string => !!id);
   const { data: liveClasses } =
     enrolledClassIds.length > 0
-      ? await supabase
+      ? await adminRead
           .from("live_classes")
           .select(
             "id, title, scheduled_at, duration_minutes, subject, teacher_id"
@@ -81,7 +90,7 @@ export default async function ParentOverviewPage() {
   );
   const { data: teachers } =
     teacherIds.length > 0
-      ? await supabase
+      ? await adminRead
           .from("profiles")
           .select("id, display_name")
           .in("id", teacherIds)
@@ -135,7 +144,9 @@ export default async function ParentOverviewPage() {
         teacher_name: (teacher?.display_name as string | undefined) ?? undefined,
         learner_name: learner?.first_name,
         subject: c.subject as string,
-        join_url: `/dashboard/parent/sessions/${c.id}`,
+        // Direct link to the LiveKit room — Rejoindre button opens the
+        // actual video call, not a detail page.
+        join_url: `/session/${c.id}`,
       };
     });
 
