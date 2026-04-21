@@ -38,7 +38,7 @@ export default async function TeacherTransactionsPage() {
     .single();
 
   if (!profile || profile.role !== "teacher") {
-    redirect("/dashboard");
+    redirect("/");
   }
 
   // Fetch teacher's transactions

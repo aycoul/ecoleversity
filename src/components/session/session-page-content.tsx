@@ -98,7 +98,7 @@ export async function SessionPageContent({
       if (count && count > 0) authorized = true;
     }
   }
-  if (!authorized) redirect("/dashboard");
+  if (!authorized) redirect("/");
 
   const { count: completedRecordings } = await supabase
     .from("session_recordings")

@@ -26,7 +26,7 @@ export default async function RateSessionPage({
     .single();
 
   if (!profile || profile.role !== "parent") {
-    redirect("/dashboard");
+    redirect("/");
   }
 
   // Fetch session info
@@ -60,7 +60,7 @@ export default async function RateSessionPage({
     .eq("parent_id", user.id);
 
   if (!count || count === 0) {
-    redirect("/dashboard");
+    redirect("/");
   }
 
   // Check if already reviewed

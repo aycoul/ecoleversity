@@ -52,7 +52,7 @@ export default async function TeacherDashboardPage() {
     .single();
 
   if (!profile || profile.role !== "teacher") {
-    redirect("/dashboard");
+    redirect("/");
   }
 
   const locale = await getLocale();

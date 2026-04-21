@@ -38,12 +38,12 @@ export default async function PaymentPage({
     .single();
 
   if (!transaction) {
-    redirect("/dashboard");
+    redirect("/dashboard/parent/overview");
   }
 
   // If already confirmed, redirect to dashboard
   if (transaction.status === "confirmed") {
-    redirect("/dashboard");
+    redirect("/dashboard/parent/overview");
   }
 
   // Get teacher display name

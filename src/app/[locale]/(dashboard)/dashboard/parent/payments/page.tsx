@@ -43,7 +43,7 @@ export default async function ParentPaymentsPage() {
     .single();
 
   if (!profile || profile.role !== "parent") {
-    redirect("/dashboard");
+    redirect("/");
   }
 
   // Admin client for RLS-safe reads; parent_id filter scopes to the caller.

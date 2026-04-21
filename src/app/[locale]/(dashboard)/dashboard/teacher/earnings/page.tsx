@@ -24,7 +24,7 @@ export default async function TeacherEarningsPage() {
     .single();
 
   if (!profile || profile.role !== "teacher") {
-    redirect("/dashboard");
+    redirect("/");
   }
 
   // Fetch confirmed transactions for this teacher
