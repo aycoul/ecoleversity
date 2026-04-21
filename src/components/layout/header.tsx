@@ -48,7 +48,8 @@ export function Header({ user = null }: HeaderProps) {
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/k/") ||
     pathname.startsWith("/session/") ||
-    pathname.startsWith("/course/");
+    pathname.startsWith("/course/") ||
+    pathname.startsWith("/payment/");
   const showPublicNav = !isAppShell;
   const showTeachCta = !user && showPublicNav;
 

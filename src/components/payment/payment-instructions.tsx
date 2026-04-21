@@ -272,6 +272,26 @@ export function PaymentInstructions({
         {t("instructions", { amount: formattedAmount })}
       </p>
 
+      {/* Misconfiguration warning — payment can't proceed without at least
+          one configured channel. Better to be loud than silently blank. */}
+      {!orangeNumber && !waveNumber && (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+          <p className="font-semibold">Paiement mobile indisponible</p>
+          <p className="mt-1 text-xs">
+            Les numéros Orange Money et Wave ne sont pas configurés. Contactez
+            le support à{" "}
+            <a
+              href="mailto:support@ecoleversity.com"
+              className="underline"
+            >
+              support@ecoleversity.com
+            </a>{" "}
+            pour finaliser ce paiement, ou utilisez PayPal ci-dessous si
+            disponible.
+          </p>
+        </div>
+      )}
+
       {/* Orange Money — QR code scans straight into the Orange app
           which prefills the recipient so parent only types the amount. */}
       {orangeNumber && (
