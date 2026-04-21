@@ -69,3 +69,48 @@ pay pending invoice, etc.). Right now they just say "Rien ici."
 ## Resolutions
 
 - 🔴 #1 + #2 + 🟡 #3 + #4 — commit pending (see below).
+
+## Second pass — 2026-04-21
+
+### 🔴 Broken
+
+**#A. Parent overview + /sessions session cards go to `/session/[id]`, losing the sidebar.**
+Same pattern as the kid bug (FIX-28). Parent clicks "Rejoindre" or
+card → lands outside `(dashboard)` layout → `DashboardShell` sidebar
+disappears → they see only the top bar + back button.
+→ **Fixed** by creating `/dashboard/parent/session/[id]/page.tsx` that
+reuses `SessionPageContent` inside the dashboard layout. Overview +
+/sessions rows now link there. Kid route stays as `/k/[id]/class/[id]/room`.
+
+### 🟡 Awkward
+
+**#B. `/dashboard/parent/courses` empty state has no CTA.**
+Parent with no pre-recorded enrollments saw "Aucun cours en cours"
+with no way forward.
+→ **Fixed**: added a "Parcourir les cours vidéo" button pointing at
+`/fr/courses` (the public catalog).
+
+**#C. Wallet copy-code icon lacks accessible name.**
+Screen readers announce nothing; sighted users see only an icon.
+→ **Fixed**: added `aria-label="Copier le code de parrainage"` +
+`title`.
+
+### ✅ Verified working
+
+- Sidebar nav (8 entries) — all route correctly
+- Overview: Gérer → children, Awa card → /k/[id], upcoming session
+  card now → parent-scoped session route
+- Children: edit pencil opens modal, Ajouter opens modal
+- Sessions: Rejoindre + past-recording Revoir (R2 signed URL)
+- Messages: conversation buttons open thread, input + send work
+- Payments: read-only table renders 3 confirmed transactions
+- Spending: Total + transaction list render correctly
+- Wallet: Solde + referral code + Copier / Partager sur WhatsApp
+- Settings: 3 channel toggles + heures de silence + Enregistrer
+  (no console errors on save)
+
+### Not ship-blocking, logged
+
+- Payments rows not drilling into receipt detail. Defer.
+- Settings "heures de silence" inputs accept HH:MM but have no explicit
+  24h format hint. Minor.

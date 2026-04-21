@@ -29,6 +29,12 @@ export default async function ParentCoursesPage() {
         <BookOpen className="mb-4 size-16 text-slate-300" />
         <h1 className="text-2xl font-bold text-slate-900">{t("myCourses")}</h1>
         <p className="mt-2 text-sm text-slate-500">{t("noCourses")}</p>
+        <Link
+          href="/courses"
+          className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--ev-blue)] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[var(--ev-blue-light)]"
+        >
+          Parcourir les cours vidéo
+        </Link>
       </div>
     );
   }
@@ -50,6 +56,12 @@ export default async function ParentCoursesPage() {
         <BookOpen className="mb-4 size-16 text-slate-300" />
         <h1 className="text-2xl font-bold text-slate-900">{t("myCourses")}</h1>
         <p className="mt-2 text-sm text-slate-500">{t("noCourses")}</p>
+        <Link
+          href="/courses"
+          className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--ev-blue)] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[var(--ev-blue-light)]"
+        >
+          Parcourir les cours vidéo
+        </Link>
       </div>
     );
   }

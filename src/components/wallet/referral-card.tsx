@@ -70,6 +70,8 @@ export function ReferralCard() {
           size="icon"
           onClick={handleCopy}
           className="shrink-0"
+          aria-label="Copier le code de parrainage"
+          title="Copier le code"
         >
           {copied ? <Check className="size-4 text-green-600" /> : <Copy className="size-4" />}
         </Button>

@@ -156,9 +156,10 @@ export default async function ParentOverviewPage() {
         teacher_name: (teacher?.display_name as string | undefined) ?? undefined,
         learner_name: learner?.first_name,
         subject: c.subject as string,
-        // Direct link to the LiveKit room — Rejoindre button opens the
-        // actual video call, not a detail page.
-        join_url: `/session/${c.id}`,
+        // Parent-scoped session route so the dashboard sidebar stays
+        // visible during class. Renders the same content as /session/[id]
+        // but wrapped in DashboardShell.
+        join_url: `/dashboard/parent/session/${c.id}`,
       };
     });
 

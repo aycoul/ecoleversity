@@ -227,7 +227,7 @@ export default async function ParentSessionsPage() {
                 </div>
 
                 <Link
-                  href={`/session/${session.id}`}
+                  href={`/dashboard/parent/session/${session.id}`}
                   className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold transition-colors ${
                     isJoinable
                       ? "bg-[var(--ev-blue)] text-white shadow-sm hover:bg-[var(--ev-blue-light)]"
