@@ -58,8 +58,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Montant insuffisant" }, { status: 400 });
     }
 
-    // Confirm atomically
-    const { data: updated } = await adminSupabase
+    // Confirm atomically. Destructure error so a silent failure (RLS
+    // reject, constraint violation, network blip) can't be mistaken for
+    // "no rows matched" — which would wrongly return success to the
+    // client while leaving the DB pending.
+    const { data: updated, error: updateError } = await adminSupabase
       .from("transactions")
       .update({
         status: "confirmed",
@@ -70,7 +73,27 @@ export async function POST(request: NextRequest) {
       .select("id")
       .maybeSingle();
 
+    if (updateError) {
+      console.error(
+        "[paypal-capture] Update failed:",
+        updateError.code,
+        updateError.message,
+        updateError.details,
+      );
+      return NextResponse.json(
+        { error: "Erreur lors de la confirmation du paiement", hint: updateError.message },
+        { status: 500 },
+      );
+    }
+
     if (!updated) {
+      // Race condition — someone else flipped it to confirmed between
+      // our SELECT and UPDATE. Treat as success but log so we notice
+      // if it starts happening often.
+      console.warn(
+        "[paypal-capture] update matched 0 rows",
+        { tx: transaction.id, startingStatus: transaction.status },
+      );
       return NextResponse.json({ data: { status: "already_confirmed" } });
     }
 
