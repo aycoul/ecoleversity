@@ -13,7 +13,8 @@ import {
   type ContinueWatchingItem,
 } from "@/components/dashboard/continue-watching-rail";
 import type { GradeLevel } from "@/types/domain";
-import { Plus } from "lucide-react";
+import { Plus, ArrowRight, AlertCircle } from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
 
 // Live data — parent queue changes as admin confirms enrollments
 export const dynamic = "force-dynamic";
@@ -186,6 +187,27 @@ export default async function ParentOverviewPage() {
       };
     });
 
+  // In-flight payments — surface the most recent pending transaction
+  // so a parent who closed the checkout tab can pick up where they
+  // left off without hunting through email.
+  const { data: pendingTx } = await adminRead
+    .from("transactions")
+    .select("id, amount_xof, payment_reference, teacher_id")
+    .eq("parent_id", user.id)
+    .eq("status", "pending")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const pendingTeacherName = pendingTx
+    ? (
+        await adminRead
+          .from("profiles")
+          .select("display_name")
+          .eq("id", pendingTx.teacher_id as string)
+          .maybeSingle()
+      ).data?.display_name ?? "Enseignant"
+    : null;
+
   return (
     <div className="space-y-8">
       {/* Greeting banner */}
@@ -199,6 +221,32 @@ export default async function ParentOverviewPage() {
             : t("childCount", { count: children.length })}
         </p>
       </div>
+
+      {/* Pending-payment banner — one tap to finish checkout */}
+      {pendingTx && (
+        <Link
+          href={`/payment/${pendingTx.id}`}
+          className="flex items-center justify-between rounded-xl border border-amber-300 bg-amber-50 p-4 transition-colors hover:bg-amber-100"
+        >
+          <div className="flex items-center gap-3">
+            <AlertCircle className="size-5 shrink-0 text-amber-600" />
+            <div>
+              <p className="text-sm font-semibold text-amber-900">
+                Paiement à finaliser
+              </p>
+              <p className="text-xs text-amber-800">
+                {formatCurrency(pendingTx.amount_xof as number)} · {pendingTeacherName}
+                {pendingTx.payment_reference
+                  ? ` · Réf ${pendingTx.payment_reference}`
+                  : ""}
+              </p>
+            </div>
+          </div>
+          <span className="inline-flex items-center gap-1 text-sm font-semibold text-amber-800">
+            Finaliser <ArrowRight className="size-4" />
+          </span>
+        </Link>
+      )}
 
       {/* Kids */}
       {children.length === 0 ? (

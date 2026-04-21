@@ -2,7 +2,8 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { Receipt } from "lucide-react";
+import { Link } from "@/i18n/routing";
+import { Receipt, ArrowRight } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -87,12 +88,43 @@ export default async function ParentPaymentsPage() {
     return t(key);
   };
 
+  // Surface any in-flight payments at the top so parents can finish
+  // them without digging back through their email or the booking flow.
+  const pending = enriched.filter((tx) => tx.status === "pending");
+
   return (
     <div className="pb-20 md:pb-0">
       <div className="mb-8 flex items-center gap-3">
         <Receipt className="size-7 text-[var(--ev-blue)]" />
         <h1 className="text-2xl font-bold text-slate-900">{t("title")}</h1>
       </div>
+
+      {pending.length > 0 && (
+        <div className="mb-6 space-y-2">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-amber-700">
+            Paiements en attente
+          </h2>
+          {pending.map((tx) => (
+            <Link
+              key={tx.id}
+              href={`/payment/${tx.id}`}
+              className="flex items-center justify-between rounded-xl border border-amber-300 bg-amber-50 p-4 shadow-sm transition-colors hover:bg-amber-100"
+            >
+              <div>
+                <p className="text-sm font-semibold text-amber-900">
+                  {formatCurrency(tx.amount_xof)} · {tx.teacherName}
+                </p>
+                <p className="text-xs text-amber-700">
+                  Réf {tx.payment_reference ?? "—"} · {formatDate(tx.created_at)}
+                </p>
+              </div>
+              <span className="inline-flex items-center gap-1 text-sm font-semibold text-amber-800">
+                Finaliser <ArrowRight className="size-4" />
+              </span>
+            </Link>
+          ))}
+        </div>
+      )}
 
       {enriched.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-16 text-center">

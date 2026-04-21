@@ -22,6 +22,9 @@ type PaymentInstructionsProps = {
   scheduledAt: string;
   durationMinutes: number;
   createdAt: string;
+  /** Server-rendered 256×256 PNG data URLs. Null when the env var isn't set. */
+  orangeQR?: string | null;
+  waveQR?: string | null;
 };
 
 const EXPIRY_HOURS = 2;
@@ -142,6 +145,8 @@ export function PaymentInstructions({
   scheduledAt,
   durationMinutes,
   createdAt,
+  orangeQR,
+  waveQR,
 }: PaymentInstructionsProps) {
   const t = useTranslations("payment");
   const router = useRouter();
@@ -267,35 +272,60 @@ export function PaymentInstructions({
         {t("instructions", { amount: formattedAmount })}
       </p>
 
-      {/* Orange Money */}
+      {/* Orange Money — QR code scans straight into the Orange app
+          which prefills the recipient so parent only types the amount. */}
       {orangeNumber && (
         <div className="rounded-xl border border-orange-200 bg-orange-50 p-4">
-          <div className="mb-2 flex items-center gap-2">
+          <div className="mb-3 flex items-center gap-2">
             <span className="text-lg">🟠</span>
             <span className="text-sm font-semibold text-orange-800">
               {t("orangeMoney")}
             </span>
           </div>
-          <p className="mb-2 font-mono text-lg font-bold text-orange-900">
-            {orangeNumber}
-          </p>
-          <CopyButton text={orangeNumber} label={t("copyNumber")} />
+          <div className="flex items-center gap-4">
+            {orangeQR && (
+              <img
+                src={orangeQR}
+                alt={`QR Orange Money ${orangeNumber}`}
+                className="size-28 shrink-0 rounded-lg border border-orange-200 bg-white p-1.5"
+              />
+            )}
+            <div className="min-w-0 flex-1">
+              <p className="mb-1 text-xs text-orange-700">Numéro</p>
+              <p className="mb-2 break-all font-mono text-lg font-bold text-orange-900">
+                {orangeNumber}
+              </p>
+              <CopyButton text={orangeNumber} label={t("copyNumber")} />
+            </div>
+          </div>
         </div>
       )}
 
       {/* Wave */}
       {waveNumber && (
         <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
-          <div className="mb-2 flex items-center gap-2">
+          <div className="mb-3 flex items-center gap-2">
             <span className="text-lg">🔵</span>
             <span className="text-sm font-semibold text-blue-800">
               {t("wave")}
             </span>
           </div>
-          <p className="mb-2 font-mono text-lg font-bold text-blue-900">
-            {waveNumber}
-          </p>
-          <CopyButton text={waveNumber} label={t("copyNumber")} />
+          <div className="flex items-center gap-4">
+            {waveQR && (
+              <img
+                src={waveQR}
+                alt={`QR Wave ${waveNumber}`}
+                className="size-28 shrink-0 rounded-lg border border-blue-200 bg-white p-1.5"
+              />
+            )}
+            <div className="min-w-0 flex-1">
+              <p className="mb-1 text-xs text-blue-700">Numéro</p>
+              <p className="mb-2 break-all font-mono text-lg font-bold text-blue-900">
+                {waveNumber}
+              </p>
+              <CopyButton text={waveNumber} label={t("copyNumber")} />
+            </div>
+          </div>
         </div>
       )}
 
