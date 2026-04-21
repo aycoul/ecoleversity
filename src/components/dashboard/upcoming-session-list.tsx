@@ -56,11 +56,16 @@ export async function UpcomingSessionList({
     <div className="space-y-2">
       {sessions.map((session) => {
         const joinable = isJoinable(session);
-        const href = session.join_url ?? `#`;
+        // Always land on the session page — it handles every state
+        // (waiting → countdown, ready → join CTA, live → embed, ended
+        // → recording). Users tapping the card get the same affordance
+        // before the class starts as during the class.
+        const href = session.join_url ?? `/session/${session.id}`;
         return (
-          <div
+          <Link
             key={session.id}
-            className="flex items-center gap-4 rounded-lg border border-slate-200 bg-white p-4 transition-colors hover:border-[var(--ev-blue)]"
+            href={href}
+            className="flex items-center gap-4 rounded-lg border border-slate-200 bg-white p-4 transition-colors hover:border-[var(--ev-blue)] hover:shadow-sm"
           >
             <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[var(--ev-blue-50)] text-[var(--ev-blue)]">
               <Video className="size-5" />
@@ -81,16 +86,13 @@ export async function UpcomingSessionList({
               </div>
             </div>
             {joinable ? (
-              <Link
-                href={href}
-                className="rounded-lg bg-[var(--ev-green)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--ev-green-dark)]"
-              >
+              <span className="shrink-0 rounded-lg bg-[var(--ev-green)] px-4 py-2 text-sm font-semibold text-white">
                 {t("join")}
-              </Link>
+              </span>
             ) : (
-              <ChevronRight className="size-5 text-slate-400" />
+              <ChevronRight className="size-5 shrink-0 text-slate-400" />
             )}
-          </div>
+          </Link>
         );
       })}
     </div>
