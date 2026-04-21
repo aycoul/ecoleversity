@@ -27,6 +27,7 @@ import {
   Cpu,
   TrendingUp,
   Award,
+  Search,
 } from "lucide-react";
 
 type NavLink = {
@@ -68,6 +69,7 @@ const iconMap: Record<string, React.ElementType> = {
   cpu: Cpu,
   "trending-up": TrendingUp,
   award: Award,
+  search: Search,
 };
 
 export function DashboardShell({

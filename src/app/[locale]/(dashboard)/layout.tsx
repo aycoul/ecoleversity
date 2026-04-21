@@ -119,6 +119,7 @@ export default async function DashboardLayout({
     ],
     parent: [
       { href: "/dashboard/parent", label: t("myChildren"), icon: "users" },
+      { href: "/teachers", label: t("findTeacher"), icon: "search" },
       { href: "/dashboard/parent/sessions", label: t("upcomingSessions"), icon: "calendar" },
       { href: "/dashboard/parent/courses", label: t("recordedCourses"), icon: "play-circle" },
       { href: "/dashboard/parent/messages", label: t("messages"), icon: "message-circle" },

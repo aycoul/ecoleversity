@@ -219,7 +219,7 @@ export function PaymentInstructions({
             {t("confirmedMessage")}
           </p>
           <Button
-            onClick={() => router.push("/dashboard")}
+            onClick={() => router.push("/dashboard/parent/overview")}
             className="mt-6 bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]"
           >
             {t("goToSession")}
@@ -239,7 +239,7 @@ export function PaymentInstructions({
             {t("expired")}
           </h2>
           <Button
-            onClick={() => router.push("/dashboard")}
+            onClick={() => router.push("/dashboard/parent/overview")}
             variant="outline"
             className="mt-6"
           >
