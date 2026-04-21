@@ -29,7 +29,10 @@ export async function verifyPaypalOrder(
   payerEmail: string;
   captureId: string;
 }> {
-  const clientId = process.env.PAYPAL_CLIENT_ID;
+  // Client ID is the same value used client-side (public), so we reuse
+  // the config helper with its hardcoded fallback. Secret stays env-only.
+  const { getPaypalClientId } = await import("./config");
+  const clientId = getPaypalClientId();
   const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
 
   if (!clientId || !clientSecret) {

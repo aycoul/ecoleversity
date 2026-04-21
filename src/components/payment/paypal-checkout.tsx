@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { CreditCard, Loader2 } from "lucide-react";
 import { xofToEur } from "@/lib/payments/paypal";
+import { getPaypalClientId } from "@/lib/payments/config";
 
 type PaypalCheckoutProps = {
   paymentReference: string;
@@ -32,7 +33,7 @@ export function PaypalCheckout({
   const [error, setError] = useState<string | null>(null);
   const [sdkReady, setSdkReady] = useState(false);
 
-  const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
+  const clientId = getPaypalClientId();
   const amountEur = xofToEur(amountXof);
 
   // Load PayPal SDK

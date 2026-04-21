@@ -22,9 +22,12 @@ type PaymentInstructionsProps = {
   scheduledAt: string;
   durationMinutes: number;
   createdAt: string;
-  /** Server-rendered 256×256 PNG data URLs. Null when the env var isn't set. */
+  /** Server-rendered 256×256 PNG data URLs. Null when no number configured. */
   orangeQR?: string | null;
   waveQR?: string | null;
+  /** Resolved from env or hardcoded fallback on the server. */
+  orangeNumber?: string;
+  waveNumber?: string;
 };
 
 const EXPIRY_HOURS = 2;
@@ -147,6 +150,8 @@ export function PaymentInstructions({
   createdAt,
   orangeQR,
   waveQR,
+  orangeNumber: orangeNumberProp,
+  waveNumber: waveNumberProp,
 }: PaymentInstructionsProps) {
   const t = useTranslations("payment");
   const router = useRouter();
@@ -161,8 +166,9 @@ export function PaymentInstructions({
   );
   const { timeLeft, isExpired } = useCountdown(expiresAt);
 
-  const orangeNumber = process.env.NEXT_PUBLIC_ORANGE_MONEY_NUMBER ?? "";
-  const waveNumber = process.env.NEXT_PUBLIC_WAVE_NUMBER ?? "";
+  // Server passed resolved values (env var with hardcoded fallback)
+  const orangeNumber = orangeNumberProp ?? "";
+  const waveNumber = waveNumberProp ?? "";
 
   const checkStatus = useCallback(async () => {
     try {

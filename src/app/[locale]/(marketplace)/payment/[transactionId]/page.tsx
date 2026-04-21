@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { PaymentInstructions } from "@/components/payment/payment-instructions";
 import { generatePaymentQR, orangeMoneyUri, waveUri } from "@/lib/payments/qr";
+import { getOrangeMoneyNumber, getWaveNumber } from "@/lib/payments/config";
 
 export default async function PaymentPage({
   params,
@@ -68,8 +69,8 @@ export default async function PaymentPage({
 
   // Pre-render the QR codes server-side so the parent's device doesn't
   // need to load a JS QR library just to show 256×256 PNGs.
-  const orangeNumber = process.env.NEXT_PUBLIC_ORANGE_MONEY_NUMBER ?? "";
-  const waveNumber = process.env.NEXT_PUBLIC_WAVE_NUMBER ?? "";
+  const orangeNumber = getOrangeMoneyNumber();
+  const waveNumber = getWaveNumber();
   const orangeQR = orangeNumber
     ? await generatePaymentQR(orangeMoneyUri(orangeNumber))
     : null;
@@ -86,6 +87,8 @@ export default async function PaymentPage({
       createdAt={transaction.created_at}
       orangeQR={orangeQR}
       waveQR={waveQR}
+      orangeNumber={orangeNumber}
+      waveNumber={waveNumber}
     />
   );
 }
