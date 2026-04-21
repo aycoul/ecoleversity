@@ -18,6 +18,7 @@ type LiveKitRoomEmbedProps = {
   liveClassId: string;
   userRole: "parent" | "teacher";
   onClose?: () => void;
+  actingAsLearnerId?: string;
 };
 
 type TokenResponse = {
@@ -30,6 +31,7 @@ export function LiveKitRoomEmbed({
   liveClassId,
   userRole,
   onClose,
+  actingAsLearnerId,
 }: LiveKitRoomEmbedProps) {
   const t = useTranslations("session");
   const [connection, setConnection] = useState<TokenResponse | null>(null);
@@ -43,7 +45,7 @@ export function LiveKitRoomEmbed({
         const tokenRes = await fetch("/api/livekit/token", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ liveClassId }),
+          body: JSON.stringify({ liveClassId, learnerId: actingAsLearnerId }),
         });
 
         if (!tokenRes.ok) {
@@ -75,7 +77,7 @@ export function LiveKitRoomEmbed({
     return () => {
       cancelled = true;
     };
-  }, [liveClassId, userRole]);
+  }, [liveClassId, userRole, actingAsLearnerId]);
 
   // Teacher leave → stop egress so we don't bill for a phantom recording.
   useEffect(() => {
@@ -139,7 +141,7 @@ export function LiveKitRoomEmbed({
         onDisconnected={onClose}
         style={{ height: "100%" }}
       >
-        <RoomLayout liveClassId={liveClassId} />
+        <RoomLayout liveClassId={liveClassId} actingAsLearnerId={actingAsLearnerId} />
         <RoomAudioRenderer />
       </LiveKitRoom>
     </div>
@@ -152,7 +154,13 @@ export function LiveKitRoomEmbed({
  * local state and wired to the ControlBar's chat toggle via the standard
  * LayoutContext that ControlBar reads from.
  */
-function RoomLayout({ liveClassId }: { liveClassId: string }) {
+function RoomLayout({
+  liveClassId,
+  actingAsLearnerId,
+}: {
+  liveClassId: string;
+  actingAsLearnerId?: string;
+}) {
   const [chatOpen, setChatOpen] = useState(false);
 
   // Camera + screen share tile refs for GridLayout
@@ -191,7 +199,10 @@ function RoomLayout({ liveClassId }: { liveClassId: string }) {
               </button>
             </div>
             <div className="flex-1 overflow-hidden">
-              <ModeratedChat liveClassId={liveClassId} />
+              <ModeratedChat
+                liveClassId={liveClassId}
+                actingAsLearnerId={actingAsLearnerId}
+              />
             </div>
           </aside>
         ) : null}

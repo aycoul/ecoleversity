@@ -26,6 +26,7 @@ type SessionRoomProps = {
   subjectLabel: string;
   userRole: "parent" | "teacher";
   hasRecording?: boolean;
+  actingAsLearnerId?: string;
 };
 
 function computeState(
@@ -51,6 +52,7 @@ export function SessionRoom({
   subjectLabel,
   userRole,
   hasRecording,
+  actingAsLearnerId,
 }: SessionRoomProps) {
   const t = useTranslations("session");
   const scheduledDate = new Date(scheduledAt);
@@ -272,6 +274,7 @@ export function SessionRoom({
           liveClassId={sessionId}
           userRole={userRole}
           onClose={handleLeave}
+          actingAsLearnerId={actingAsLearnerId}
         />
       </div>
     );

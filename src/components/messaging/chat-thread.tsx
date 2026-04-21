@@ -25,12 +25,14 @@ type ChatThreadProps = {
   conversationId: string;
   currentUserId: string;
   otherUserName: string;
+  actingAsLearnerId?: string;
 };
 
 export function ChatThread({
   conversationId,
   currentUserId,
   otherUserName,
+  actingAsLearnerId,
 }: ChatThreadProps) {
   const t = useTranslations("messaging");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -275,6 +277,7 @@ export function ChatThread({
       <MessageInput
         conversationId={conversationId}
         onMessageSent={fetchMessages}
+        actingAsLearnerId={actingAsLearnerId}
       />
     </div>
   );

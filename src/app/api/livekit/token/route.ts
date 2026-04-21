@@ -9,6 +9,11 @@ import {
 
 const schema = z.object({
   liveClassId: z.string().uuid(),
+  // When the session was joined from /k/[learner_id]/* the client
+  // includes the learner ID. We swap the participant display name to
+  // the kid's first name and tag the token metadata so the teacher
+  // sees "Awa" in the video tile + chat instead of "Test Parent".
+  learnerId: z.string().uuid().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -20,7 +25,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    const { liveClassId } = parsed.data;
+    const { liveClassId, learnerId } = parsed.data;
 
     const supabase = await createServerSupabaseClient();
     const {
@@ -82,12 +87,38 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
     }
 
+    // If joining from kid mode, substitute the learner's first name so
+    // teachers see "Awa" on the video tile + chat. We still ship the
+    // parent UUID as the LiveKit identity (one auth per family), but
+    // the display layer swaps. Validate the learner belongs to this
+    // parent so a malicious client can't impersonate another family's
+    // kid.
+    let displayName = profile.display_name ?? user.email ?? "Utilisateur";
+    let actingLearner: { id: string; first_name: string } | null = null;
+    if (learnerId && role === "parent") {
+      const { data: learner } = await supabase
+        .from("learner_profiles")
+        .select("id, first_name")
+        .eq("id", learnerId)
+        .eq("parent_id", user.id)
+        .maybeSingle();
+      if (learner) {
+        actingLearner = {
+          id: learner.id as string,
+          first_name: learner.first_name as string,
+        };
+        displayName = actingLearner.first_name;
+      }
+    }
+
     const token = await generateAccessToken({
       roomName: getRoomName(liveClassId),
       userId: user.id,
-      displayName: profile.display_name ?? user.email ?? "Utilisateur",
+      displayName,
       userEmail: user.email ?? null,
       role,
+      actingAsLearnerId: actingLearner?.id ?? null,
+      actingAsLearnerName: actingLearner?.first_name ?? null,
     });
 
     return NextResponse.json({

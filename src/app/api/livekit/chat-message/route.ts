@@ -7,6 +7,9 @@ import { detectPII, blockReasonMessage } from "@/lib/moderation/pii-detector";
 const schema = z.object({
   liveClassId: z.string().uuid(),
   content: z.string().min(1).max(2000),
+  // When the parent is in kid mode, the client stamps the learner_id so
+  // teachers/admins can see "Awa typed this" rather than "the parent".
+  learnerId: z.string().uuid().optional(),
 });
 
 /**
@@ -28,7 +31,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    const { liveClassId, content } = parsed.data;
+    const { liveClassId, content, learnerId } = parsed.data;
 
     const supabase = await createServerSupabaseClient();
     const {
@@ -91,6 +94,19 @@ export async function POST(request: NextRequest) {
     const moderation = detectPII(content);
     const blocked = !moderation.allowed;
 
+    // Validate learner belongs to sender before stamping (parents only;
+    // teachers/admin ignore learnerId). Prevents forged attribution.
+    let actingAsLearnerId: string | null = null;
+    if (learnerId && role === "parent") {
+      const { data: ownsLearner } = await admin
+        .from("learner_profiles")
+        .select("id")
+        .eq("id", learnerId)
+        .eq("parent_id", user.id)
+        .maybeSingle();
+      if (ownsLearner) actingAsLearnerId = learnerId;
+    }
+
     // Log (audit). Graceful degrade if the migration hasn't landed yet:
     // we still block on PII, we just skip the persistent record.
     const { error: logError } = await admin
@@ -103,6 +119,7 @@ export async function POST(request: NextRequest) {
         blocked,
         block_reason: blocked ? moderation.blockReason : null,
         matched_pattern: blocked ? moderation.matchedPattern ?? null : null,
+        acting_as_learner_id: actingAsLearnerId,
       });
     if (logError && logError.code !== "42P01") {
       // 42P01 = table doesn't exist yet (migration pending). Any other

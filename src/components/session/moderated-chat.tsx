@@ -6,6 +6,7 @@ import { useChat } from "@livekit/components-react";
 
 type ModeratedChatProps = {
   liveClassId: string;
+  actingAsLearnerId?: string;
 };
 
 /**
@@ -17,7 +18,10 @@ type ModeratedChatProps = {
  * A blocked message never reaches useChat().send() — the client shows
  * a red inline warning and clears the input.
  */
-export function ModeratedChat({ liveClassId }: ModeratedChatProps) {
+export function ModeratedChat({
+  liveClassId,
+  actingAsLearnerId,
+}: ModeratedChatProps) {
   const { chatMessages, send, isSending } = useChat();
   const [input, setInput] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +39,11 @@ export function ModeratedChat({ liveClassId }: ModeratedChatProps) {
       const res = await fetch("/api/livekit/chat-message", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ liveClassId, content }),
+        body: JSON.stringify({
+          liveClassId,
+          content,
+          learnerId: actingAsLearnerId,
+        }),
       });
 
       if (res.status === 422) {

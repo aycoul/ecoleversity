@@ -127,6 +127,7 @@ export function Inbox({ learnerId }: InboxProps = {}) {
               conversationId={active.id}
               currentUserId={currentUserId}
               otherUserName={active.other.display_name}
+              actingAsLearnerId={learnerId}
             />
           </>
         ) : (

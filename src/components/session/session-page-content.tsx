@@ -19,6 +19,12 @@ type SessionPageContentProps = {
    * — or hide the bar entirely.
    */
   backHref?: string;
+  /**
+   * Stamped when the parent joined from kid mode. Propagates down to
+   * the LiveKit token + chat API so teachers see the kid's name as
+   * the participant display / message author.
+   */
+  actingAsLearnerId?: string;
 };
 
 /**
@@ -34,6 +40,7 @@ export async function SessionPageContent({
   sessionId,
   hideBackBar = false,
   backHref,
+  actingAsLearnerId,
 }: SessionPageContentProps) {
   const supabase = await createServerSupabaseClient();
 
@@ -146,6 +153,7 @@ export async function SessionPageContent({
           subjectLabel={subjectLabel}
           userRole={role === "teacher" ? "teacher" : "parent"}
           hasRecording={hasRecording}
+          actingAsLearnerId={actingAsLearnerId}
         />
       </div>
     </div>

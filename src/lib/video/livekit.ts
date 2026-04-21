@@ -8,6 +8,11 @@ type TokenInput = {
   displayName: string;
   userEmail: string | null;
   role: UserRole;
+  // Present when a parent joined from /k/[learner_id]/* — stamped on
+  // the JWT metadata so the teacher's client can label messages with
+  // the kid's name.
+  actingAsLearnerId?: string | null;
+  actingAsLearnerName?: string | null;
 };
 
 export function getLiveKitUrl(): string {
@@ -26,6 +31,8 @@ export async function generateAccessToken({
   displayName,
   userEmail,
   role,
+  actingAsLearnerId = null,
+  actingAsLearnerName = null,
 }: TokenInput): Promise<string> {
   const apiKey = process.env.LIVEKIT_API_KEY;
   const apiSecret = process.env.LIVEKIT_API_SECRET;
@@ -38,7 +45,12 @@ export async function generateAccessToken({
   const at = new AccessToken(apiKey, apiSecret, {
     identity: userId,
     name: displayName,
-    metadata: JSON.stringify({ role, email: userEmail }),
+    metadata: JSON.stringify({
+      role,
+      email: userEmail,
+      actingAsLearnerId,
+      actingAsLearnerName,
+    }),
     ttl: "1h",
   });
 

@@ -8,6 +8,8 @@ const sendMessageSchema = z.object({
   conversationId: z.string().uuid(),
   content: z.string().min(1).max(2000),
   // No attachments per spec — no image uploads in DMs.
+  // Present when the parent sent from kid mode; stamped for attribution.
+  learnerId: z.string().uuid().optional(),
 });
 
 export async function GET(request: NextRequest) {
@@ -106,7 +108,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { conversationId, content } = parsed.data;
+    const { conversationId, content, learnerId } = parsed.data;
     const supabase = await createServerSupabaseClient();
     const {
       data: { user },
@@ -154,6 +156,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Attribution stamp — only kept if the parent actually owns the
+    // learner. Anyone could post any UUID but we defensively validate.
+    let actingAsLearnerId: string | null = null;
+    if (learnerId) {
+      const { data: owns } = await supabase
+        .from("learner_profiles")
+        .select("id")
+        .eq("id", learnerId)
+        .eq("parent_id", user.id)
+        .maybeSingle();
+      if (owns) actingAsLearnerId = learnerId;
+    }
+
     // Insert the clean message
     const { data: message, error } = await supabase
       .from("messages")
@@ -162,9 +177,10 @@ export async function POST(request: NextRequest) {
         sender_id: user.id,
         content,
         moderation_status: "clean",
+        acting_as_learner_id: actingAsLearnerId,
       })
       .select(
-        "id, sender_id, content, moderation_status, attachments, created_at"
+        "id, sender_id, content, moderation_status, attachments, acting_as_learner_id, created_at"
       )
       .single();
 

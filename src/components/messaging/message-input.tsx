@@ -26,11 +26,14 @@ type Attachment = {
 type MessageInputProps = {
   conversationId: string;
   onMessageSent: () => void;
+  /** When the parent is in kid mode, stamp the learner on outbound messages. */
+  actingAsLearnerId?: string;
 };
 
 export function MessageInput({
   conversationId,
   onMessageSent,
+  actingAsLearnerId,
 }: MessageInputProps) {
   const t = useTranslations("messaging");
   const [content, setContent] = useState("");
@@ -117,6 +120,7 @@ export function MessageInput({
           conversationId,
           content: trimmed || "(fichier joint)",
           attachments,
+          learnerId: actingAsLearnerId,
         }),
       });
 

@@ -20,6 +20,7 @@ export default async function KidClassRoomPage({
       sessionId={id}
       hideBackBar
       backHref={`/k/${learner_id}`}
+      actingAsLearnerId={learner_id}
     />
   );
 }
