@@ -72,9 +72,11 @@ export default async function PaymentPage({
   const orangeNumber = getOrangeMoneyNumber();
   const waveNumber = getWaveNumber();
   const orangeQR = orangeNumber
-    ? await generatePaymentQR(orangeMoneyUri(orangeNumber))
+    ? await generatePaymentQR(orangeMoneyUri(orangeNumber, transaction.amount_xof))
     : null;
-  const waveQR = waveNumber ? await generatePaymentQR(waveUri(waveNumber)) : null;
+  const waveQR = waveNumber
+    ? await generatePaymentQR(waveUri(waveNumber, transaction.amount_xof))
+    : null;
 
   return (
     <PaymentInstructions
