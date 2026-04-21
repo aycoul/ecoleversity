@@ -321,6 +321,12 @@ export function LoginForm() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                // Browser autofill silently hydrates this field with a
+                // previously saved email after our initial render. React's
+                // onChange only fires on user input, so the next keystroke
+                // appends to the autofilled value instead of replacing it.
+                // Selecting on focus makes the first keystroke overwrite.
+                onFocus={(e) => e.currentTarget.select()}
                 autoComplete="email"
                 autoFocus
               />
@@ -337,6 +343,7 @@ export function LoginForm() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                onFocus={(e) => e.currentTarget.select()}
                 autoComplete="current-password"
               />
             </div>
