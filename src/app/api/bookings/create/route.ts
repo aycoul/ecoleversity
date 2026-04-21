@@ -8,6 +8,7 @@ import {
   calculateSessionPrice,
   calculateCommission,
 } from "@/lib/booking";
+import { SUBJECT_LABELS, type Subject } from "@/types/domain";
 
 const bookingSchema = z.object({
   teacherId: z.string().uuid(),
@@ -128,7 +129,7 @@ export async function POST(request: NextRequest) {
       .from("live_classes")
       .insert({
         teacher_id: teacherId,
-        title: `Cours particulier — ${subject}`,
+        title: `Cours particulier — ${SUBJECT_LABELS[subject as Subject] ?? subject}`,
         description: note ?? null,
         subject,
         grade_level: gradeLevel,

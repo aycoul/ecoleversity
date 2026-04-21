@@ -19,13 +19,17 @@ type PendingPaymentsProps = {
   transactions: PendingTransaction[];
 };
 
+// Uses fr-FR + explicit Africa/Abidjan timezone so SSR (Node, usually UTC) and
+// the browser produce byte-identical output. fr-CI falls back differently
+// between V8 (Chrome) and Node's ICU, which caused React hydration error #418.
 function formatDate(isoString: string): string {
-  return new Date(isoString).toLocaleDateString("fr-CI", {
+  return new Date(isoString).toLocaleString("fr-FR", {
     day: "numeric",
     month: "short",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "Africa/Abidjan",
   });
 }
 

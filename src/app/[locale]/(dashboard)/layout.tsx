@@ -56,11 +56,17 @@ export default async function DashboardLayout({
       avatar_url: (l.avatar_url as string | null) ?? null,
     }));
 
+    // Only count transactions within the 2h expiry window (matches
+    // EXPIRY_HOURS in payment-instructions.tsx). Without this, stale
+    // rows that the UI already considers "expired" still inflate the
+    // badge and tempt the parent into a dead-end "Finaliser" click.
+    const expiryCutoff = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
     const { count } = await supabase
       .from("transactions")
       .select("id", { count: "exact", head: true })
       .eq("parent_id", user.id)
-      .eq("status", "pending");
+      .eq("status", "pending")
+      .gte("created_at", expiryCutoff);
     pendingPaymentsCount = count ?? 0;
   }
   const t = await getTranslations("dashboard.sidebar");

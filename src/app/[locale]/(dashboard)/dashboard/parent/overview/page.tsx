@@ -189,12 +189,16 @@ export default async function ParentOverviewPage() {
 
   // In-flight payments — surface the most recent pending transaction
   // so a parent who closed the checkout tab can pick up where they
-  // left off without hunting through email.
+  // left off without hunting through email. Filter to rows still within
+  // the 2h expiry window (matches EXPIRY_HOURS in payment-instructions.tsx)
+  // so the card only appears when the "Finaliser" CTA actually works.
+  const pendingExpiryCutoff = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
   const { data: pendingTx } = await adminRead
     .from("transactions")
     .select("id, amount_xof, payment_reference, teacher_id")
     .eq("parent_id", user.id)
     .eq("status", "pending")
+    .gte("created_at", pendingExpiryCutoff)
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
