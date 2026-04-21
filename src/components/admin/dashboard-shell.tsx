@@ -33,6 +33,8 @@ type NavLink = {
   href: string;
   label: string;
   icon: string;
+  /** Number shown as a red badge next to the label. Hidden when 0 / undefined. */
+  badge?: number;
 };
 
 type DashboardShellProps = {
@@ -105,7 +107,15 @@ export function DashboardShell({
                     )}
                   >
                     <Icon className="size-4" />
-                    {link.label}
+                    <span className="flex-1">{link.label}</span>
+                    {!!link.badge && link.badge > 0 && (
+                      <span
+                        aria-label={`${link.badge} en attente`}
+                        className="inline-flex min-w-5 items-center justify-center rounded-full bg-amber-500 px-1.5 text-[0.65rem] font-bold text-white"
+                      >
+                        {link.badge}
+                      </span>
+                    )}
                   </Link>
                 </li>
               );
@@ -157,13 +167,23 @@ export function DashboardShell({
                 <Link
                   href={link.href}
                   className={cn(
-                    "flex flex-col items-center gap-0.5 px-3 py-2 text-[0.65rem]",
+                    "relative flex flex-col items-center gap-0.5 px-3 py-2 text-[0.65rem]",
                     isActive
                       ? "text-[var(--ev-blue)]"
                       : "text-slate-400"
                   )}
                 >
-                  <Icon className="size-5" />
+                  <div className="relative">
+                    <Icon className="size-5" />
+                    {!!link.badge && link.badge > 0 && (
+                      <span
+                        aria-label={`${link.badge} en attente`}
+                        className="absolute -right-2 -top-1 inline-flex min-w-4 items-center justify-center rounded-full bg-amber-500 px-1 text-[0.55rem] font-bold text-white"
+                      >
+                        {link.badge}
+                      </span>
+                    )}
+                  </div>
                   <span className="truncate">{link.label}</span>
                 </Link>
               </li>

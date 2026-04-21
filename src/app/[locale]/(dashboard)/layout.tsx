@@ -38,8 +38,11 @@ export default async function DashboardLayout({
   const role = profile.role as UserRole;
   const adminScope = (profile.admin_scope as AdminScope | null) ?? null;
 
-  // For parents, fetch learners for the AvatarSwitcher dropdown
+  // For parents, fetch learners for the AvatarSwitcher dropdown +
+  // count pending transactions so the sidebar can badge "Paiements"
+  // when the parent has a payment waiting to be finalized.
   let learners: AvatarSwitcherLearner[] = [];
+  let pendingPaymentsCount = 0;
   if (role === "parent") {
     const { data: learnerRows } = await supabase
       .from("learner_profiles")
@@ -52,6 +55,13 @@ export default async function DashboardLayout({
       grade_level: l.grade_level as GradeLevel,
       avatar_url: (l.avatar_url as string | null) ?? null,
     }));
+
+    const { count } = await supabase
+      .from("transactions")
+      .select("id", { count: "exact", head: true })
+      .eq("parent_id", user.id)
+      .eq("status", "pending");
+    pendingPaymentsCount = count ?? 0;
   }
   const t = await getTranslations("dashboard.sidebar");
 
@@ -91,7 +101,10 @@ export default async function DashboardLayout({
     icon: "settings",
   });
 
-  const navConfig: Record<UserRole, Array<{ href: string; label: string; icon: string }>> = {
+  const navConfig: Record<
+    UserRole,
+    Array<{ href: string; label: string; icon: string; badge?: number }>
+  > = {
     admin: adminNav,
     teacher: [
       { href: "/dashboard/teacher", label: t("myProfile"), icon: "user" },
@@ -109,7 +122,7 @@ export default async function DashboardLayout({
       { href: "/dashboard/parent/sessions", label: t("upcomingSessions"), icon: "calendar" },
       { href: "/dashboard/parent/courses", label: t("recordedCourses"), icon: "play-circle" },
       { href: "/dashboard/parent/messages", label: t("messages"), icon: "message-circle" },
-      { href: "/dashboard/parent/payments", label: t("payments"), icon: "receipt" },
+      { href: "/dashboard/parent/payments", label: t("payments"), icon: "receipt", badge: pendingPaymentsCount },
       { href: "/dashboard/parent/spending", label: t("spending"), icon: "trending-up" },
       { href: "/dashboard/parent/wallet", label: t("wallet"), icon: "wallet" },
       { href: "/dashboard/settings/notifications", label: t("settings"), icon: "settings" },
