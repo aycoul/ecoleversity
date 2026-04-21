@@ -115,9 +115,10 @@ export default async function KidHomePage({ params }: PageProps) {
       (teachers ?? []).find((t) => t.id === (c.teacher_id as string))
         ?.display_name ?? undefined,
     subject: c.subject as string,
-    // Direct link to the LiveKit room — skips the intermediate redirect
-    // wrapper that used to forward here anyway.
-    join_url: `/session/${c.id}`,
+    // Stay inside kid layout so the sidebar + "Retour en mode parent"
+    // stay visible while the class is running. The kid room page
+    // reuses SessionPageContent and inherits the shell.
+    join_url: `/k/${learner_id}/class/${c.id}/room`,
   }));
 
   // Continue watching

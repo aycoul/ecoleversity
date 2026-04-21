@@ -38,13 +38,17 @@ export function Header({ user = null }: HeaderProps) {
   const initial = (user?.displayName?.[0] ?? "?").toUpperCase();
   const pathname = usePathname();
 
-  // Hide public marketing nav on pages where the sidebar handles
-  // navigation. Without this the header competes with the dashboard
-  // left-nav, which confused users into thinking they'd logged out.
-  // We also drop the "Enseigner" link once the user is logged in —
-  // becoming a teacher from an already-signed-in account is a
-  // dashboard-level action, not a marketing CTA.
-  const isAppShell = pathname.startsWith("/dashboard") || pathname.startsWith("/k/");
+  // Hide public marketing nav on every signed-in surface: dashboard,
+  // kid mode, and focus surfaces (video room, lesson player). Without
+  // this the header competes with the in-app nav and confuses users
+  // into thinking they've been logged out. Also drops "Enseigner"
+  // for logged-in users — becoming a teacher from an active account
+  // is a dashboard action, not a marketing CTA.
+  const isAppShell =
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/k/") ||
+    pathname.startsWith("/session/") ||
+    pathname.startsWith("/course/");
   const showPublicNav = !isAppShell;
   const showTeachCta = !user && showPublicNav;
 
