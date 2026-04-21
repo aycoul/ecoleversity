@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import type { UserRole } from "@/types/domain";
 import { AvatarSwitcher, type AvatarSwitcherLearner } from "@/components/nav/avatar-switcher";
+import { SwitchToParentButton } from "@/components/nav/switch-to-parent-button";
 import {
   ShieldCheck,
   Ticket,
@@ -112,6 +113,16 @@ export function DashboardShell({
           </ul>
         </nav>
 
+        {/* In kid mode, surface a one-tap exit above the avatar switcher.
+            The dropdown is fine for kid-to-kid switching but too buried
+            for the common case: parent wants to go back to their own
+            dashboard. One tap, clearly labeled. */}
+        {activeLearnerId && (
+          <div className="border-t border-slate-200 px-3 pt-3">
+            <SwitchToParentButton />
+          </div>
+        )}
+
         <div className="border-t border-slate-200 px-4 py-3">
           <AvatarSwitcher
             userName={userName}
@@ -125,6 +136,13 @@ export function DashboardShell({
 
       {/* Main content */}
       <main className="flex-1 overflow-auto bg-white p-4 md:p-8">
+        {/* Mobile-only kid-mode banner — the sidebar switch button
+            is hidden on phones, so surface the exit here too. */}
+        {activeLearnerId && (
+          <div className="mb-4 md:hidden">
+            <SwitchToParentButton />
+          </div>
+        )}
         {children}
       </main>
 
