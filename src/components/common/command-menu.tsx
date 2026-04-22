@@ -1,18 +1,23 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useLogout } from "@/hooks/use-logout";
 import type { UserRole } from "@/types/domain";
 import {
-  CommandDialog,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
   CommandSeparator,
+  Command,
 } from "cmdk";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Search,
   LayoutDashboard,
@@ -98,6 +103,16 @@ export function CommandMenu({ user }: { user?: { role: UserRole } | null }) {
     [router, logout]
   );
 
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (open && inputRef.current) {
+      // Small delay to ensure dialog is mounted before focusing
+      const t = setTimeout(() => inputRef.current?.focus(), 50);
+      return () => clearTimeout(t);
+    }
+  }, [open]);
+
   return (
     <>
       <button
@@ -113,50 +128,71 @@ export function CommandMenu({ user }: { user?: { role: UserRole } | null }) {
         </kbd>
       </button>
 
-      <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput placeholder="Rechercher une page, un cours, un enseignant…" />
-        <CommandList>
-          <CommandEmpty>Aucun résultat trouvé.</CommandEmpty>
-          <CommandGroup heading="Navigation">
-            {(user ? [...PUBLIC_ITEMS, ...AUTH_ITEMS.filter((i) => !i.roles || i.roles.includes(user.role))] : PUBLIC_ITEMS).map((item) => {
-              const Icon = item.icon;
-              return (
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="overflow-hidden p-0 shadow-2xl sm:max-w-lg">
+          <DialogTitle className="sr-only">Rechercher</DialogTitle>
+          <Command
+            filter={(value, search) => {
+              const normalizedValue = value.toLowerCase();
+              const normalizedSearch = search.toLowerCase();
+              if (normalizedValue.includes(normalizedSearch)) return 1;
+              return 0;
+            }}
+          >
+            <CommandInput
+              ref={inputRef}
+              placeholder="Rechercher une page, un cours, un enseignant…"
+              className="h-12 border-0 border-b border-slate-200 px-4 text-base outline-none focus:ring-0"
+            />
+            <CommandList className="max-h-[60vh] overflow-y-auto py-2">
+              <CommandEmpty className="px-4 py-6 text-center text-sm text-slate-500">
+                Aucun résultat trouvé.
+              </CommandEmpty>
+              <CommandGroup heading="Navigation" className="px-2">
+                {(user ? [...PUBLIC_ITEMS, ...AUTH_ITEMS.filter((i) => !i.roles || i.roles.includes(user.role))] : PUBLIC_ITEMS).map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <CommandItem
+                      key={item.href}
+                      value={`${item.label} ${item.keywords.join(" ")}`}
+                      onSelect={() => handleSelect(item)}
+                      className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-slate-700 cursor-pointer hover:bg-slate-100 aria-selected:bg-[var(--ev-blue)]/10 aria-selected:text-[var(--ev-blue)]"
+                    >
+                      <Icon className="size-4 text-slate-500" />
+                      <span>{item.label}</span>
+                    </CommandItem>
+                  );
+                })}
+              </CommandGroup>
+              <CommandSeparator className="my-2 h-px bg-slate-100" />
+              <CommandGroup heading="Recherche rapide" className="px-2">
                 <CommandItem
-                  key={item.href}
-                  value={`${item.label} ${item.keywords.join(" ")}`}
-                  onSelect={() => handleSelect(item)}
+                  value="search teachers enseignants"
+                  onSelect={() => {
+                    setOpen(false);
+                    router.push("/teachers");
+                  }}
+                  className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-slate-700 cursor-pointer hover:bg-slate-100 aria-selected:bg-[var(--ev-blue)]/10 aria-selected:text-[var(--ev-blue)]"
                 >
-                  <Icon className="mr-2 size-4 text-slate-500" />
-                  <span>{item.label}</span>
+                  <Search className="size-4 text-slate-500" />
+                  <span>Rechercher un enseignant…</span>
                 </CommandItem>
-              );
-            })}
-          </CommandGroup>
-          <CommandSeparator />
-          <CommandGroup heading="Recherche rapide">
-            <CommandItem
-              value="search teachers enseignants"
-              onSelect={() => {
-                setOpen(false);
-                router.push("/teachers");
-              }}
-            >
-              <Search className="mr-2 size-4 text-slate-500" />
-              <span>Rechercher un enseignant…</span>
-            </CommandItem>
-            <CommandItem
-              value="search courses cours"
-              onSelect={() => {
-                setOpen(false);
-                router.push("/courses");
-              }}
-            >
-              <Search className="mr-2 size-4 text-slate-500" />
-              <span>Rechercher un cours…</span>
-            </CommandItem>
-          </CommandGroup>
-        </CommandList>
-      </CommandDialog>
+                <CommandItem
+                  value="search courses cours"
+                  onSelect={() => {
+                    setOpen(false);
+                    router.push("/courses");
+                  }}
+                  className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-slate-700 cursor-pointer hover:bg-slate-100 aria-selected:bg-[var(--ev-blue)]/10 aria-selected:text-[var(--ev-blue)]"
+                >
+                  <Search className="size-4 text-slate-500" />
+                  <span>Rechercher un cours…</span>
+                </CommandItem>
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
