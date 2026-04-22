@@ -278,7 +278,7 @@ async function ensureTwin(
       teacher_id: opts.teacherId,
       subject: opts.subject,
       grade_level: opts.gradeLevel,
-      maturity_level: "unavailable",
+      maturity_level: "level_0",
       total_recordings_processed: 0,
       teaching_style_profile: {},
       is_active: false,
