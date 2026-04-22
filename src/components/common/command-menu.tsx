@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useLogout } from "@/hooks/use-logout";
 import {
   CommandDialog,
   CommandEmpty,
@@ -33,6 +34,7 @@ type CommandItemData = {
   href: string;
   icon: React.ElementType;
   keywords: string[];
+  action?: "logout";
 };
 
 const NAV_ITEMS: CommandItemData[] = [
@@ -52,12 +54,13 @@ const NAV_ITEMS: CommandItemData[] = [
   { label: "Préparation aux examens", href: "/exams", icon: GraduationCap, keywords: ["exams", "examens", "bac", "bepc"] },
   { label: "Aide", href: "/help", icon: HelpCircle, keywords: ["help", "aide", "support"] },
   { label: "Paramètres", href: "/dashboard/settings/notifications", icon: Settings, keywords: ["settings", "paramètres"] },
-  { label: "Déconnexion", href: "/logout", icon: LogOut, keywords: ["logout", "déconnexion", "quitter"] },
+  { label: "Déconnexion", href: "/logout", icon: LogOut, keywords: ["logout", "déconnexion", "quitter"], action: "logout" },
 ];
 
 export function CommandMenu() {
   const [open, setOpen] = useState(false);
   const router = useRouter();
+  const logout = useLogout();
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -71,11 +74,15 @@ export function CommandMenu() {
   }, []);
 
   const handleSelect = useCallback(
-    (href: string) => {
+    (item: CommandItemData) => {
       setOpen(false);
-      router.push(href);
+      if (item.action === "logout") {
+        logout();
+      } else {
+        router.push(item.href);
+      }
     },
-    [router]
+    [router, logout]
   );
 
   return (
@@ -104,7 +111,7 @@ export function CommandMenu() {
                 <CommandItem
                   key={item.href}
                   value={`${item.label} ${item.keywords.join(" ")}`}
-                  onSelect={() => handleSelect(item.href)}
+                  onSelect={() => handleSelect(item)}
                 >
                   <Icon className="mr-2 size-4 text-slate-500" />
                   <span>{item.label}</span>

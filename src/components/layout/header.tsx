@@ -9,6 +9,7 @@ import { LayoutDashboard, LogOut, Menu } from "lucide-react";
 import Image from "next/image";
 import type { UserRole } from "@/types/domain";
 import { CommandMenu } from "@/components/common/command-menu";
+import { useLogout } from "@/hooks/use-logout";
 
 type HeaderProps = {
   user: {
@@ -38,6 +39,10 @@ export function Header({ user = null }: HeaderProps) {
   const tc = useTranslations("common");
   const initial = (user?.displayName?.[0] ?? "?").toUpperCase();
   const pathname = usePathname();
+  const logout = useLogout();
+
+  // Strip locale so checks work for /fr, /en, etc. (must match AppChrome)
+  const stripped = pathname.replace(/^\/[a-z]{2}(?=\/|$)/, "");
 
   // Hide public marketing nav on every signed-in surface: dashboard,
   // kid mode, and focus surfaces (video room, lesson player). Without
@@ -46,11 +51,11 @@ export function Header({ user = null }: HeaderProps) {
   // for logged-in users — becoming a teacher from an active account
   // is a dashboard action, not a marketing CTA.
   const isAppShell =
-    pathname.startsWith("/dashboard") ||
-    pathname.startsWith("/k/") ||
-    pathname.startsWith("/session/") ||
-    pathname.startsWith("/course/") ||
-    pathname.startsWith("/payment/");
+    stripped.startsWith("/dashboard") ||
+    stripped.startsWith("/k/") ||
+    stripped.startsWith("/session/") ||
+    stripped.startsWith("/course/") ||
+    stripped.startsWith("/payment/");
   const showPublicNav = !isAppShell;
   const showTeachCta = !user && showPublicNav;
 
@@ -121,18 +126,16 @@ export function Header({ user = null }: HeaderProps) {
                   {initial}
                 </div>
               </Link>
-              {/* Plain <a> for full-page nav — ensures root layout re-fetches with cleared auth */}
-              <a href="/logout">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-slate-400 hover:text-slate-700"
-                  aria-label={tc("logout")}
-                  title={tc("logout")}
-                >
-                  <LogOut className="size-4" />
-                </Button>
-              </a>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-slate-400 hover:text-slate-700"
+                aria-label={tc("logout")}
+                title={tc("logout")}
+                onClick={logout}
+              >
+                <LogOut className="size-4" />
+              </Button>
             </>
           ) : (
             <>

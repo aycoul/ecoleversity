@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { ChevronDown, LogOut, Plus, Settings } from "lucide-react";
 import { GRADE_LEVEL_LABELS, type GradeLevel } from "@/types/domain";
+import { useLogout } from "@/hooks/use-logout";
 
 export type AvatarSwitcherLearner = {
   id: string;
@@ -34,6 +35,7 @@ export function AvatarSwitcher({
   const [switching, setSwitching] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const logout = useLogout();
 
   useEffect(() => {
     if (!open) return;
@@ -171,13 +173,13 @@ export function AvatarSwitcher({
             <Settings className="size-4" />
             {t("settings")}
           </a>
-          <a
-            href="/logout"
-            className="flex items-center gap-3 px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-b-lg"
+          <button
+            onClick={logout}
+            className="flex w-full items-center gap-3 px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-b-lg text-left"
           >
             <LogOut className="size-4" />
             {t("logout")}
-          </a>
+          </button>
         </div>
       )}
     </div>

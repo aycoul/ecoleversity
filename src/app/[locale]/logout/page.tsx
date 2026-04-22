@@ -1,10 +1,18 @@
-import { redirect } from "next/navigation";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+"use client";
 
-export const dynamic = "force-dynamic";
+import { useEffect } from "react";
+import { useLogout } from "@/hooks/use-logout";
 
-export default async function LogoutPage() {
-  const supabase = await createServerSupabaseClient();
-  await supabase.auth.signOut();
-  redirect("/login");
+export default function LogoutPage() {
+  const logout = useLogout();
+
+  useEffect(() => {
+    logout();
+  }, [logout]);
+
+  return (
+    <div className="flex min-h-screen items-center justify-center">
+      <p className="text-slate-500">Déconnexion en cours…</p>
+    </div>
+  );
 }

@@ -24,6 +24,7 @@ import {
   LogOut,
 } from "lucide-react";
 import type { UserRole } from "@/types/domain";
+import { useLogout } from "@/hooks/use-logout";
 
 type MobileNavProps = {
   open: boolean;
@@ -60,6 +61,7 @@ const navLinks = [
 export function MobileNav({ open, onOpenChange, user }: MobileNavProps) {
   const t = useTranslations("navigation");
   const tc = useTranslations("common");
+  const logout = useLogout();
   const initial = (user?.displayName?.[0] ?? "?").toUpperCase();
 
   return (
@@ -124,16 +126,17 @@ export function MobileNav({ open, onOpenChange, user }: MobileNavProps) {
                   {tc("mySpace")}
                 </Button>
               </Link>
-              {/* Plain <a> — full-page nav clears Header auth state reliably */}
-              <a href="/logout" onClick={() => onOpenChange(false)}>
-                <Button
-                  variant="outline"
-                  className="w-full gap-2 text-base font-semibold text-red-600 hover:bg-red-50 hover:text-red-700"
-                >
-                  <LogOut className="size-4" />
-                  {tc("logout")}
-                </Button>
-              </a>
+              <Button
+                variant="outline"
+                className="w-full gap-2 text-base font-semibold text-red-600 hover:bg-red-50 hover:text-red-700"
+                onClick={() => {
+                  onOpenChange(false);
+                  logout();
+                }}
+              >
+                <LogOut className="size-4" />
+                {tc("logout")}
+              </Button>
             </>
           ) : (
             <>

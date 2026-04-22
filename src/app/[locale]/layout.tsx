@@ -36,6 +36,12 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+// Always re-fetch auth state — never cache the root layout.
+// Without this, navUser can be stale after login/logout because
+// Next.js may statically generate the layout and skip re-running
+// the server component on subsequent requests.
+export const dynamic = "force-dynamic";
+
 export default async function LocaleLayout({
   children,
   params,
