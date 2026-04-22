@@ -4,6 +4,8 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { EarningsDashboard } from "@/components/teacher/earnings-dashboard";
 import { Wallet } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function TeacherEarningsPage() {
   const supabase = await createServerSupabaseClient();
   const t = await getTranslations("earnings");
