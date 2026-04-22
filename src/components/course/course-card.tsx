@@ -73,9 +73,9 @@ export function CourseCard({ course }: { course: CourseCardData }) {
   };
 
   return (
-    <div className="group flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[var(--ev-blue)]/10">
+    <div className="group flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[var(--ev-blue)]/8">
       {/* Thumbnail */}
-      <div className="relative h-44 w-full overflow-hidden">
+      <div className="relative h-40 w-full overflow-hidden">
         {course.thumbnail_url ? (
           <img
             src={course.thumbnail_url}

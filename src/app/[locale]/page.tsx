@@ -429,7 +429,7 @@ export default async function Home() {
               const Icon = service.icon;
               return (
                 <AnimateOnScroll key={service.titleKey} delay={i * 80}>
-                  <div className="group overflow-hidden rounded-2xl border border-slate-100 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[var(--ev-blue)]/10">
+                  <div className="group overflow-hidden rounded-2xl border border-slate-100 bg-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[var(--ev-blue)]/8">
                     <div className="aspect-[16/9] overflow-hidden">
                       <Image
                         src={service.src}
@@ -511,7 +511,7 @@ export default async function Home() {
               const Icon = feature.icon;
               return (
                 <AnimateOnScroll key={feature.titleKey} delay={i * 80}>
-                  <div className="group flex items-start gap-4 rounded-2xl border border-slate-100 bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[var(--ev-blue)]/10 sm:p-6">
+                  <div className="group flex items-start gap-4 rounded-2xl border border-slate-100 bg-white p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[var(--ev-blue)]/8 sm:p-6">
                     <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--ev-green)]/15 to-[var(--ev-green)]/5 text-[var(--ev-green)] transition-all duration-300 group-hover:from-[var(--ev-green)] group-hover:to-[var(--ev-green-light)] group-hover:text-white">
                       <Icon className="size-5" />
                     </div>
@@ -578,7 +578,7 @@ export default async function Home() {
 
           <div className="mt-12 grid gap-8 sm:grid-cols-2">
             <AnimateOnScroll delay={0}>
-              <div className="relative rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg sm:p-8">
+              <div className="relative rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md sm:p-8">
                 <div className="absolute inset-y-0 left-0 w-1 rounded-l-2xl bg-gradient-to-b from-[var(--ev-green)] to-[var(--ev-green-light)]" />
                 <Quote className="absolute right-6 top-6 size-8 text-[var(--ev-green)]/20" />
                 <p className="text-lg leading-8 text-slate-700">
@@ -597,7 +597,7 @@ export default async function Home() {
             </AnimateOnScroll>
 
             <AnimateOnScroll delay={150}>
-              <div className="relative rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg sm:p-8">
+              <div className="relative rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md sm:p-8">
                 <div className="absolute inset-y-0 left-0 w-1 rounded-l-2xl bg-gradient-to-b from-[var(--ev-green)] to-[var(--ev-green-light)]" />
                 <Quote className="absolute right-6 top-6 size-8 text-[var(--ev-green)]/20" />
                 <p className="text-lg leading-8 text-slate-700">

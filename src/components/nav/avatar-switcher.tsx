@@ -105,7 +105,7 @@ export function AvatarSwitcher({
       </button>
 
       {open && (
-        <div className="absolute right-0 bottom-full mb-2 w-64 rounded-lg border border-slate-200 bg-white shadow-lg z-50">
+        <div className="absolute right-0 bottom-full mb-2 w-52 rounded-lg border border-slate-200 bg-white shadow-lg z-50">
           {/* Self row — clickable only for parents (switch back from kid mode) */}
           {isParent ? (
             <button
