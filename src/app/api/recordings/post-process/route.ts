@@ -5,6 +5,9 @@ import { transcribeRecording, TranscribeError } from "@/lib/ai/transcribe";
 import { buildTwinPayload } from "@/lib/ai/twin-payload";
 import { extractLessonStructure } from "@/lib/ai/lesson-extract";
 import { buildSessionSummary } from "@/lib/ai/session-summary";
+import { chunkSegments } from "@/lib/ai/twin-chunking";
+import { embedBatch } from "@/lib/ai/embeddings";
+import { aggregateTeachingStyle } from "@/lib/ai/twin-style-aggregator";
 import { sendSessionSummaryEmail } from "@/lib/notifications/session-summary-email";
 import { SUBJECT_LABELS, type Subject } from "@/types/domain";
 
@@ -165,7 +168,9 @@ export async function POST(req: NextRequest) {
     // Powers the future session-twin (scale teachers who sell out).
     const lesson = await extractLessonStructure(payload);
 
-    const { error: trainInsertErr } = await admin
+    // Lesson-structure extraction — phases, exercise bank, explanation bank.
+    // Powers the future session-twin (scale teachers who sell out).
+    const { data: trainRow, error: trainInsertErr } = await admin
       .from("ai_training_content")
       .insert({
         twin_id: twinId,
@@ -183,18 +188,45 @@ export async function POST(req: NextRequest) {
         payload_version: 1,
         processing_status: "ready",
         processed_at: new Date().toISOString(),
-      });
-    if (trainInsertErr) {
-      throw new Error(`ai_training_content insert failed: ${trainInsertErr.message}`);
+      })
+      .select("id")
+      .single<{ id: string }>();
+    if (trainInsertErr || !trainRow) {
+      throw new Error(
+        `ai_training_content insert failed: ${trainInsertErr?.message ?? "null"}`
+      );
     }
 
-    await admin
-      .from("ai_teacher_twins")
-      .update({
-        total_recordings_processed: await incTrainingCount(admin, twinId),
-        last_trained_at: new Date().toISOString(),
-      })
-      .eq("id", twinId);
+    // Chunk segments + embed into the RAG index. Cheap at ~€0.02/1M tokens;
+    // the invocation API reads this table at conversation time via pgvector.
+    const chunks = chunkSegments(payload);
+    if (chunks.length > 0) {
+      const embeddings = await embedBatch(chunks.map((c) => c.text));
+      const rows = chunks.map((c, i) => ({
+        twin_id: twinId,
+        training_content_id: trainRow.id,
+        chunk_index: c.chunkIndex,
+        speaker: c.speaker,
+        text: c.text,
+        start_seconds: c.startSeconds,
+        end_seconds: c.endSeconds,
+        topics: c.topics,
+        embedding: embeddings[i]
+          ? `[${embeddings[i].join(",")}]`
+          : null,
+      }));
+      const { error: chunkErr } = await admin
+        .from("twin_knowledge_chunks")
+        .insert(rows);
+      if (chunkErr) {
+        // Non-fatal: we still have the transcript + summary. Log + continue.
+        console.error("twin_knowledge_chunks insert failed:", chunkErr.message);
+      }
+    }
+
+    // Re-aggregate the teacher's style profile across all sessions so the
+    // twin's system prompt stays current.
+    await aggregateTeachingStyle(admin, twinId);
 
     // ── Parent-facing summary ──────────────────────────────────────────
     const summary = await buildSessionSummary(whisper.text);
@@ -302,17 +334,6 @@ async function ensureTwin(
     throw new Error(`failed to create twin: ${error?.message ?? "unknown"}`);
   }
   return created.id;
-}
-
-async function incTrainingCount(
-  admin: ReturnType<typeof createAdminClient>,
-  twinId: string
-): Promise<number> {
-  const { count } = await admin
-    .from("ai_training_content")
-    .select("id", { count: "exact", head: true })
-    .eq("twin_id", twinId);
-  return count ?? 0;
 }
 
 async function loadParentRecipients(

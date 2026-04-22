@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { SUBJECT_LABELS, type Subject } from "@/types/domain";
+import { TwinTestChat } from "@/components/admin/twin-test-chat";
 
 /**
  * Per-twin inspector. Admin lands here from /dashboard/admin/ai-twins and
@@ -163,6 +164,13 @@ export default async function AiTwinDetailPage({
           {trainingRows.length} séance(s) d&apos;entraînement collectée(s)
         </p>
       </div>
+
+      <section>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-600">
+          Chat de test
+        </h2>
+        <TwinTestChat twinId={twin.id} />
+      </section>
 
       {/* Aggregated style profile — what the twin has learned so far. */}
       <section className="rounded-xl border border-slate-200 bg-slate-50 p-5">
