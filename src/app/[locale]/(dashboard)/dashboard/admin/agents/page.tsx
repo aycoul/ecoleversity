@@ -9,6 +9,7 @@ import {
 } from "@/lib/admin/agents-data";
 import { canAccess, type AdminScope } from "@/lib/admin/scopes";
 import { AgentCard } from "@/components/admin/agent-card";
+import { AiSectionTabs } from "@/components/admin/ai-section-tabs";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +44,7 @@ export default async function AdminAgentsPage() {
 
   return (
     <div className="space-y-8 pb-16">
+      <AiSectionTabs />
       <div className="flex items-center gap-3">
         <Cpu className="size-7 text-[var(--ev-blue)]" />
         <div>

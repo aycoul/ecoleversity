@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AiServicesToggle } from "@/components/admin/ai-services-toggle";
+import { AiSectionTabs } from "@/components/admin/ai-section-tabs";
 
 type UserRow = {
   id: string;
@@ -58,6 +59,7 @@ export default async function AiServicesPage() {
 
   return (
     <div className="space-y-8">
+      <AiSectionTabs />
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Services IA</h1>
         <p className="mt-1 text-sm text-slate-600">

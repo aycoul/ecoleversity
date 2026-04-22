@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { SUBJECT_LABELS, type Subject } from "@/types/domain";
+import { AiSectionTabs } from "@/components/admin/ai-section-tabs";
 
 /**
  * Admin-only inspector for AI teacher twins.
@@ -81,6 +82,7 @@ export default async function AiTwinsPage() {
 
   return (
     <div className="space-y-6">
+      <AiSectionTabs />
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Jumeaux IA des enseignants</h1>
         <p className="mt-1 text-sm text-slate-600">

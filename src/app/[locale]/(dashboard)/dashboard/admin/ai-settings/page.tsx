@@ -3,6 +3,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { PlatformConfigRow } from "@/components/admin/platform-config-row";
 import { TeacherTwinPolicyRow } from "@/components/admin/teacher-twin-policy-row";
+import { AiSectionTabs } from "@/components/admin/ai-section-tabs";
 
 type ConfigRow = {
   key: string;
@@ -80,6 +81,7 @@ export default async function AiSettingsPage() {
 
   return (
     <div className="space-y-10">
+      <AiSectionTabs />
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Paramètres IA</h1>
         <p className="mt-1 text-sm text-slate-600">

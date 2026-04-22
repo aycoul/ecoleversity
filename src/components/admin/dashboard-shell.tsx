@@ -36,6 +36,12 @@ type NavLink = {
   icon: string;
   /** Number shown as a red badge next to the label. Hidden when 0 / undefined. */
   badge?: number;
+  /**
+   * Section header to render before this link. Consecutive links sharing
+   * the same section are grouped visually; undefined/null means the link
+   * sits outside any group (rendered above the first section).
+   */
+  section?: string;
 };
 
 type DashboardShellProps = {
@@ -92,13 +98,30 @@ export function DashboardShell({
           <Image src="/logo.png" alt="écoleVersity" width={180} height={48} className="h-11 w-auto" />
         </div>
 
-        <nav className="flex-1 px-3 py-4">
+        <nav className="flex-1 overflow-y-auto px-3 py-4">
           <ul className="space-y-1">
-            {links.map((link) => {
+            {links.map((link, i) => {
               const Icon = iconMap[link.icon] ?? User;
-              const isActive = pathname.startsWith(link.href);
+              // startsWith on "/" would match everything, so anchor overview
+              // links (typically ending in "/dashboard/{role}" or root) with
+              // an exact comparison as a fallback.
+              const isActive =
+                pathname === link.href || pathname.startsWith(link.href + "/");
+              const prevSection = i > 0 ? links[i - 1].section : undefined;
+              const showHeader =
+                link.section && link.section !== prevSection;
               return (
                 <li key={link.href}>
+                  {showHeader && (
+                    <div
+                      className={cn(
+                        "px-3 text-[0.65rem] font-semibold uppercase tracking-wider text-slate-400",
+                        i === 0 ? "pb-1" : "pb-1 pt-4"
+                      )}
+                    >
+                      {link.section}
+                    </div>
+                  )}
                   <Link
                     href={link.href}
                     className={cn(

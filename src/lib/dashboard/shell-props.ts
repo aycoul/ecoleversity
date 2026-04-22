@@ -97,49 +97,83 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
     ai_twins: "cpu",
     ai_settings: "settings",
   };
+  // Section labels for sidebar grouping. Order here defines display order.
+  // Keys map 1:1 to AdminPage. 'overview' has no section (sits above the
+  // first group as a bare entry).
+  const ADMIN_PAGE_SECTION: Record<AdminPage, string | undefined> = {
+    overview: undefined,
+    payments: "Finances",
+    payouts: "Finances",
+    reports: "Modération",
+    strikes: "Modération",
+    tickets: "Modération",
+    verification: "Opérations",
+    analytics: "Opérations",
+    ai_services: "IA",
+    ai_twins: "IA",
+    ai_settings: "IA",
+    agents: "IA",
+  };
+
+  // Preserve the SCOPE_PAGES order for access control, but re-order within
+  // that set by section so the sidebar renders grouped items together.
   const adminPages = adminScope ? SCOPE_PAGES[adminScope] : [];
-  const adminNav = adminPages.map((page) => ({
+  const sectionOrder = [
+    undefined,
+    "Finances",
+    "Modération",
+    "Opérations",
+    "IA",
+  ];
+  const adminPagesOrdered = [...adminPages].sort((a, b) => {
+    const aIdx = sectionOrder.indexOf(ADMIN_PAGE_SECTION[a]);
+    const bIdx = sectionOrder.indexOf(ADMIN_PAGE_SECTION[b]);
+    return aIdx - bIdx;
+  });
+  const adminNav = adminPagesOrdered.map((page) => ({
     href: PAGE_PATHS[page],
     label: ADMIN_PAGE_LABEL[page],
     icon: ADMIN_PAGE_ICON[page],
+    section: ADMIN_PAGE_SECTION[page],
   }));
   adminNav.push({
     href: "/dashboard/settings/notifications",
     label: t("settings"),
     icon: "settings",
+    section: "Compte",
   });
 
   const navConfig: Record<
     UserRole,
-    Array<{ href: string; label: string; icon: string; badge?: number }>
+    Array<{ href: string; label: string; icon: string; badge?: number; section?: string }>
   > = {
     admin: adminNav,
     teacher: [
       { href: "/dashboard/teacher", label: t("myProfile"), icon: "user" },
-      { href: "/dashboard/teacher/availability", label: t("schedule"), icon: "calendar" },
-      { href: "/dashboard/teacher/sessions", label: t("upcomingSessions"), icon: "video" },
-      { href: "/dashboard/teacher/classes", label: t("myCourses"), icon: "book-open" },
-      { href: "/dashboard/teacher/courses", label: t("recordedCourses"), icon: "play-circle" },
-      { href: "/dashboard/teacher/earnings", label: t("earnings"), icon: "wallet" },
-      { href: "/dashboard/teacher/transactions", label: t("payments"), icon: "receipt" },
-      { href: "/dashboard/teacher/messages", label: t("messages"), icon: "message-circle" },
-      { href: "/dashboard/settings/notifications", label: t("settings"), icon: "settings" },
+      { href: "/dashboard/teacher/availability", label: t("schedule"), icon: "calendar", section: "Enseignement" },
+      { href: "/dashboard/teacher/sessions", label: t("upcomingSessions"), icon: "video", section: "Enseignement" },
+      { href: "/dashboard/teacher/classes", label: t("myCourses"), icon: "book-open", section: "Enseignement" },
+      { href: "/dashboard/teacher/courses", label: t("recordedCourses"), icon: "play-circle", section: "Enseignement" },
+      { href: "/dashboard/teacher/earnings", label: t("earnings"), icon: "wallet", section: "Finances" },
+      { href: "/dashboard/teacher/transactions", label: t("payments"), icon: "receipt", section: "Finances" },
+      { href: "/dashboard/teacher/messages", label: t("messages"), icon: "message-circle", section: "Communication" },
+      { href: "/dashboard/settings/notifications", label: t("settings"), icon: "settings", section: "Compte" },
     ],
     parent: [
       { href: "/dashboard/parent", label: t("myChildren"), icon: "users" },
-      { href: "/teachers", label: t("findTeacher"), icon: "search" },
-      { href: "/dashboard/parent/sessions", label: t("upcomingSessions"), icon: "calendar" },
-      { href: "/dashboard/parent/courses", label: t("recordedCourses"), icon: "play-circle" },
-      { href: "/dashboard/parent/messages", label: t("messages"), icon: "message-circle" },
-      { href: "/dashboard/parent/payments", label: t("payments"), icon: "receipt", badge: pendingPaymentsCount },
-      { href: "/dashboard/parent/spending", label: t("spending"), icon: "trending-up" },
-      { href: "/dashboard/parent/wallet", label: t("wallet"), icon: "wallet" },
-      { href: "/dashboard/settings/notifications", label: t("settings"), icon: "settings" },
+      { href: "/teachers", label: t("findTeacher"), icon: "search", section: "Apprentissage" },
+      { href: "/dashboard/parent/sessions", label: t("upcomingSessions"), icon: "calendar", section: "Apprentissage" },
+      { href: "/dashboard/parent/courses", label: t("recordedCourses"), icon: "play-circle", section: "Apprentissage" },
+      { href: "/dashboard/parent/payments", label: t("payments"), icon: "receipt", badge: pendingPaymentsCount, section: "Finances" },
+      { href: "/dashboard/parent/spending", label: t("spending"), icon: "trending-up", section: "Finances" },
+      { href: "/dashboard/parent/wallet", label: t("wallet"), icon: "wallet", section: "Finances" },
+      { href: "/dashboard/parent/messages", label: t("messages"), icon: "message-circle", section: "Communication" },
+      { href: "/dashboard/settings/notifications", label: t("settings"), icon: "settings", section: "Compte" },
     ],
     school_admin: [
       { href: "/dashboard/admin/verification", label: t("verification"), icon: "shield-check" },
       { href: "/dashboard/admin/reports", label: t("reports"), icon: "bar-chart" },
-      { href: "/dashboard/settings/notifications", label: t("settings"), icon: "settings" },
+      { href: "/dashboard/settings/notifications", label: t("settings"), icon: "settings", section: "Compte" },
     ],
   };
 
