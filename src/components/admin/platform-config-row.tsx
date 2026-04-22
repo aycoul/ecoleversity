@@ -4,9 +4,9 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 /**
- * Inline editor for a single platform_config row. Accepts any JSON-serializable
- * value; renders a number input when the current value is a number, text input
- * otherwise. Saves via POST /api/admin/platform-config.
+ * Inline editor for a single platform_config row. Autosaves on blur (and
+ * on Enter): avoids stacking six "Enregistrer" buttons down the page.
+ * A brief ✓ / × status flashes inline so the admin sees the outcome.
  */
 export function PlatformConfigRow({
   configKey,
@@ -21,18 +21,20 @@ export function PlatformConfigRow({
 }) {
   const isNumber = typeof initialValue === "number";
   const [draft, setDraft] = useState<string>(String(initialValue ?? ""));
+  const [committed, setCommitted] = useState<string>(String(initialValue ?? ""));
+  const [status, setStatus] = useState<"idle" | "saving" | "ok" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
-  const [ok, setOk] = useState(false);
-  const [pending, start] = useTransition();
+  const [, start] = useTransition();
   const router = useRouter();
 
   function save() {
+    if (draft === committed) return;
     setError(null);
-    setOk(false);
     let parsed: unknown;
     if (isNumber) {
       const n = Number(draft);
       if (Number.isNaN(n)) {
+        setStatus("error");
         setError("Nombre invalide");
         return;
       }
@@ -44,6 +46,7 @@ export function PlatformConfigRow({
         parsed = draft;
       }
     }
+    setStatus("saving");
     start(async () => {
       const res = await fetch("/api/admin/platform-config", {
         method: "POST",
@@ -52,11 +55,16 @@ export function PlatformConfigRow({
       });
       if (!res.ok) {
         const j = await res.json().catch(() => ({}));
+        setStatus("error");
         setError(j.error ?? "Échec");
+        setDraft(committed);
         return;
       }
-      setOk(true);
+      setCommitted(draft);
+      setStatus("ok");
       router.refresh();
+      // Let the ✓ sit for a moment, then drop back to idle.
+      setTimeout(() => setStatus("idle"), 1500);
     });
   }
 
@@ -79,17 +87,21 @@ export function PlatformConfigRow({
           max={isNumber ? 1 : undefined}
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
+          onBlur={save}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.currentTarget.blur();
+            }
+          }}
           className="w-28 rounded-md border border-slate-300 px-2 py-1 text-sm"
         />
-        <button
-          onClick={save}
-          disabled={pending}
-          className="rounded-md bg-[var(--ev-blue)] px-3 py-1 text-xs font-semibold text-white hover:bg-[var(--ev-blue-light)] disabled:opacity-60"
-        >
-          {pending ? "…" : "Enregistrer"}
-        </button>
-        {ok && <span className="text-xs text-emerald-600">✓</span>}
-        {error && <span className="text-xs text-rose-500">{error}</span>}
+        <span className="inline-block w-16 text-xs" aria-live="polite">
+          {status === "saving" && <span className="text-slate-400">…</span>}
+          {status === "ok" && <span className="text-emerald-600">✓ enregistré</span>}
+          {status === "error" && (
+            <span className="text-rose-500">{error ?? "échec"}</span>
+          )}
+        </span>
       </div>
     </div>
   );

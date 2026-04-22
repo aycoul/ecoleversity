@@ -1075,8 +1075,10 @@
       "gmvHelper": "Confirmed transactions today",
       "signups": "New signups",
       "signupsHelper": "{parents} parents · {teachers} teachers",
+      "signupsHelper_empty": "No new signups today",
       "sessions": "Sessions",
-      "sessionsHelper": "Completed / scheduled today"
+      "sessionsHelper": "Completed / scheduled today",
+      "sessionsHelper_empty": "No sessions scheduled today"
     }
   },
   "parentOverview": {

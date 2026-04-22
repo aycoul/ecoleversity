@@ -6,9 +6,9 @@ import { useRouter } from "next/navigation";
 type Tier = "none" | "qa" | "full";
 
 /**
- * Per-teacher twin policy editor. Admin sets tier + records voice/full-session
- * consent + overrides price ratio. All changes flow through POST
- * /api/admin/teacher-twin-policy with optimistic UI.
+ * Per-teacher twin policy editor. Autosaves on every change (tier dropdown,
+ * checkbox, price blur) so the table doesn't carry one "Enregistrer"
+ * button per row. A shared status pill flashes inline after each save.
  */
 export function TeacherTwinPolicyRow({
   teacherId,
@@ -26,44 +26,69 @@ export function TeacherTwinPolicyRow({
   const [tier, setTier] = useState<Tier>(initialTier);
   const [voice, setVoice] = useState<boolean>(Boolean(initialVoiceConsent));
   const [full, setFull] = useState<boolean>(Boolean(initialFullConsent));
-  const [price, setPrice] = useState<string>(
+  const [priceInput, setPriceInput] = useState<string>(
     initialPriceRatio == null ? "" : String(initialPriceRatio)
   );
+  const [priceCommitted, setPriceCommitted] = useState<string>(
+    initialPriceRatio == null ? "" : String(initialPriceRatio)
+  );
+  const [status, setStatus] = useState<"idle" | "saving" | "ok" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
-  const [ok, setOk] = useState(false);
-  const [pending, start] = useTransition();
+  const [, start] = useTransition();
   const router = useRouter();
 
-  function save() {
+  function persist(patch: Record<string, unknown>) {
     setError(null);
-    setOk(false);
-    const body: Record<string, unknown> = { teacherId };
-    body.twin_tier = tier;
-    body.twin_voice_consent_at = voice ? new Date().toISOString() : null;
-    body.twin_full_session_consent_at = full ? new Date().toISOString() : null;
-    body.twin_price_ratio = price.trim() === "" ? null : Number(price);
-
+    setStatus("saving");
     start(async () => {
       const res = await fetch("/api/admin/teacher-twin-policy", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ teacherId, ...patch }),
       });
       if (!res.ok) {
         const j = await res.json().catch(() => ({}));
+        setStatus("error");
         setError(j.error ?? "Échec");
         return;
       }
-      setOk(true);
+      setStatus("ok");
       router.refresh();
+      setTimeout(() => setStatus("idle"), 1500);
     });
+  }
+
+  function onTierChange(next: Tier) {
+    setTier(next);
+    persist({ twin_tier: next });
+  }
+  function onVoiceChange(next: boolean) {
+    setVoice(next);
+    persist({ twin_voice_consent_at: next ? new Date().toISOString() : null });
+  }
+  function onFullChange(next: boolean) {
+    setFull(next);
+    persist({ twin_full_session_consent_at: next ? new Date().toISOString() : null });
+  }
+  function onPriceBlur() {
+    if (priceInput === priceCommitted) return;
+    const trimmed = priceInput.trim();
+    const value = trimmed === "" ? null : Number(trimmed);
+    if (value !== null && (Number.isNaN(value) || value < 0 || value > 1)) {
+      setStatus("error");
+      setError("0–1");
+      setPriceInput(priceCommitted);
+      return;
+    }
+    setPriceCommitted(priceInput);
+    persist({ twin_price_ratio: value });
   }
 
   return (
     <div className="flex flex-wrap items-center gap-3">
       <select
         value={tier}
-        onChange={(e) => setTier(e.target.value as Tier)}
+        onChange={(e) => onTierChange(e.target.value as Tier)}
         className="rounded-md border border-slate-300 px-2 py-1 text-xs"
       >
         <option value="none">Aucun jumeau</option>
@@ -75,7 +100,7 @@ export function TeacherTwinPolicyRow({
         <input
           type="checkbox"
           checked={voice}
-          onChange={(e) => setVoice(e.target.checked)}
+          onChange={(e) => onVoiceChange(e.target.checked)}
         />
         Consent. voix
       </label>
@@ -84,7 +109,7 @@ export function TeacherTwinPolicyRow({
         <input
           type="checkbox"
           checked={full}
-          onChange={(e) => setFull(e.target.checked)}
+          onChange={(e) => onFullChange(e.target.checked)}
         />
         Consent. séance complète
       </label>
@@ -95,21 +120,23 @@ export function TeacherTwinPolicyRow({
         min={0}
         max={1}
         placeholder="défaut"
-        value={price}
-        onChange={(e) => setPrice(e.target.value)}
+        value={priceInput}
+        onChange={(e) => setPriceInput(e.target.value)}
+        onBlur={onPriceBlur}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") e.currentTarget.blur();
+        }}
         className="w-20 rounded-md border border-slate-300 px-2 py-1 text-xs"
         title="Ratio du tarif live (ex: 0.35). Laisser vide pour utiliser la valeur plateforme."
       />
 
-      <button
-        onClick={save}
-        disabled={pending}
-        className="rounded-md bg-[var(--ev-blue)] px-3 py-1 text-xs font-semibold text-white hover:bg-[var(--ev-blue-light)] disabled:opacity-60"
-      >
-        {pending ? "…" : "Enregistrer"}
-      </button>
-      {ok && <span className="text-xs text-emerald-600">✓</span>}
-      {error && <span className="text-xs text-rose-500">{error}</span>}
+      <span className="inline-block min-w-[5rem] text-xs" aria-live="polite">
+        {status === "saving" && <span className="text-slate-400">…</span>}
+        {status === "ok" && <span className="text-emerald-600">✓</span>}
+        {status === "error" && (
+          <span className="text-rose-500">{error ?? "échec"}</span>
+        )}
+      </span>
     </div>
   );
 }

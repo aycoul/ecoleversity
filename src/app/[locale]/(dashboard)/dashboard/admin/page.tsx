@@ -286,17 +286,33 @@ export default async function AdminOverviewPage() {
             tone="violet"
             label={t("snapshot.signups")}
             value={`${today.newSignups}`}
-            helper={t("snapshot.signupsHelper", {
-              parents: today.newParents,
-              teachers: today.newTeachers,
-            })}
+            // When there are no signups today the breakdown would repeat
+            // "0 · 0 parents · 0 enseignants". Swap in a neutral helper at
+            // zero; keep the split helper when something actually happened.
+            helper={
+              today.newSignups === 0
+                ? t("snapshot.signupsHelper_empty")
+                : t("snapshot.signupsHelper", {
+                    parents: today.newParents,
+                    teachers: today.newTeachers,
+                  })
+            }
           />
           <SnapshotTile
             icon={CalendarCheck}
             tone="amber"
+            // Same reasoning: "0/0" reads as nonsense, "—" reads as empty.
+            value={(() => {
+              const total =
+                today.sessionsScheduledToday + today.sessionsCompleted;
+              return total === 0 ? "—" : `${today.sessionsCompleted}/${total}`;
+            })()}
             label={t("snapshot.sessions")}
-            value={`${today.sessionsCompleted}/${today.sessionsScheduledToday + today.sessionsCompleted}`}
-            helper={t("snapshot.sessionsHelper")}
+            helper={
+              today.sessionsScheduledToday + today.sessionsCompleted === 0
+                ? t("snapshot.sessionsHelper_empty")
+                : t("snapshot.sessionsHelper")
+            }
           />
         </div>
       </section>
