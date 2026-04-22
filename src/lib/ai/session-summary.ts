@@ -27,7 +27,7 @@ Règles :
 - Écris à la troisième personne ("l'élève a montré...", "le cours a couvert...").
 - Pas d'emoji. Pas de formule de politesse.
 - Maximum 200 mots au total.
-- Si la transcription est vide ou trop courte pour dégager un résumé utile, réponds exactement : "Session trop courte pour générer un résumé."`;
+- Même si la transcription est brève ou ne couvre qu'une prise de contact, rédige un résumé honnête : décris ce qui s'est passé (introduction, évaluation initiale, discussion d'objectifs, problème technique rencontré...). Ne réponds "Session trop courte pour générer un résumé." UNIQUEMENT si la transcription fait moins de trois phrases utiles.`;
 
 export async function buildSessionSummary(transcript: string): Promise<string> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -47,7 +47,13 @@ export async function buildSessionSummary(transcript: string): Promise<string> {
   });
 
   const block = resp.content.find((b) => b.type === "text");
-  return block && block.type === "text"
-    ? block.text.trim()
-    : "Session trop courte pour générer un résumé.";
+  if (!block || block.type !== "text") {
+    return "Session trop courte pour générer un résumé.";
+  }
+  // Strip occasional markdown fences Claude adds around structured output.
+  return block.text
+    .trim()
+    .replace(/^```(?:markdown|md)?\s*/i, "")
+    .replace(/\s*```$/i, "")
+    .trim();
 }

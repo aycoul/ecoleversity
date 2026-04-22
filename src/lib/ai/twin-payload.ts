@@ -34,15 +34,29 @@ export type TwinTrainingPayload = {
   };
 };
 
-const STRUCTURE_PROMPT = `Tu reçois la transcription brute d'un cours particulier (élève + enseignant, en français). Ta mission : structurer cette transcription en JSON strictement conforme au schéma indiqué, pour servir à entraîner un agent "jumeau numérique" de l'enseignant.
+const STRUCTURE_PROMPT = `Tu reçois la transcription brute d'un cours particulier (élève + enseignant, en français). Ta mission : structurer cette transcription en JSON strictement conforme au schéma ci-dessous, pour servir à entraîner un agent "jumeau numérique" de l'enseignant.
+
+Schéma JSON (obligatoire, toutes les clés présentes) :
+{
+  "segments": [
+    { "t": <number>, "end": <number>, "speaker": "teacher" | "student" | "unknown", "text": "<string>" }
+  ],
+  "topics": ["<string>", ...],
+  "qAndA": [ { "question": "<string>", "answerSummary": "<string>" } ],
+  "teacherStyleSignals": {
+    "tone": ["<string>", ...],
+    "vocabularyLevel": "simple" | "standard" | "advanced",
+    "pedagogicalPatterns": ["<string>", ...]
+  }
+}
 
 Règles :
-- Attribue chaque segment à "teacher" ou "student". En cas de doute, "unknown".
-- Identifie au plus 6 sujets pédagogiques abordés (strings courts, en français, en minuscules, format slug ou mot simple : "fractions", "addition", "conjugaison passé composé").
-- Extrait les 3–5 paires question-élève / réponse-enseignant les plus significatives.
-- Décris le style de l'enseignant : tonalité (ex. patient, enjoué, strict, encourageant), niveau de vocabulaire (simple | standard | advanced), patterns pédagogiques observés (ex. scaffolding, reformulation, répétition, renforcement positif, exemples concrets).
+- TOUJOURS remplir "segments" avec les rawSegments fournis, en ajoutant un "speaker". Si tu n'es pas sûr, utilise "unknown" — ne laisse jamais le tableau vide.
+- "topics" : 1 à 6 sujets en français, courts et concrets (ex. "mathématiques troisième", "objectifs scolaires", "introduction"). Retourne au moins 1 sujet.
+- "qAndA" : 1 à 5 paires. Peut être vide uniquement si aucune question n'est posée.
+- "teacherStyleSignals.tone" : au moins 1 adjectif observé. "vocabularyLevel" : toujours requis.
 - Ne réécris pas le contenu — conserve le texte original des segments.
-- Réponds UNIQUEMENT avec du JSON valide, aucun texte additionnel, pas de \`\`\`.`;
+- Réponds UNIQUEMENT avec du JSON valide, aucun texte additionnel, aucun \`\`\`.`;
 
 export async function buildTwinPayload(opts: {
   segments: WhisperSegment[];
