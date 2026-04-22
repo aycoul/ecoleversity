@@ -162,7 +162,7 @@ export default async function ParentCoursesPage() {
                     className="w-full bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]"
                   >
                     <Play className="mr-1.5 size-3.5" />
-                    {isCompleted ? t("resumeWatching") : t("continueCourse")}
+                    {isCompleted ? t("continueCourse") : t("resumeWatching")}
                   </Button>
                 </Link>
               </div>

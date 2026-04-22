@@ -48,19 +48,19 @@ function eventToNotification(payload: NotificationPayload): { title: string; bod
       return {
         title: 'Reservation confirmee',
         body: `Cours avec ${data.teacherName} le ${data.date}`,
-        url: `${appUrl}/dashboard/bookings`,
+        url: `${appUrl}/dashboard/parent/sessions`,
       };
     case 'payment_confirmed':
       return {
         title: 'Paiement confirme',
         body: `${data.amount} FCFA recu pour le cours avec ${data.teacherName}`,
-        url: `${appUrl}/dashboard/bookings`,
+        url: `${appUrl}/dashboard/parent/sessions`,
       };
     case 'session_reminder_24h':
       return {
         title: 'Rappel : cours demain',
         body: `Cours avec ${data.teacherName} demain a ${data.time}`,
-        url: `${appUrl}/dashboard/bookings`,
+        url: `${appUrl}/dashboard/parent/sessions`,
       };
     case 'session_reminder_15min':
       return {

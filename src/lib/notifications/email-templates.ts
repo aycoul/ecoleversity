@@ -59,7 +59,7 @@ export function bookingConfirmedEmail(teacherName: string, date: string, time: s
       <tr><td style="padding:8px 0;color:#6b7280;font-size:14px">Montant</td><td style="padding:8px 0;color:#111827;font-size:14px;font-weight:600">${price} FCFA</td></tr>
       <tr><td style="padding:8px 0;color:#6b7280;font-size:14px">R&eacute;f&eacute;rence</td><td style="padding:8px 0;color:#111827;font-size:14px;font-weight:600">${reference}</td></tr>
     </table>`;
-  return layout(content, `${appUrl()}/dashboard/bookings`, 'Voir mes cours');
+  return layout(content, `${appUrl()}/dashboard/parent/sessions`, 'Voir mes cours');
 }
 
 export function paymentConfirmedEmail(teacherName: string, date: string, time: string, amount: string | number) {
@@ -71,7 +71,7 @@ export function paymentConfirmedEmail(teacherName: string, date: string, time: s
     <p style="margin:0;color:#374151;font-size:15px;line-height:1.6">
       Date du cours : <strong>${date}</strong> &agrave; <strong>${time}</strong>
     </p>`;
-  return layout(content, `${appUrl()}/dashboard/bookings`, 'Voir mes cours');
+  return layout(content, `${appUrl()}/dashboard/parent/sessions`, 'Voir mes cours');
 }
 
 export function sessionReminderEmail(teacherName: string, date: string, time: string, joinUrl: string, minutesBefore: number) {

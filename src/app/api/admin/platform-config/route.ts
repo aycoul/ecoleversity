@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { canAccess, type AdminScope } from "@/lib/admin/scopes";
 
 /**
- * Update one platform_config row. Admin-only. Value is an arbitrary JSON
- * literal (we store numbers, strings, booleans, objects — all jsonb).
+ * Update one platform_config row. Admin-only with ai_settings scope.
+ * Value is an arbitrary JSON literal (we store numbers, strings, booleans, objects — all jsonb).
  *
  * Body: { key: string, value: unknown }
  */
@@ -16,10 +17,10 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   const { data: me } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, admin_scope")
     .eq("id", user.id)
-    .maybeSingle<{ role: string }>();
-  if (me?.role !== "admin") {
+    .maybeSingle<{ role: string; admin_scope: AdminScope | null }>();
+  if (me?.role !== "admin" || !canAccess(me.admin_scope, "ai_settings")) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 

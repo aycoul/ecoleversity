@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { canAccess, type AdminScope } from "@/lib/admin/scopes";
 
 /**
  * Admin toggle for profiles.ai_services_enabled. Only authenticated admins
- * (profiles.role='admin') can call this. The flag controls whether a user
- * participates in the AI transcript/summary/twin pipeline — teachers get
- * their sessions transcribed, parents get summary emails.
+ * with ai_settings scope can call this. The flag controls whether a user
+ * participates in the AI transcript/summary/twin pipeline.
  */
 export async function POST(req: NextRequest) {
   const supabase = await createServerSupabaseClient();
@@ -17,10 +17,10 @@ export async function POST(req: NextRequest) {
 
   const { data: me } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, admin_scope")
     .eq("id", user.id)
-    .maybeSingle<{ role: string }>();
-  if (me?.role !== "admin") {
+    .maybeSingle<{ role: string; admin_scope: AdminScope | null }>();
+  if (me?.role !== "admin" || !canAccess(me.admin_scope, "ai_settings")) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 

@@ -30,14 +30,6 @@ export default async function ParentOverviewPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("display_name")
-    .eq("id", user.id)
-    .maybeSingle();
-  const parentFirstName = (profile?.display_name ?? user.email ?? "")
-    .split(" ")[0];
-
   // 1. All children
   const { data: childrenRows } = await supabase
     .from("learner_profiles")
@@ -216,18 +208,6 @@ export default async function ParentOverviewPage() {
 
   return (
     <div className="space-y-8">
-      {/* Greeting banner */}
-      <div className="rounded-2xl bg-gradient-to-br from-[var(--ev-blue)] to-[var(--ev-blue-light)] p-6 text-white md:p-8">
-        <h1 className="text-2xl font-bold md:text-3xl">
-          {t("greeting", { name: parentFirstName })}
-        </h1>
-        <p className="mt-1 text-sm text-white/80 md:text-base">
-          {children.length === 0
-            ? t("noChildrenCta")
-            : t("childCount", { count: children.length })}
-        </p>
-      </div>
-
       {/* Pending-payment banner — one tap to finish checkout */}
       {pendingTx && (
         <Link

@@ -31,7 +31,7 @@ export function AwayModeToggle({
     const newState = !isAway;
 
     try {
-      const res = await fetch("/api/teachers/search", {
+      const res = await fetch("/api/teacher/availability", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

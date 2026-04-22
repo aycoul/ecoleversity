@@ -9,7 +9,6 @@ import {
   Cpu,
   Flag,
   ShieldCheck,
-  Sparkles,
   Ticket,
   Wallet,
   Banknote,
@@ -20,7 +19,6 @@ import {
 import { loadAdminOverview, formatXof } from "@/lib/admin/overview-data";
 import {
   canAccess,
-  SCOPE_LABELS_FR,
   type AdminPage,
   type AdminScope,
 } from "@/lib/admin/scopes";
@@ -91,17 +89,6 @@ export default async function AdminOverviewPage() {
   const t = await getTranslations("adminOverview");
   const { counts, today, agentEscalations } = await loadAdminOverview();
 
-  const firstName = (profile.display_name ?? user.email ?? "").split(" ")[0];
-  const todayLabel = new Date().toLocaleDateString(
-    locale === "fr" ? "fr-FR" : "en-US",
-    {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    }
-  );
-
   const cardsUntyped = [
     {
       page: "verification",
@@ -171,40 +158,8 @@ export default async function AdminOverviewPage() {
   const canSeeMoney =
     canAccess(adminScope, "analytics") || canAccess(adminScope, "payments");
 
-  const totalPendingAttention =
-    counts.pendingVerifications +
-    counts.pendingPayments +
-    counts.pendingPayouts +
-    counts.pendingReports +
-    counts.openTickets +
-    counts.activeStrikes;
-
   return (
     <div className="space-y-8 pb-16">
-      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[var(--ev-blue)] via-[var(--ev-blue)] to-[var(--ev-blue-light)] p-6 text-white md:p-8">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="min-w-0">
-            <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-white/80">
-              <Sparkles className="size-3.5" />
-              Le Patron · {SCOPE_LABELS_FR[adminScope]}
-            </p>
-            <h1 className="mt-2 text-2xl font-bold md:text-3xl">
-              {t("greeting", { name: firstName })}
-            </h1>
-            <p className="mt-1 text-sm text-white/80">
-              {todayLabel}
-              {" · "}
-              {totalPendingAttention === 0
-                ? t("allClear")
-                : t("pendingSummary", { count: totalPendingAttention })}
-            </p>
-          </div>
-          {/* Hero used to carry a "Voir les agents" CTA — removed as it
-              duplicated the sidebar link and the escalation section CTA below.
-              Keeping the hero minimal: greeting + today's status line. */}
-        </div>
-      </section>
-
       {cards.length > 0 && (() => {
         // Only surface cards with actual pending work; empty categories are
         // already accessible from the sidebar. If everything is clear, show

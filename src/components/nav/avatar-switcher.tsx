@@ -186,7 +186,7 @@ export function AvatarSwitcher({
 
           <div className="border-t border-slate-100" />
           <a
-            href={isParent ? "/dashboard/parent/settings" : "/dashboard/settings"}
+            href="/dashboard/settings/notifications"
             className="flex items-center gap-3 px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
           >
             <Settings className="size-4" />

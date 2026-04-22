@@ -864,6 +864,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          admin_scope: string | null
           avatar_url: string | null
           bio: string | null
           city: string | null
@@ -874,10 +875,12 @@ export type Database = {
           language_preference: string
           phone: string | null
           phone_verified: boolean
+          referral_code: string | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
         }
         Insert: {
+          admin_scope?: string | null
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
@@ -888,10 +891,12 @@ export type Database = {
           language_preference?: string
           phone?: string | null
           phone_verified?: boolean
+          referral_code?: string | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at?: string
         }
         Update: {
+          admin_scope?: string | null
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
@@ -902,6 +907,7 @@ export type Database = {
           language_preference?: string
           phone?: string | null
           phone_verified?: boolean
+          referral_code?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
         }

@@ -15,7 +15,8 @@ export type AdminScope =
   | "moderation"
   | "verification"
   | "support"
-  | "analytics_viewer";
+  | "analytics_viewer"
+  | "school_admin";
 
 /**
  * Every admin page key. Added to this list → every scope table below
@@ -55,6 +56,7 @@ export const SCOPE_PAGES: Record<AdminScope, AdminPage[]> = {
   verification: ["overview", "verification"],
   support: ["overview", "tickets"],
   analytics_viewer: ["overview", "analytics"],
+  school_admin: ["overview", "verification", "reports"],
 };
 
 /**
@@ -126,4 +128,5 @@ export const SCOPE_LABELS_FR: Record<AdminScope, string> = {
   verification: "Vérification",
   support: "Support",
   analytics_viewer: "Analytique (lecture)",
+  school_admin: "Admin école",
 };

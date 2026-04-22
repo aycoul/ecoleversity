@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { EarningsDashboard } from "@/components/teacher/earnings-dashboard";
-import { SUBJECT_LABELS, type Subject } from "@/types/domain";
 import { Wallet } from "lucide-react";
 
 export default async function TeacherEarningsPage() {
@@ -37,7 +36,7 @@ export default async function TeacherEarningsPage() {
     .eq("type", "class_booking")
     .order("created_at", { ascending: false });
 
-  // Resolve parent names and live class subjects
+  // Resolve parent names
   const enriched = await Promise.all(
     (transactions ?? []).map(async (tx) => {
       const { data: parentProfile } = await supabase
@@ -75,17 +74,31 @@ export default async function TeacherEarningsPage() {
     .reduce((sum, tx) => sum + tx.teacher_amount, 0);
 
   // Pending payout = confirmed transactions minus already paid out
-  const { data: payouts } = await supabase
+  const { data: completedPayouts } = await supabase
     .from("teacher_payouts")
     .select("amount_xof")
     .eq("teacher_id", user.id)
     .eq("status", "completed");
 
-  const totalPaidOut = (payouts ?? []).reduce(
+  const totalPaidOut = (completedPayouts ?? []).reduce(
     (sum, p) => sum + p.amount_xof,
     0
   );
   const pendingPayout = totalEarned - totalPaidOut;
+
+  // Payout history
+  const { data: payoutHistory } = await supabase
+    .from("teacher_payouts")
+    .select("id, amount_xof, status, provider, payout_phone, created_at, processed_at")
+    .eq("teacher_id", user.id)
+    .order("created_at", { ascending: false });
+
+  // Teacher payout info
+  const { data: tp } = await supabase
+    .from("teacher_profiles")
+    .select("payout_phone, payout_provider")
+    .eq("id", user.id)
+    .single();
 
   // Last 7 days earnings for bar chart
   const last7Days = Array.from({ length: 7 }, (_, i) => {
@@ -122,6 +135,9 @@ export default async function TeacherEarningsPage() {
         pendingPayout={Math.max(0, pendingPayout)}
         transactions={enriched}
         dailyEarnings={dailyEarnings}
+        payoutHistory={payoutHistory ?? []}
+        payoutPhone={tp?.payout_phone ?? null}
+        payoutProvider={tp?.payout_provider ?? null}
       />
     </div>
   );

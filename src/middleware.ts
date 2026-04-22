@@ -8,10 +8,9 @@ const intlMiddleware = createMiddleware(routing);
 
 // Role-scoped dashboard paths — middleware redirects if role doesn't match.
 // Order matters: more-specific first.
-const ROLE_GATES: Array<{ prefix: string; role: string; fallback: string }> = [
-  { prefix: "/dashboard/admin", role: "admin", fallback: "/dashboard/parent" },
-  { prefix: "/dashboard/school", role: "school_admin", fallback: "/dashboard/parent" },
-  { prefix: "/dashboard/teacher", role: "teacher", fallback: "/dashboard/parent" },
+const ROLE_GATES: Array<{ prefix: string; roles: string[]; fallback: string }> = [
+  { prefix: "/dashboard/admin", roles: ["admin", "school_admin"], fallback: "/dashboard/parent" },
+  { prefix: "/dashboard/teacher", roles: ["teacher"], fallback: "/dashboard/parent" },
 ];
 
 function stripLocale(pathname: string): string {
@@ -82,7 +81,7 @@ export async function middleware(request: NextRequest) {
     // Role gates for /dashboard/{admin,school,teacher}
     if (isDashboardRoute) {
       for (const gate of ROLE_GATES) {
-        if (localeStripped.startsWith(gate.prefix) && role !== gate.role) {
+        if (localeStripped.startsWith(gate.prefix) && !gate.roles.includes(role)) {
           const fallbackUrl = new URL(
             `/${locale}${gate.fallback}`,
             request.url
@@ -91,10 +90,10 @@ export async function middleware(request: NextRequest) {
         }
       }
 
-      // Admin scope gate — within /dashboard/admin/*, each sub-admin only
+      // Admin / school_admin scope gate — within /dashboard/admin/*, each sub-admin only
       // sees the pages their scope grants. Out-of-scope → redirect to the
       // Overview hub (which every scope can access).
-      if (role === "admin" && localeStripped.startsWith("/dashboard/admin")) {
+      if ((role === "admin" || role === "school_admin") && localeStripped.startsWith("/dashboard/admin")) {
         const page = pageForPath(localeStripped);
         if (page && !canAccess(adminScope, page)) {
           return NextResponse.redirect(

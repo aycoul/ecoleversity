@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { canAccess, type AdminScope } from "@/lib/admin/scopes";
 
 /**
  * Admin edits per-teacher twin policy: tier, consent timestamps, price ratio.
- * Admin-only — teachers cannot self-service this until the feature is cleared
- * for public rollout.
+ * Admin-only with ai_twins scope.
  *
  * Body (any subset):
  *   { teacherId, twin_tier, twin_voice_consent_at, twin_full_session_consent_at, twin_price_ratio }
@@ -18,10 +18,10 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   const { data: me } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, admin_scope")
     .eq("id", user.id)
-    .maybeSingle<{ role: string }>();
-  if (me?.role !== "admin") {
+    .maybeSingle<{ role: string; admin_scope: AdminScope | null }>();
+  if (me?.role !== "admin" || !canAccess(me.admin_scope, "ai_twins")) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 

@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { canAccess, type AdminScope } from "@/lib/admin/scopes";
 
 /**
- * Download a single training_content row as raw JSON. Admin-only. Useful
- * for (a) inspecting the exact payload the twin trainer will consume and
+ * Download a single training_content row as raw JSON. Admin-only with ai_twins scope.
+ * Useful for (a) inspecting the exact payload the twin trainer will consume and
  * (b) handing a sample to an external annotator.
  *
  * Query: ?rowId=<uuid> (required) — the ai_training_content row to export.
@@ -22,10 +23,10 @@ export async function GET(
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   const { data: me } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, admin_scope")
     .eq("id", user.id)
-    .maybeSingle<{ role: string }>();
-  if (me?.role !== "admin") {
+    .maybeSingle<{ role: string; admin_scope: AdminScope | null }>();
+  if (me?.role !== "admin" || !canAccess(me.admin_scope, "ai_twins")) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 

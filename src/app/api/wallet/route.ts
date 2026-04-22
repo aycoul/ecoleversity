@@ -16,14 +16,14 @@ export async function GET() {
 
     // Get or create wallet
     let { data: wallet } = await adminSupabase
-      .from("wallets")
+      .from("platform_wallet")
       .select("id, balance_xof")
       .eq("user_id", user.id)
       .maybeSingle();
 
     if (!wallet) {
       const { data: newWallet } = await adminSupabase
-        .from("wallets")
+        .from("platform_wallet")
         .insert({ user_id: user.id, balance_xof: 0 })
         .select("id, balance_xof")
         .single();
@@ -33,7 +33,7 @@ export async function GET() {
     // Get wallet transactions
     const { data: transactions } = await adminSupabase
       .from("wallet_transactions")
-      .select("id, type, amount_xof, description, created_at")
+      .select("id, type, amount_xof, reference, created_at")
       .eq("wallet_id", wallet?.id)
       .order("created_at", { ascending: false })
       .limit(50);
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
       console.error("[wallet] Debit RPC error:", updateError);
       // Fallback: check if insufficient balance
       const { data: wallet } = await adminSupabase
-        .from("wallets")
+        .from("platform_wallet")
         .select("balance_xof")
         .eq("user_id", user.id)
         .single();

@@ -134,7 +134,6 @@ export default async function TeacherDashboardPage() {
     .eq("id", user.id)
     .maybeSingle();
 
-  const firstName = (profile.display_name ?? user.email ?? "").split(" ")[0];
   const nowTime = new Date().getTime();
 
   const nextSession = sessions?.[0];
@@ -148,18 +147,6 @@ export default async function TeacherDashboardPage() {
 
   return (
     <div className="space-y-8 pb-16">
-      {/* Greeting + imminent banner */}
-      <section className="rounded-2xl bg-gradient-to-br from-[var(--ev-blue)] via-[var(--ev-blue)] to-[var(--ev-blue-light)] p-6 text-white md:p-8">
-        <h1 className="text-2xl font-bold md:text-3xl">
-          {t("greeting", { name: firstName })}
-        </h1>
-        <p className="mt-1 text-sm text-white/80">
-          {tp?.verification_status === "fully_verified"
-            ? t("verifiedTagline")
-            : t("pendingTagline")}
-        </p>
-      </section>
-
       {/* Imminent session banner */}
       {imminent && nextSession && (
         <section className="flex flex-col items-start justify-between gap-3 rounded-2xl border-2 border-[var(--ev-amber)] bg-[var(--ev-amber-50)] p-5 sm:flex-row sm:items-center">

@@ -39,6 +39,7 @@ import {
   Search,
   Menu,
   LogOut,
+  Sparkles,
 } from "lucide-react";
 
 type NavLink = {
@@ -88,6 +89,51 @@ const iconMap: Record<string, React.ElementType> = {
   award: Award,
   search: Search,
 };
+
+const ROLE_GREETING: Record<UserRole | "kid", { emoji: string; subtitle: string }> = {
+  teacher: { emoji: "👨‍🏫", subtitle: "Votre espace enseignant — gérez vos cours, disponibilités et revenus." },
+  parent: { emoji: "👋", subtitle: "Votre espace parent — suivez les progrès de vos enfants." },
+  admin: { emoji: "👋", subtitle: "Votre espace administrateur — supervisez la plateforme." },
+  school_admin: { emoji: "🏫", subtitle: "Votre espace école — gérez votre établissement." },
+  kid: { emoji: "🎒", subtitle: "Bonne séance d'apprentissage !" },
+};
+
+function GreetingBanner({
+  userName,
+  role,
+  activeLearnerId,
+  learners,
+}: {
+  userName: string;
+  role: UserRole;
+  activeLearnerId: string | null;
+  learners: AvatarSwitcherLearner[];
+}) {
+  const firstName = userName.split(" ")[0];
+  const isKidMode = role === "parent" && !!activeLearnerId;
+  const activeLearner = isKidMode
+    ? learners.find((l) => l.id === activeLearnerId)
+    : null;
+  const displayName = activeLearner?.first_name ?? firstName;
+  const greetingRole = isKidMode ? "kid" : role;
+  const meta = ROLE_GREETING[greetingRole] ?? ROLE_GREETING.parent;
+
+  return (
+    <section className="rounded-2xl bg-gradient-to-br from-[var(--ev-blue)] via-[var(--ev-blue)] to-[var(--ev-blue-light)] p-5 text-white md:p-6">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-xl font-bold md:text-2xl">
+            Bonjour {displayName} {meta.emoji}
+          </h1>
+          <p className="mt-1 text-sm text-white/80">{meta.subtitle}</p>
+        </div>
+        {role === "admin" && (
+          <Sparkles className="size-5 shrink-0 text-white/60" />
+        )}
+      </div>
+    </section>
+  );
+}
 
 export function DashboardShell({
   links,
@@ -193,6 +239,16 @@ export function DashboardShell({
 
       {/* Main content */}
       <main className="flex-1 overflow-auto bg-white p-4 pb-24 md:p-8">
+        {/* Persistent identity banner — visible on every dashboard page */}
+        <div className="mb-6">
+          <GreetingBanner
+            userName={userName}
+            role={role}
+            activeLearnerId={activeLearnerId}
+            learners={learners}
+          />
+        </div>
+
         {/* Mobile-only kid-mode banner — the sidebar switch button
             is hidden on phones, so surface the exit here too. */}
         {activeLearnerId && (

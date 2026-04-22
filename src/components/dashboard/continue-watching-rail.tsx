@@ -34,7 +34,7 @@ export function ContinueWatchingRail({
           {items.map((item) => {
             const href = kidMode
               ? `/k/${item.learner_id}/course/${item.course_id}${item.last_lesson_id ? `/lesson/${item.last_lesson_id}` : ""}`
-              : `/dashboard/parent/courses/${item.enrollment_id}`;
+              : `/dashboard/parent/courses`;
             const clampedPct = Math.max(0, Math.min(100, item.progress_pct));
             return (
               <Link
