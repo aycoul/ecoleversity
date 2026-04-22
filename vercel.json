@@ -1,7 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/cron/session-reminders",
+      "path": "/api/help",
       "schedule": "*/5 * * * *"
     }
   ]
