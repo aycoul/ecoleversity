@@ -215,17 +215,18 @@ export function DashboardShell({
           </ul>
         </nav>
 
-        {/* In kid mode, surface a one-tap exit above the avatar switcher.
-            The dropdown is fine for kid-to-kid switching but too buried
-            for the common case: parent wants to go back to their own
-            dashboard. One tap, clearly labeled. */}
+        {/* In kid mode, surface a one-tap exit at the bottom of the sidebar. */}
         {activeLearnerId && (
           <div className="border-t border-slate-200 px-3 pt-3">
             <SwitchToParentButton />
           </div>
         )}
+      </aside>
 
-        <div className="border-t border-slate-200 px-4 py-3">
+      {/* Main content */}
+      <main className="flex-1 overflow-auto bg-white p-4 pb-24 md:p-8">
+        {/* Top-right header bar with avatar */}
+        <div className="mb-4 flex items-center justify-end">
           <AvatarSwitcher
             userName={userName}
             userInitial={userInitial}
@@ -233,12 +234,10 @@ export function DashboardShell({
             learners={learners}
             isParent={role === "parent"}
             role={role}
+            dropdownPosition="top"
           />
         </div>
-      </aside>
 
-      {/* Main content */}
-      <main className="flex-1 overflow-auto bg-white p-4 pb-24 md:p-8">
         {/* Persistent identity banner — visible on every dashboard page */}
         <div className="mb-6">
           <GreetingBanner

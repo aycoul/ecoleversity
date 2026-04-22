@@ -22,6 +22,8 @@ export type AvatarSwitcherProps = {
   learners: AvatarSwitcherLearner[];
   isParent: boolean;
   role?: "admin" | "teacher" | "school_admin" | "parent";
+  /** Dropdown opens downward (top placement) or upward (bottom placement). */
+  dropdownPosition?: "top" | "bottom";
 };
 
 const ROLE_LABEL: Record<string, string> = {
@@ -38,6 +40,7 @@ export function AvatarSwitcher({
   learners,
   isParent,
   role = "parent",
+  dropdownPosition = "bottom",
 }: AvatarSwitcherProps) {
   const t = useTranslations("common");
   const [open, setOpen] = useState(false);
@@ -105,7 +108,7 @@ export function AvatarSwitcher({
       </button>
 
       {open && (
-        <div className="absolute right-0 bottom-full mb-2 w-52 rounded-lg border border-slate-200 bg-white shadow-lg z-50">
+        <div className={`absolute right-0 ${dropdownPosition === "top" ? "top-full mt-2" : "bottom-full mb-2"} w-52 rounded-lg border border-slate-200 bg-white shadow-lg z-50`}>
           {/* Self row — clickable only for parents (switch back from kid mode) */}
           {isParent ? (
             <button
