@@ -253,7 +253,7 @@ export default async function TeacherSessionsPage() {
                   {summary ? (
                     <details className="mt-4 rounded-lg bg-slate-50 p-3 text-xs text-slate-700">
                       <summary className="cursor-pointer font-semibold text-slate-900">
-                        Résumé IA du cours
+                        Résumé du cours
                       </summary>
                       <div className="mt-2 whitespace-pre-wrap leading-relaxed">
                         {summary}
@@ -261,11 +261,11 @@ export default async function TeacherSessionsPage() {
                     </details>
                   ) : aiStatus === "processing" ? (
                     <div className="mt-3 text-xs italic text-slate-400">
-                      Résumé IA en cours de génération…
+                      Résumé en cours de génération…
                     </div>
                   ) : aiStatus === "failed" ? (
                     <div className="mt-3 text-xs italic text-rose-500">
-                      Résumé IA indisponible.
+                      Résumé indisponible.
                     </div>
                   ) : null}
                 </div>
