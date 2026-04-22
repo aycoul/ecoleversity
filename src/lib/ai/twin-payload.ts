@@ -70,9 +70,11 @@ export async function buildTwinPayload(opts: {
     rawSegments,
   });
 
+  // Longer classes produce many segments. Claude Haiku 4.5 supports larger
+  // outputs; we give it headroom so the JSON isn't truncated mid-array.
   const resp = await client.messages.create({
     model: "claude-haiku-4-5-20251001",
-    max_tokens: 4096,
+    max_tokens: 8192,
     system: STRUCTURE_PROMPT,
     messages: [{ role: "user", content: userMsg }],
   });

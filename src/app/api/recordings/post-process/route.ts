@@ -160,20 +160,25 @@ export async function POST(req: NextRequest) {
       gradeLevel: liveClass.grade_level,
     });
 
-    await admin.from("ai_training_content").insert({
-      twin_id: twinId,
-      source_type: "live_recording",
-      source_id: recording.id,
-      transcription: whisper.text,
-      training_payload: payload,
-      extracted_topics: payload.topics,
-      language: whisper.language,
-      duration_seconds: whisper.durationSeconds,
-      segment_count: payload.segments.length,
-      payload_version: 1,
-      processing_status: "ready",
-      processed_at: new Date().toISOString(),
-    });
+    const { error: trainInsertErr } = await admin
+      .from("ai_training_content")
+      .insert({
+        twin_id: twinId,
+        source_type: "live_recording",
+        source_id: String(recording.id),
+        transcription: whisper.text,
+        training_payload: payload,
+        extracted_topics: payload.topics,
+        language: whisper.language,
+        duration_seconds: whisper.durationSeconds,
+        segment_count: payload.segments.length,
+        payload_version: 1,
+        processing_status: "ready",
+        processed_at: new Date().toISOString(),
+      });
+    if (trainInsertErr) {
+      throw new Error(`ai_training_content insert failed: ${trainInsertErr.message}`);
+    }
 
     await admin
       .from("ai_teacher_twins")
@@ -295,11 +300,11 @@ async function incTrainingCount(
   admin: ReturnType<typeof createAdminClient>,
   twinId: string
 ): Promise<number> {
-  const { data } = await admin
+  const { count } = await admin
     .from("ai_training_content")
     .select("id", { count: "exact", head: true })
     .eq("twin_id", twinId);
-  return (data as unknown as { length?: number })?.length ?? 0;
+  return count ?? 0;
 }
 
 async function loadParentRecipients(
