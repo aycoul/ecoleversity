@@ -82,7 +82,15 @@ export async function buildTwinPayload(opts: {
     throw new Error("Claude returned no text block for twin payload");
   }
 
-  const parsed = JSON.parse(block.text) as Partial<TwinTrainingPayload>;
+  // Claude sometimes wraps JSON in ```json fences despite the instruction.
+  // Strip fences defensively before parsing so a single stubborn response
+  // doesn't poison the whole pipeline.
+  const raw = block.text
+    .trim()
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/\s*```$/i, "")
+    .trim();
+  const parsed = JSON.parse(raw) as Partial<TwinTrainingPayload>;
 
   return {
     version: 1,
