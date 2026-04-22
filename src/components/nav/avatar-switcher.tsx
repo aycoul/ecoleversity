@@ -21,6 +21,14 @@ export type AvatarSwitcherProps = {
   activeLearnerId: string | null;
   learners: AvatarSwitcherLearner[];
   isParent: boolean;
+  role?: "admin" | "teacher" | "school_admin" | "parent";
+};
+
+const ROLE_LABEL: Record<string, string> = {
+  admin: "Administrateur",
+  teacher: "Enseignant",
+  school_admin: "Admin école",
+  parent: "Parent",
 };
 
 export function AvatarSwitcher({
@@ -29,6 +37,7 @@ export function AvatarSwitcher({
   activeLearnerId,
   learners,
   isParent,
+  role = "parent",
 }: AvatarSwitcherProps) {
   const t = useTranslations("common");
   const [open, setOpen] = useState(false);
@@ -97,27 +106,37 @@ export function AvatarSwitcher({
 
       {open && (
         <div className="absolute right-0 mt-2 w-64 rounded-lg border border-slate-200 bg-white shadow-lg z-50">
-          {/* Parent self row */}
-          <button
-            onClick={() => switchTo(null)}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-slate-50 ${
-              activeLearnerId === null ? "bg-[var(--ev-green-50)]" : ""
-            }`}
-            disabled={switching !== null}
-          >
-            <div className="flex size-9 items-center justify-center rounded-full bg-[var(--ev-blue)] text-sm font-bold text-white">
-              {userInitial}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium text-slate-900 truncate">{userName}</div>
-              <div className="text-xs text-slate-500">
-                {isParent ? t("parentMode") : userName}
+          {/* Self row — clickable only for parents (switch back from kid mode) */}
+          {isParent ? (
+            <button
+              onClick={() => switchTo(null)}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-slate-50 ${
+                activeLearnerId === null ? "bg-[var(--ev-green-50)]" : ""
+              }`}
+              disabled={switching !== null}
+            >
+              <div className="flex size-9 items-center justify-center rounded-full bg-[var(--ev-blue)] text-sm font-bold text-white">
+                {userInitial}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-medium text-slate-900 truncate">{userName}</div>
+                <div className="text-xs text-slate-500">{t("parentMode")}</div>
+              </div>
+              {activeLearnerId === null && (
+                <div className="size-2 rounded-full bg-[var(--ev-green)]" />
+              )}
+            </button>
+          ) : (
+            <div className="flex items-center gap-3 px-3 py-2.5">
+              <div className="flex size-9 items-center justify-center rounded-full bg-[var(--ev-blue)] text-sm font-bold text-white">
+                {userInitial}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-medium text-slate-900 truncate">{userName}</div>
+                <div className="text-xs text-slate-500">{ROLE_LABEL[role] ?? role}</div>
               </div>
             </div>
-            {activeLearnerId === null && (
-              <div className="size-2 rounded-full bg-[var(--ev-green)]" />
-            )}
-          </button>
+          )}
 
           {/* Learners (only if parent) */}
           {isParent && learners.length > 0 && (

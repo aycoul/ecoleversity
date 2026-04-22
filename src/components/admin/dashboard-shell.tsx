@@ -7,6 +7,7 @@ import Image from "next/image";
 import type { UserRole } from "@/types/domain";
 import { AvatarSwitcher, type AvatarSwitcherLearner } from "@/components/nav/avatar-switcher";
 import { SwitchToParentButton } from "@/components/nav/switch-to-parent-button";
+import { useLogout } from "@/hooks/use-logout";
 import {
   Sheet,
   SheetContent,
@@ -37,6 +38,7 @@ import {
   Award,
   Search,
   Menu,
+  LogOut,
 } from "lucide-react";
 
 type NavLink = {
@@ -99,6 +101,7 @@ export function DashboardShell({
   const pathname = usePathname();
   const userInitial = userName.charAt(0).toUpperCase() || "?";
   const [moreOpen, setMoreOpen] = useState(false);
+  const logout = useLogout();
 
   const hasOverflow = links.length > 5;
   const primaryLinks = hasOverflow ? links.slice(0, 4) : links.slice(0, 5);
@@ -180,6 +183,7 @@ export function DashboardShell({
             activeLearnerId={activeLearnerId}
             learners={learners}
             isParent={role === "parent"}
+            role={role}
           />
         </div>
       </aside>
@@ -280,6 +284,18 @@ export function DashboardShell({
                       );
                     })}
                   </ul>
+                  <div className="mt-4 border-t border-slate-100 pt-4">
+                    <button
+                      onClick={() => {
+                        setMoreOpen(false);
+                        logout();
+                      }}
+                      className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-red-600 hover:bg-red-50"
+                    >
+                      <LogOut className="size-5" />
+                      <span>Se déconnecter</span>
+                    </button>
+                  </div>
                 </SheetContent>
               </Sheet>
             </li>
