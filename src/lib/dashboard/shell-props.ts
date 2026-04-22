@@ -79,7 +79,6 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
     tickets: t("supportTickets"),
     agents: t("agents"),
     analytics: t("analytics"),
-    ai_services: "Services IA",
     ai_twins: "Jumeaux IA",
     ai_settings: "Paramètres IA",
   };
@@ -93,7 +92,6 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
     tickets: "ticket",
     agents: "cpu",
     analytics: "bar-chart",
-    ai_services: "cpu",
     ai_twins: "cpu",
     ai_settings: "settings",
   };
@@ -109,7 +107,6 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
     tickets: "Modération",
     verification: "Opérations",
     analytics: "Opérations",
-    ai_services: "IA",
     ai_twins: "IA",
     ai_settings: "IA",
     agents: "IA",

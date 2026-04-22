@@ -191,66 +191,72 @@ export default async function AdminOverviewPage() {
                 : t("pendingSummary", { count: totalPendingAttention })}
             </p>
           </div>
-          {canAccess(adminScope, "agents") && (
-            <Link
-              href={`/${locale}/dashboard/admin/agents`}
-              className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-white/15 px-4 py-2 text-sm font-medium text-white backdrop-blur hover:bg-white/25"
-            >
-              <Cpu className="size-4" />
-              {t("viewAgents")}
-              <ArrowUpRight className="size-3.5" />
-            </Link>
-          )}
+          {/* Hero used to carry a "Voir les agents" CTA — removed as it
+              duplicated the sidebar link and the escalation section CTA below.
+              Keeping the hero minimal: greeting + today's status line. */}
         </div>
       </section>
 
-      {cards.length > 0 && (
-        <section>
-          <h2 className="mb-3 text-lg font-semibold text-slate-900">
-            {t("needsAttention")}
-          </h2>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {cards.map((card) => {
-              const Icon = card.icon;
-              const isEmpty = card.count === 0;
-              return (
-                <Link
-                  key={card.page}
-                  href={card.href}
-                  className={`group rounded-xl border p-5 transition-all hover:-translate-y-0.5 hover:shadow-md ${
-                    isEmpty
-                      ? "border-slate-200 bg-white"
-                      : "border-slate-200 bg-white ring-1 ring-[var(--ev-blue)]/10"
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div
-                      className={`flex size-10 items-center justify-center rounded-lg ${TONE_CLASSES[card.tone]}`}
-                    >
-                      <Icon className="size-5" />
-                    </div>
-                    {isEmpty ? (
-                      <span className="flex items-center gap-1 text-xs text-[var(--ev-green)]">
-                        <CircleCheck className="size-3.5" />
-                      </span>
-                    ) : (
+      {cards.length > 0 && (() => {
+        // Only surface cards with actual pending work; empty categories are
+        // already accessible from the sidebar. If everything is clear, show
+        // a single reassuring tile instead of six zero-count cards.
+        const pending = cards.filter((c) => c.count > 0);
+        if (pending.length === 0) {
+          return (
+            <section>
+              <h2 className="mb-3 text-lg font-semibold text-slate-900">
+                {t("needsAttention")}
+              </h2>
+              <div className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
+                <CircleCheck className="size-5 text-emerald-600" />
+                <div>
+                  <div className="font-semibold">Tout est à jour</div>
+                  <div className="text-xs text-emerald-700/80">
+                    Aucune action en attente. Les catégories sont accessibles depuis le menu de gauche.
+                  </div>
+                </div>
+              </div>
+            </section>
+          );
+        }
+        return (
+          <section>
+            <h2 className="mb-3 text-lg font-semibold text-slate-900">
+              {t("needsAttention")}
+            </h2>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {pending.map((card) => {
+                const Icon = card.icon;
+                return (
+                  <Link
+                    key={card.page}
+                    href={card.href}
+                    className="group rounded-xl border border-slate-200 bg-white p-5 ring-1 ring-[var(--ev-blue)]/10 transition-all hover:-translate-y-0.5 hover:shadow-md"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div
+                        className={`flex size-10 items-center justify-center rounded-lg ${TONE_CLASSES[card.tone]}`}
+                      >
+                        <Icon className="size-5" />
+                      </div>
                       <span className="inline-flex min-w-[2rem] justify-center rounded-full bg-[var(--ev-blue)] px-2 py-0.5 text-xs font-semibold text-white">
                         {card.count}
                       </span>
-                    )}
-                  </div>
-                  <p className="mt-4 text-sm font-semibold text-slate-900">
-                    {card.label}
-                  </p>
-                  <p className="mt-1 text-xs text-slate-500">
-                    {isEmpty ? card.empty : card.helper}
-                  </p>
-                </Link>
-              );
-            })}
-          </div>
-        </section>
-      )}
+                    </div>
+                    <p className="mt-4 text-sm font-semibold text-slate-900">
+                      {card.label}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {card.helper}
+                    </p>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        );
+      })()}
 
       <section>
         <h2 className="mb-3 text-lg font-semibold text-slate-900">

@@ -4,8 +4,7 @@ import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
+import { AppChrome } from "@/components/layout/app-chrome";
 import { Toaster } from "@/components/ui/sonner";
 import { ServiceWorkerRegister } from "@/components/common/sw-register";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -90,9 +89,7 @@ export default async function LocaleLayout({
       </head>
       <body className="flex min-h-full flex-col bg-white text-slate-900">
         <NextIntlClientProvider messages={messages}>
-          <Header user={navUser} />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          <AppChrome user={navUser}>{children}</AppChrome>
           <Toaster position="top-center" richColors />
           <ServiceWorkerRegister />
         </NextIntlClientProvider>

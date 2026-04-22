@@ -3,6 +3,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { PlatformConfigRow } from "@/components/admin/platform-config-row";
 import { TeacherTwinPolicyRow } from "@/components/admin/teacher-twin-policy-row";
+import { AiServicesToggle } from "@/components/admin/ai-services-toggle";
 import { AiSectionTabs } from "@/components/admin/ai-section-tabs";
 
 type ConfigRow = {
@@ -20,6 +21,14 @@ type TeacherRow = {
   twin_voice_consent_at: string | null;
   twin_full_session_consent_at: string | null;
   twin_price_ratio: number | null;
+  ai_services_enabled: boolean;
+};
+
+type ParentRow = {
+  id: string;
+  display_name: string | null;
+  email: string;
+  ai_services_enabled: boolean;
 };
 
 /**
@@ -56,9 +65,15 @@ export default async function AiSettingsPage() {
   const { data: teachers } = await admin
     .from("profiles")
     .select(
-      "id, display_name, twin_tier, twin_voice_consent_at, twin_full_session_consent_at, twin_price_ratio"
+      "id, display_name, twin_tier, twin_voice_consent_at, twin_full_session_consent_at, twin_price_ratio, ai_services_enabled"
     )
     .eq("role", "teacher")
+    .order("display_name", { ascending: true });
+
+  const { data: parents } = await admin
+    .from("profiles")
+    .select("id, display_name, ai_services_enabled")
+    .eq("role", "parent")
     .order("display_name", { ascending: true });
 
   const { data: usersData } = await admin.auth.admin.listUsers({ perPage: 1000 });
@@ -77,6 +92,13 @@ export default async function AiSettingsPage() {
       t.twin_price_ratio === null || t.twin_price_ratio === undefined
         ? null
         : Number(t.twin_price_ratio),
+    ai_services_enabled: Boolean(t.ai_services_enabled),
+  }));
+  const parentRows: ParentRow[] = (parents ?? []).map((p) => ({
+    id: p.id as string,
+    display_name: (p.display_name as string) ?? null,
+    email: emailById.get(p.id as string) ?? "—",
+    ai_services_enabled: Boolean(p.ai_services_enabled),
   }));
 
   return (
@@ -114,15 +136,21 @@ export default async function AiSettingsPage() {
 
       <section>
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
-          Politique jumeau par enseignant
+          Enseignants
         </h2>
+        <p className="mb-3 text-xs text-slate-500">
+          &quot;Transcription&quot; active la capture automatique des cours (résumés + données du jumeau).
+          &quot;Politique&quot; fixe le tier du jumeau (aucun / Q&amp;R / complet), les consentements et la
+          surcharge de tarif.
+        </p>
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
           <table className="w-full text-sm">
             <thead className="border-b border-slate-200 bg-slate-50">
               <tr>
                 <th className="p-3 text-left font-semibold text-slate-700">Enseignant</th>
                 <th className="p-3 text-left font-semibold text-slate-700">Email</th>
-                <th className="p-3 text-left font-semibold text-slate-700">Politique</th>
+                <th className="p-3 text-center font-semibold text-slate-700">Transcription</th>
+                <th className="p-3 text-left font-semibold text-slate-700">Politique jumeau</th>
               </tr>
             </thead>
             <tbody>
@@ -130,6 +158,12 @@ export default async function AiSettingsPage() {
                 <tr key={t.id} className="border-t border-slate-100">
                   <td className="p-3 align-top">{t.display_name ?? "—"}</td>
                   <td className="p-3 align-top text-slate-500">{t.email}</td>
+                  <td className="p-3 text-center align-top">
+                    <AiServicesToggle
+                      userId={t.id}
+                      initialEnabled={t.ai_services_enabled}
+                    />
+                  </td>
                   <td className="p-3">
                     <TeacherTwinPolicyRow
                       teacherId={t.id}
@@ -143,8 +177,49 @@ export default async function AiSettingsPage() {
               ))}
               {teacherRows.length === 0 && (
                 <tr>
-                  <td colSpan={3} className="p-4 text-center text-sm text-slate-500">
+                  <td colSpan={4} className="p-4 text-center text-sm text-slate-500">
                     Aucun enseignant.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+          Parents
+        </h2>
+        <p className="mb-3 text-xs text-slate-500">
+          Active l&apos;envoi des résumés de cours par email après chaque séance de l&apos;enfant.
+        </p>
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+          <table className="w-full text-sm">
+            <thead className="border-b border-slate-200 bg-slate-50">
+              <tr>
+                <th className="p-3 text-left font-semibold text-slate-700">Parent</th>
+                <th className="p-3 text-left font-semibold text-slate-700">Email</th>
+                <th className="p-3 text-right font-semibold text-slate-700">Résumés email</th>
+              </tr>
+            </thead>
+            <tbody>
+              {parentRows.map((p) => (
+                <tr key={p.id} className="border-t border-slate-100">
+                  <td className="p-3">{p.display_name ?? "—"}</td>
+                  <td className="p-3 text-slate-500">{p.email}</td>
+                  <td className="p-3 text-right">
+                    <AiServicesToggle
+                      userId={p.id}
+                      initialEnabled={p.ai_services_enabled}
+                    />
+                  </td>
+                </tr>
+              ))}
+              {parentRows.length === 0 && (
+                <tr>
+                  <td colSpan={3} className="p-4 text-center text-sm text-slate-500">
+                    Aucun parent.
                   </td>
                 </tr>
               )}

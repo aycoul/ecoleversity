@@ -15,7 +15,6 @@ import { cn } from "@/lib/utils";
 type Tab = { href: string; label: string };
 
 const TABS: Tab[] = [
-  { href: "/dashboard/admin/ai-services", label: "Services" },
   { href: "/dashboard/admin/ai-twins", label: "Jumeaux" },
   { href: "/dashboard/admin/ai-settings", label: "Paramètres" },
   { href: "/dashboard/admin/agents", label: "Agents" },
