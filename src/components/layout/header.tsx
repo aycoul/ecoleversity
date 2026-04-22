@@ -109,7 +109,7 @@ export function Header({ user = null }: HeaderProps) {
 
         {/* Desktop actions — conditional on auth state */}
         <div className="hidden items-center gap-2 lg:flex">
-          <CommandMenu />
+          <CommandMenu user={user} />
           {user ? (
             <>
               <Link href={dashboardHref(user.role)}>

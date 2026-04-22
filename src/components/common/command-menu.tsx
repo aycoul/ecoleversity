@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useLogout } from "@/hooks/use-logout";
+import type { UserRole } from "@/types/domain";
 import {
   CommandDialog,
   CommandEmpty,
@@ -35,32 +36,44 @@ type CommandItemData = {
   icon: React.ElementType;
   keywords: string[];
   action?: "logout";
+  requiresAuth?: boolean;
+  roles?: UserRole[];
 };
 
-const NAV_ITEMS: CommandItemData[] = [
+const PUBLIC_ITEMS: CommandItemData[] = [
   { label: "Accueil", href: "/", icon: Home, keywords: ["home", "landing"] },
-  { label: "Tableau de bord parent", href: "/dashboard/parent/overview", icon: LayoutDashboard, keywords: ["dashboard", "parent", "overview"] },
-  { label: "Mes enfants", href: "/dashboard/parent/children", icon: Users, keywords: ["children", "kids", "enfants"] },
-  { label: "Mes cours", href: "/dashboard/parent/courses", icon: BookOpen, keywords: ["courses", "cours"] },
-  { label: "Mes sessions", href: "/dashboard/parent/sessions", icon: Calendar, keywords: ["sessions", "classes", "rendez-vous"] },
-  { label: "Messages", href: "/dashboard/parent/messages", icon: MessageCircle, keywords: ["messages", "chat"] },
-  { label: "Portefeuille", href: "/dashboard/parent/wallet", icon: Wallet, keywords: ["wallet", "paiement", "argent"] },
-  { label: "Tableau de bord enseignant", href: "/dashboard/teacher", icon: LayoutDashboard, keywords: ["dashboard", "teacher", "enseignant"] },
-  { label: "Mes classes (enseignant)", href: "/dashboard/teacher/classes", icon: Video, keywords: ["classes", "teacher", "sessions"] },
-  { label: "Gains", href: "/dashboard/teacher/earnings", icon: Wallet, keywords: ["earnings", "gains", "argent"] },
   { label: "Catalogue des enseignants", href: "/teachers", icon: Users, keywords: ["teachers", "enseignants", "catalogue"] },
   { label: "Catalogue des cours", href: "/courses", icon: BookOpen, keywords: ["courses", "cours", "catalogue"] },
   { label: "Classes en groupe", href: "/classes", icon: Video, keywords: ["classes", "groupe", "live"] },
   { label: "Préparation aux examens", href: "/exams", icon: GraduationCap, keywords: ["exams", "examens", "bac", "bepc"] },
   { label: "Aide", href: "/help", icon: HelpCircle, keywords: ["help", "aide", "support"] },
+];
+
+const AUTH_ITEMS: CommandItemData[] = [
+  { label: "Tableau de bord parent", href: "/dashboard/parent/overview", icon: LayoutDashboard, keywords: ["dashboard", "parent", "overview"], roles: ["parent"] },
+  { label: "Mes enfants", href: "/dashboard/parent/children", icon: Users, keywords: ["children", "kids", "enfants"], roles: ["parent"] },
+  { label: "Mes cours", href: "/dashboard/parent/courses", icon: BookOpen, keywords: ["courses", "cours"], roles: ["parent"] },
+  { label: "Mes sessions", href: "/dashboard/parent/sessions", icon: Calendar, keywords: ["sessions", "classes", "rendez-vous"], roles: ["parent"] },
+  { label: "Messages", href: "/dashboard/parent/messages", icon: MessageCircle, keywords: ["messages", "chat"] },
+  { label: "Portefeuille", href: "/dashboard/parent/wallet", icon: Wallet, keywords: ["wallet", "paiement", "argent"], roles: ["parent"] },
+  { label: "Tableau de bord enseignant", href: "/dashboard/teacher", icon: LayoutDashboard, keywords: ["dashboard", "teacher", "enseignant"], roles: ["teacher"] },
+  { label: "Mes classes (enseignant)", href: "/dashboard/teacher/classes", icon: Video, keywords: ["classes", "teacher", "sessions"], roles: ["teacher"] },
+  { label: "Gains", href: "/dashboard/teacher/earnings", icon: Wallet, keywords: ["earnings", "gains", "argent"], roles: ["teacher"] },
   { label: "Paramètres", href: "/dashboard/settings/notifications", icon: Settings, keywords: ["settings", "paramètres"] },
   { label: "Déconnexion", href: "/logout", icon: LogOut, keywords: ["logout", "déconnexion", "quitter"], action: "logout" },
 ];
 
-export function CommandMenu() {
+export function CommandMenu({ user }: { user?: { role: UserRole } | null }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const logout = useLogout();
+
+  const shortcut = useMemo(() => {
+    if (typeof navigator !== "undefined" && /Mac|iPod|iPhone|iPad/.test(navigator.platform)) {
+      return "⌘K";
+    }
+    return "Ctrl+K";
+  }, []);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -96,7 +109,7 @@ export function CommandMenu() {
         <Search className="size-4" />
         <span className="text-xs">Rechercher…</span>
         <kbd className="ml-2 hidden rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-mono text-slate-500 lg:inline">
-          ⌘K
+          {shortcut}
         </kbd>
       </button>
 
@@ -105,7 +118,7 @@ export function CommandMenu() {
         <CommandList>
           <CommandEmpty>Aucun résultat trouvé.</CommandEmpty>
           <CommandGroup heading="Navigation">
-            {NAV_ITEMS.map((item) => {
+            {(user ? [...PUBLIC_ITEMS, ...AUTH_ITEMS.filter((i) => !i.roles || i.roles.includes(user.role))] : PUBLIC_ITEMS).map((item) => {
               const Icon = item.icon;
               return (
                 <CommandItem
