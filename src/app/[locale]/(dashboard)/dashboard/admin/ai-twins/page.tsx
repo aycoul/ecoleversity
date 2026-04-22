@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -122,8 +123,18 @@ export default async function AiTwinsPage() {
           </thead>
           <tbody>
             {twinList.map((t) => (
-              <tr key={t.id} className="border-t border-slate-100">
-                <td className="p-3">{nameById.get(t.teacher_id) ?? "—"}</td>
+              <tr
+                key={t.id}
+                className="border-t border-slate-100 hover:bg-slate-50"
+              >
+                <td className="p-3">
+                  <Link
+                    href={`/dashboard/admin/ai-twins/${t.id}`}
+                    className="text-[var(--ev-blue)] hover:underline"
+                  >
+                    {nameById.get(t.teacher_id) ?? "—"}
+                  </Link>
+                </td>
                 <td className="p-3">
                   {SUBJECT_LABELS[t.subject as Subject] ?? t.subject}
                 </td>
