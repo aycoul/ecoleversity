@@ -7,6 +7,31 @@ const receiver = new WebhookReceiver(
   process.env.LIVEKIT_API_SECRET!
 );
 
+/**
+ * Fire the post-processing pipeline without blocking the webhook response.
+ * Network + transcription can take 30–60s for a full class; LiveKit expects
+ * us to ack in ~5s or it'll retry. The post-process route is idempotent
+ * (checks ai_status) so retries are safe.
+ */
+function kickPostProcessing(recordingId: string): void {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://ecoleversity.com";
+  const secret = process.env.POST_PROCESS_SECRET;
+  if (!secret) {
+    console.warn("POST_PROCESS_SECRET not set — skipping post-process kick");
+    return;
+  }
+  void fetch(`${baseUrl}/api/recordings/post-process`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Post-Process-Secret": secret,
+    },
+    body: JSON.stringify({ recordingId }),
+  }).catch((err) => {
+    console.error("post-process kick failed:", err);
+  });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.text();
@@ -57,7 +82,7 @@ export async function POST(request: NextRequest) {
         status: internalStatus,
       })
       .eq("egress_id", egressInfo.egressId)
-      .select("live_class_id")
+      .select("id, live_class_id")
       .single();
 
     if (updateError) {
@@ -70,6 +95,11 @@ export async function POST(request: NextRequest) {
         .from("live_classes")
         .update({ recording_url: r2Url })
         .eq("id", recording.live_class_id);
+
+      // Fire-and-forget the AI post-processing pipeline. We don't await it
+      // so the webhook stays fast; LiveKit retries if we miss the ack window.
+      // Errors inside post-process surface via session_recordings.ai_status.
+      kickPostProcessing(recording.id);
     }
 
     return NextResponse.json({ ok: true, status: internalStatus });

@@ -79,6 +79,7 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
     tickets: t("supportTickets"),
     agents: t("agents"),
     analytics: t("analytics"),
+    ai_services: "Services IA",
   };
   const ADMIN_PAGE_ICON: Record<AdminPage, string> = {
     overview: "layout-dashboard",
@@ -90,6 +91,7 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
     tickets: "ticket",
     agents: "cpu",
     analytics: "bar-chart",
+    ai_services: "cpu",
   };
   const adminPages = adminScope ? SCOPE_PAGES[adminScope] : [];
   const adminNav = adminPages.map((page) => ({

@@ -116,7 +116,7 @@ export default async function ParentSessionsPage() {
     classIds.length > 0
       ? await admin
           .from("session_recordings")
-          .select("id, live_class_id, duration_seconds, ended_at")
+          .select("id, live_class_id, duration_seconds, ended_at, summary, ai_status")
           .in("live_class_id", classIds)
           .eq("status", "completed")
           .order("ended_at", { ascending: false })
@@ -259,45 +259,64 @@ export default async function ParentSessionsPage() {
                 "—";
               const teacher =
                 teacherName.get(cls.teacher_id as string) ?? "—";
+              const summary = rec.summary as string | null;
+              const aiStatus = rec.ai_status as string | null;
               return (
                 <div
                   key={rec.id as number}
-                  className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+                  className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
                 >
-                  <div className="space-y-1.5">
-                    <div className="text-sm font-semibold text-slate-900">
-                      {(cls.title as string) ?? subjectLabel}
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1.5">
+                      <div className="text-sm font-semibold text-slate-900">
+                        {(cls.title as string) ?? subjectLabel}
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-slate-500">
+                        <User className="size-3" />
+                        {t("sessionWith", { teacher })}
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-slate-500">
+                        <Calendar className="size-3" />
+                        {scheduledAt.toLocaleDateString("fr-FR", {
+                          weekday: "short",
+                          day: "numeric",
+                          month: "short",
+                          timeZone: "Africa/Abidjan",
+                        })}
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-slate-500">
+                        <Clock className="size-3" />
+                        {formatDuration(rec.duration_seconds as number | null)}
+                        {" · "}
+                        {subjectLabel}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-slate-500">
-                      <User className="size-3" />
-                      {t("sessionWith", { teacher })}
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-slate-500">
-                      <Calendar className="size-3" />
-                      {scheduledAt.toLocaleDateString("fr-FR", {
-                        weekday: "short",
-                        day: "numeric",
-                        month: "short",
-                        timeZone: "Africa/Abidjan",
-                      })}
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-slate-500">
-                      <Clock className="size-3" />
-                      {formatDuration(rec.duration_seconds as number | null)}
-                      {" · "}
-                      {subjectLabel}
-                    </div>
+
+                    <a
+                      href={`/api/recordings/${cls.id}/play?recordingId=${rec.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 rounded-lg bg-[var(--ev-blue)] px-4 py-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[var(--ev-blue-light)]"
+                    >
+                      <PlayCircle className="size-3" />
+                      Revoir
+                    </a>
                   </div>
 
-                  <a
-                    href={`/api/recordings/${cls.id}/play?recordingId=${rec.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 rounded-lg bg-[var(--ev-blue)] px-4 py-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[var(--ev-blue-light)]"
-                  >
-                    <PlayCircle className="size-3" />
-                    Revoir
-                  </a>
+                  {summary ? (
+                    <details className="mt-4 rounded-lg bg-slate-50 p-3 text-xs text-slate-700">
+                      <summary className="cursor-pointer font-semibold text-slate-900">
+                        Résumé du cours
+                      </summary>
+                      <div className="mt-2 whitespace-pre-wrap leading-relaxed">
+                        {summary}
+                      </div>
+                    </details>
+                  ) : aiStatus === "processing" ? (
+                    <div className="mt-3 text-xs italic text-slate-400">
+                      Résumé en cours de génération…
+                    </div>
+                  ) : null}
                 </div>
               );
             })}
