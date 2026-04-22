@@ -7,6 +7,7 @@ import { routing } from "@/i18n/routing";
 import { AppChrome } from "@/components/layout/app-chrome";
 import { Toaster } from "@/components/ui/sonner";
 import { ServiceWorkerRegister } from "@/components/common/sw-register";
+import { PwaInstallPrompt } from "@/components/common/pwa-install-prompt";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { UserRole } from "@/types/domain";
 import "../globals.css";
@@ -89,9 +90,16 @@ export default async function LocaleLayout({
       </head>
       <body className="flex min-h-full flex-col bg-white text-slate-900">
         <NextIntlClientProvider messages={messages}>
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:rounded-lg focus:bg-[var(--ev-blue)] focus:px-4 focus:py-2 focus:text-white"
+          >
+            Aller au contenu principal
+          </a>
           <AppChrome user={navUser}>{children}</AppChrome>
           <Toaster position="top-center" richColors />
           <ServiceWorkerRegister />
+          <PwaInstallPrompt />
         </NextIntlClientProvider>
       </body>
     </html>

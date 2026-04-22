@@ -60,13 +60,13 @@ export default function ParentOnboardingPage() {
       case 2:
         return (
           <AddChildStep
-            children={children}
+            childList={children}
             onChildAdded={handleChildAdded}
             onChildRemoved={handleChildRemoved}
           />
         );
       case 3:
-        return <RecommendationsStep children={children} />;
+        return <RecommendationsStep childList={children} />;
       case 4:
         return <DashboardTourStep />;
       default:

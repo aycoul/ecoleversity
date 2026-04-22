@@ -169,3 +169,33 @@
     font-weight: 700;
   }
 }
+
+/* Kid mode theme overrides */
+[data-theme="kid"] {
+  --ev-blue: #2563EB;
+  --ev-blue-light: #3B82F6;
+  --ev-blue-dark: #1D4ED8;
+  --ev-green: #22C55E;
+  --ev-green-light: #4ADE80;
+  --ev-green-dark: #16A34A;
+}
+
+[data-theme="kid"] h1 {
+  font-size: 1.75rem;
+  font-weight: 800;
+}
+
+[data-theme="kid"] .rounded-lg,
+[data-theme="kid"] .rounded-xl {
+  border-radius: 1rem;
+}
+
+/* Respect user motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-fade-in-up {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

@@ -27,8 +27,9 @@ export default async function TeacherSessionsPage() {
 
   // Upcoming + in-progress only — a class that started up to 8h ago
   // but whose duration still covers "now" must still show a Rejoindre.
+  const now = new Date();
   const earliestWindow = new Date(
-    Date.now() - 8 * 60 * 60 * 1000
+    now.getTime() - 8 * 60 * 60 * 1000
   ).toISOString();
   const { data: sessionsRaw } = await adminSupabase
     .from("live_classes")
@@ -39,7 +40,7 @@ export default async function TeacherSessionsPage() {
     .in("status", ["scheduled", "live"])
     .gte("scheduled_at", earliestWindow)
     .order("scheduled_at", { ascending: true });
-  const nowMs = Date.now();
+  const nowMs = now.getTime();
   const sessions = (sessionsRaw ?? []).filter((s) => {
     const start = new Date(s.scheduled_at as string).getTime();
     const end = start + (s.duration_minutes as number) * 60 * 1000;
@@ -78,8 +79,6 @@ export default async function TeacherSessionsPage() {
   const learnerName = new Map(
     (learnerRows ?? []).map((l) => [l.id as string, l.first_name as string])
   );
-
-  const now = Date.now();
 
   // Past sessions with completed recordings — last 30 across all of this
   // teacher's classes. We don't need to re-authorize since teacher_id
@@ -125,7 +124,7 @@ export default async function TeacherSessionsPage() {
           {sessions.map((session) => {
             const scheduledAt = new Date(session.scheduled_at as string);
             const startMs = scheduledAt.getTime();
-            const isJoinable = now >= startMs - 15 * 60 * 1000;
+            const isJoinable = nowMs >= startMs - 15 * 60 * 1000;
             const subjectLabel =
               SUBJECT_LABELS[session.subject as Subject] ??
               session.subject ??

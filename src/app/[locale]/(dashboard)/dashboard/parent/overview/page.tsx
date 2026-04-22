@@ -15,6 +15,7 @@ import {
 import type { GradeLevel } from "@/types/domain";
 import { Plus, ArrowRight, AlertCircle } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import { EmptyChildrenIllustration } from "@/components/common/empty-state-illustrations";
 
 // Live data — parent queue changes as admin confirms enrollments
 export const dynamic = "force-dynamic";
@@ -74,8 +75,9 @@ export default async function ParentOverviewPage() {
   const enrolledClassIds = (enrollments ?? [])
     .map((e) => e.live_class_id as string | null)
     .filter((id): id is string => !!id);
+  const now = new Date();
   const earliestWindow = new Date(
-    Date.now() - 8 * 60 * 60 * 1000
+    now.getTime() - 8 * 60 * 60 * 1000
   ).toISOString();
   const { data: liveClassesRaw } =
     enrolledClassIds.length > 0
@@ -90,7 +92,7 @@ export default async function ParentOverviewPage() {
           .order("scheduled_at", { ascending: true })
           .limit(10)
       : { data: [] };
-  const nowMs = Date.now();
+  const nowMs = now.getTime();
   const liveClasses = (liveClassesRaw ?? []).filter((c) => {
     const start = new Date(c.scheduled_at as string).getTime();
     const end = start + (c.duration_minutes as number) * 60 * 1000;
@@ -192,7 +194,7 @@ export default async function ParentOverviewPage() {
   // left off without hunting through email. Filter to rows still within
   // the 2h expiry window (matches EXPIRY_HOURS in payment-instructions.tsx)
   // so the card only appears when the "Finaliser" CTA actually works.
-  const pendingExpiryCutoff = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+  const pendingExpiryCutoff = new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString();
   const { data: pendingTx } = await adminRead
     .from("transactions")
     .select("id, amount_xof, payment_reference, teacher_id")
@@ -254,11 +256,13 @@ export default async function ParentOverviewPage() {
 
       {/* Kids */}
       {children.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-200 py-12 text-center">
-          <p className="text-sm text-slate-500">{t("noChildren")}</p>
+        <div className="flex flex-col items-center rounded-2xl border border-dashed border-slate-200 bg-[var(--ev-blue-50)] py-14 text-center">
+          <EmptyChildrenIllustration className="size-20" />
+          <p className="mt-4 text-base font-semibold text-[var(--ev-blue)]">{t("noChildren")}</p>
+          <p className="mt-1 text-sm text-slate-500">Ajoutez votre premier enfant pour commencer.</p>
           <Link
             href="/dashboard/parent/children"
-            className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-[var(--ev-blue)] hover:underline"
+            className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[var(--ev-amber)] px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-[var(--ev-amber)]/20 transition-all hover:bg-[var(--ev-amber-light)] hover:shadow-lg"
           >
             <Plus className="size-4" />
             {t("addChild")}
@@ -309,7 +313,20 @@ export default async function ParentOverviewPage() {
       )}
 
       {/* Continue watching */}
-      <ContinueWatchingRail items={continueWatching} />
+      {continueWatching.length > 0 ? (
+        <ContinueWatchingRail items={continueWatching} />
+      ) : (
+        <section className="rounded-2xl border border-dashed border-slate-200 bg-white p-8 text-center">
+          <p className="text-sm font-medium text-slate-600">Aucun cours en cours</p>
+          <p className="mt-1 text-xs text-slate-400">Explorez le catalogue pour inscrire votre enfant.</p>
+          <Link
+            href="/courses"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-[var(--ev-blue-50)] px-4 py-2 text-sm font-semibold text-[var(--ev-blue)] hover:bg-[var(--ev-blue)]/10"
+          >
+            Parcourir les cours <ArrowRight className="size-4" />
+          </Link>
+        </section>
+      )}
     </div>
   );
 }

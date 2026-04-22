@@ -1,11 +1,19 @@
 "use client";
 
+import { useState } from "react";
 import { Link, usePathname } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import type { UserRole } from "@/types/domain";
 import { AvatarSwitcher, type AvatarSwitcherLearner } from "@/components/nav/avatar-switcher";
 import { SwitchToParentButton } from "@/components/nav/switch-to-parent-button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import {
   ShieldCheck,
   Ticket,
@@ -28,6 +36,7 @@ import {
   TrendingUp,
   Award,
   Search,
+  Menu,
 } from "lucide-react";
 
 type NavLink = {
@@ -89,6 +98,11 @@ export function DashboardShell({
 }: DashboardShellProps) {
   const pathname = usePathname();
   const userInitial = userName.charAt(0).toUpperCase() || "?";
+  const [moreOpen, setMoreOpen] = useState(false);
+
+  const hasOverflow = links.length > 5;
+  const primaryLinks = hasOverflow ? links.slice(0, 4) : links.slice(0, 5);
+  const overflowLinks = hasOverflow ? links.slice(4) : [];
 
   return (
     <div className="flex min-h-[calc(100vh-3.5rem)]">
@@ -130,6 +144,7 @@ export function DashboardShell({
                         ? "bg-[var(--ev-green)]/10 text-[var(--ev-blue)]"
                         : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                     )}
+                    aria-current={isActive ? "page" : undefined}
                   >
                     <Icon className="size-4" />
                     <span className="flex-1">{link.label}</span>
@@ -170,7 +185,7 @@ export function DashboardShell({
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-auto bg-white p-4 md:p-8">
+      <main className="flex-1 overflow-auto bg-white p-4 pb-24 md:p-8">
         {/* Mobile-only kid-mode banner — the sidebar switch button
             is hidden on phones, so surface the exit here too. */}
         {activeLearnerId && (
@@ -184,7 +199,7 @@ export function DashboardShell({
       {/* Mobile bottom nav */}
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white md:hidden">
         <ul className="flex items-center justify-around">
-          {links.slice(0, 5).map((link) => {
+          {primaryLinks.map((link) => {
             const Icon = iconMap[link.icon] ?? User;
             const isActive = pathname.startsWith(link.href);
             return (
@@ -214,6 +229,61 @@ export function DashboardShell({
               </li>
             );
           })}
+          {hasOverflow && (
+            <li>
+              <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
+                <SheetTrigger
+                  render={
+                    <button
+                      type="button"
+                      className="relative flex flex-col items-center gap-0.5 px-3 py-2 text-[0.65rem] text-slate-400"
+                      aria-label="Plus d'options"
+                    >
+                      <Menu className="size-5" />
+                      <span className="truncate">Plus</span>
+                    </button>
+                  }
+                />
+                <SheetContent side="bottom" className="pb-8">
+                  <SheetHeader>
+                    <SheetTitle className="text-left text-[var(--ev-blue)]">Navigation</SheetTitle>
+                  </SheetHeader>
+                  <ul className="mt-4 space-y-1">
+                    {overflowLinks.map((link) => {
+                      const Icon = iconMap[link.icon] ?? User;
+                      const isActive = pathname.startsWith(link.href);
+                      return (
+                        <li key={link.href}>
+                          <Link
+                            href={link.href}
+                            onClick={() => setMoreOpen(false)}
+                            className={cn(
+                              "flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-colors",
+                              isActive
+                                ? "bg-[var(--ev-green)]/10 text-[var(--ev-blue)]"
+                                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                            )}
+                            aria-current={isActive ? "page" : undefined}
+                          >
+                            <Icon className="size-5" />
+                            <span className="flex-1">{link.label}</span>
+                            {!!link.badge && link.badge > 0 && (
+                              <span
+                                aria-label={`${link.badge} en attente`}
+                                className="inline-flex min-w-5 items-center justify-center rounded-full bg-amber-500 px-1.5 text-[0.65rem] font-bold text-white"
+                              >
+                                {link.badge}
+                              </span>
+                            )}
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </SheetContent>
+              </Sheet>
+            </li>
+          )}
         </ul>
       </nav>
     </div>

@@ -8,6 +8,7 @@ import { MobileNav } from "./mobile-nav";
 import { LayoutDashboard, LogOut, Menu } from "lucide-react";
 import Image from "next/image";
 import type { UserRole } from "@/types/domain";
+import { CommandMenu } from "@/components/common/command-menu";
 
 type HeaderProps = {
   user: {
@@ -103,6 +104,7 @@ export function Header({ user = null }: HeaderProps) {
 
         {/* Desktop actions — conditional on auth state */}
         <div className="hidden items-center gap-2 lg:flex">
+          <CommandMenu />
           {user ? (
             <>
               <Link href={dashboardHref(user.role)}>

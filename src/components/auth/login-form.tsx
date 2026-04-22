@@ -108,15 +108,16 @@ export function LoginForm() {
     setLoading(false);
   };
 
-  const handleVerifyOtp = async () => {
-    if (!otp || otp.length < 6) return;
+  const handleVerifyOtp = async (code?: string) => {
+    const token = code ?? otp;
+    if (!token || token.length < 6) return;
 
     setLoading(true);
     const supabase = createClient();
 
     const { error } = await supabase.auth.verifyOtp({
       phone: formattedPhone,
-      token: otp,
+      token,
       type: "sms",
     });
 
@@ -234,10 +235,20 @@ export function LoginForm() {
                       id="phone"
                       type="tel"
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/\D/g, "").slice(0, 10);
+                        // Format as 07 XX XX XX XX
+                        let formatted = raw;
+                        if (raw.length > 2) formatted = `${raw.slice(0, 2)} ${raw.slice(2)}`;
+                        if (raw.length > 4) formatted = `${raw.slice(0, 2)} ${raw.slice(2, 4)} ${raw.slice(4)}`;
+                        if (raw.length > 6) formatted = `${raw.slice(0, 2)} ${raw.slice(2, 4)} ${raw.slice(4, 6)} ${raw.slice(6)}`;
+                        if (raw.length > 8) formatted = `${raw.slice(0, 2)} ${raw.slice(2, 4)} ${raw.slice(4, 6)} ${raw.slice(6, 8)} ${raw.slice(8)}`;
+                        setPhone(formatted);
+                      }}
                       placeholder="07 XX XX XX XX"
                       autoComplete="tel"
                       autoFocus
+                      pattern="[0-9]{2} [0-9]{2} [0-9]{2} [0-9]{2} [0-9]{2}"
                     />
                   </div>
                 </div>
@@ -275,14 +286,22 @@ export function LoginForm() {
                     inputMode="numeric"
                     maxLength={6}
                     value={otp}
-                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, "");
+                      setOtp(val);
+                      if (val.length === 6) {
+                        // Use a microtask to ensure state is committed before verify reads it
+                        queueMicrotask(() => handleVerifyOtp(val));
+                      }
+                    }}
                     placeholder="000000"
                     className="text-center text-2xl tracking-[0.5em]"
                     autoFocus
+                    autoComplete="one-time-code"
                   />
                 </div>
                 <Button
-                  onClick={handleVerifyOtp}
+                  onClick={() => handleVerifyOtp()}
                   className="w-full bg-[var(--ev-blue)] text-white hover:bg-[var(--ev-blue-light)]"
                   disabled={loading || otp.length < 6}
                 >

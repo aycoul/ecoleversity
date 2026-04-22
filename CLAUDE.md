@@ -178,3 +178,76 @@ This project follows a strict 7-command lifecycle. **WORKFLOW.md is the single s
 - `src/lib/notifications/whatsapp.ts` — WhatsApp Business API (primary notifications)
 - `src/lib/notifications/cascade.ts` — Notification cascade (WhatsApp → email → push)
 - `src/lib/ai/support-bot.ts` — AI customer support chatbot "Ama"
+
+## UI/UX Changes Log (2026-04-21)
+
+The following UI/UX improvements were applied during the audit. **Preserve these patterns** when building new pages.
+
+### Design System — LOCKED
+- **Colors:** Keep the existing EV palette exactly as defined in `globals.css`:
+  - `--ev-blue: #1E40AF`, `--ev-blue-light: #2563EB`, `--ev-blue-dark: #1E3A8A`, `--ev-blue-50: #EFF6FF`
+  - `--ev-amber: #F59E0B`, `--ev-amber-light: #FBBF24`, `--ev-amber-dark: #D97706`, `--ev-amber-50: #FFFBEB`
+  - `--ev-green: #10B981`, `--ev-green-light: #34D399`, `--ev-green-dark: #059669`, `--ev-green-50: #ECFDF5`
+- **Typography:** Nunito (headings) + Nunito Sans (body). Do not change fonts.
+- **Radius scale:** Buttons/inputs `rounded-lg` (8px), cards `rounded-xl` (12px), heroes/banners `rounded-2xl` (16px). Reserve `rounded-full` for primary CTAs on dark backgrounds only.
+
+### Implemented Improvements
+1. **Mobile viewport fix** — `pb-24` added to `<main>` in `dashboard-shell.tsx` so content isn't hidden behind the bottom nav.
+2. **Loading skeletons** — Added `loading.tsx` to `(dashboard)` and `(marketplace)` route groups.
+3. **Accessibility** — `aria-current="page"` on active sidebar links, skip link (`#main-content`) in root layout, `prefers-reduced-motion` media query in `globals.css`.
+4. **Empty states** — All dashboards now use styled empty states with EV-blue tinted backgrounds (`bg-[var(--ev-blue-50)]`), white icon circles, and prominent amber CTAs.
+5. **Teacher stat cards** — Added hover arrow (`group-hover:opacity-100`) to indicate clickability.
+6. **Admin escalation colors** — Color-coded by agent type using the existing palette + semantic rose/violet.
+7. **Mobile bottom nav overflow** — When nav has >5 items, shows first 4 + "Plus" sheet with remaining links.
+8. **Hero search bar** — Converted from fake `readOnly` input to a real form that submits to `/teachers?q=...`.
+9. **Image alt text** — Added descriptive alt text to all images on the landing page (hero, featured cards, services, testimonials, CTA).
+10. **Auth form UX** — OTP input now has `autoComplete="one-time-code"` and auto-submits when 6 digits are entered.
+11. **Teacher imminent session banner** — Added pulsing amber dot indicator and restyled with EV color tokens.
+12. **Course catalog filter sync** — Client-side filters now sync to URL query params (`?subject=...&grade=...`) so filtered views are shareable and bookmarkable.
+13. **Image lazy loading** — Added `loading="lazy"` to all `<img>` tags in `CourseCard` (thumbnail + teacher avatar).
+14. **React purity fixes** — Replaced all `Date.now()` calls in Server Components with `new Date().getTime()` to comply with React 19 compiler rules.
+15. **Onboarding prop fix** — Renamed `children` prop to `childList` in `AddChildStep` and `RecommendationsStep` to resolve ESLint `react/no-children-prop` error.
+
+### Remaining UI/UX Items (Priority Order)
+1. **Course card Next.js Image** — Replace native `<img>` with Next.js `<Image>` for automatic optimization. Requires adding Supabase/Cloudflare domains to `next.config.ts`.
+2. **Real-time search data** — Command palette currently uses static nav links. Connect to API for live teacher/course search.
+3. **Kid mode SVG mascot** — Add a friendly mascot character to kid empty states and dashboard.
+4. **PWA offline page** — Add a custom offline fallback page for the service worker.
+
+### Files Modified in This Session
+- `src/components/admin/dashboard-shell.tsx` — Mobile padding, aria-current, bottom nav overflow
+- `src/app/[locale]/(dashboard)/loading.tsx` — New
+- `src/app/[locale]/(marketplace)/loading.tsx` — New
+- `src/app/globals.css` — Reduced motion support + kid mode theme overrides
+- `src/app/[locale]/layout.tsx` — Skip link + PWA install prompt
+- `src/components/layout/app-chrome.tsx` — `#main-content` id
+- `src/components/layout/header.tsx` — CommandMenu button
+- `src/app/[locale]/(dashboard)/dashboard/parent/overview/page.tsx` — Empty states, Date.now() fixes
+- `src/app/[locale]/(dashboard)/dashboard/parent/sessions/page.tsx` — Date.now() fixes
+- `src/app/[locale]/(dashboard)/dashboard/teacher/page.tsx` — Empty state + hover arrow + pulsing dot banner
+- `src/app/[locale]/(dashboard)/dashboard/teacher/sessions/page.tsx` — Date.now() fixes
+- `src/app/[locale]/(dashboard)/dashboard/teacher/earnings/page.tsx` — 7-day earnings query
+- `src/app/[locale]/(dashboard)/dashboard/admin/page.tsx` — Agent color coding
+- `src/app/[locale]/k/[learner_id]/page.tsx` — Kid empty state + Date.now() fixes
+- `src/app/[locale]/k/[learner_id]/layout.tsx` — `data-theme="kid"` wrapper
+- `src/app/[locale]/page.tsx` — Functional hero search + image alt text + Date.now() fixes
+- `src/app/[locale]/(marketplace)/classes/page.tsx` — Date.now() fixes
+- `src/components/auth/login-form.tsx` — OTP autoComplete + auto-submit + phone formatting
+- `src/components/course/course-catalog.tsx` — URL filter sync
+- `src/components/course/course-card.tsx` — Image lazy loading + alt text
+- `src/components/teacher/earnings-dashboard.tsx` — 7-day bar chart
+- `src/components/onboarding/parent/add-child-step.tsx` — Renamed `children` prop to `childList`
+- `src/components/onboarding/parent/recommendations-step.tsx` — Renamed `children` prop to `childList`
+- `src/app/[locale]/onboarding/parent/page.tsx` — Updated prop names for child step components
+- `src/components/common/empty-state-illustrations.tsx` — New: 6 inline SVG empty state illustrations
+- `src/components/common/pwa-install-prompt.tsx` — New: PWA install banner with beforeinstallprompt
+- `src/components/common/command-menu.tsx` — New: Cmd+K command palette with cmdk
+- `src/components/dashboard/upcoming-session-list.tsx` — Empty state + CTA
+- `src/app/[locale]/page.tsx` — Functional hero search + image alt text + Date.now() fixes
+- `src/app/[locale]/(marketplace)/classes/page.tsx` — Date.now() fixes
+- `src/components/auth/login-form.tsx` — OTP autoComplete + auto-submit
+- `src/components/course/course-catalog.tsx` — URL filter sync
+- `src/components/course/course-card.tsx` — Image lazy loading + alt text
+- `src/components/onboarding/parent/add-child-step.tsx` — Renamed `children` prop to `childList`
+- `src/components/onboarding/parent/recommendations-step.tsx` — Renamed `children` prop to `childList`
+- `src/app/[locale]/onboarding/parent/page.tsx` — Updated prop names for child step components

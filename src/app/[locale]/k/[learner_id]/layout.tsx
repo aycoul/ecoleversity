@@ -65,14 +65,16 @@ export default async function KidLayout({
   ];
 
   return (
-    <DashboardShell
-      links={navLinks}
-      role="parent"
-      userName={(profile.display_name as string | null) ?? "Parent"}
-      activeLearnerId={learner_id}
-      learners={learners}
-    >
-      {children}
-    </DashboardShell>
+    <div data-theme="kid">
+      <DashboardShell
+        links={navLinks}
+        role="parent"
+        userName={(profile.display_name as string | null) ?? "Parent"}
+        activeLearnerId={learner_id}
+        learners={learners}
+      >
+        {children}
+      </DashboardShell>
+    </div>
   );
 }

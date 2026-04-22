@@ -4,7 +4,6 @@ import Link from "next/link";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import {
   AlertOctagon,
-  ArrowUpRight,
   BarChart3,
   CircleCheck,
   Cpu,
@@ -44,10 +43,19 @@ type AttentionCard = {
 const TONE_CLASSES: Record<Tone, string> = {
   blue: "bg-[var(--ev-blue-50)] text-[var(--ev-blue)]",
   green: "bg-[var(--ev-green-50)] text-[var(--ev-green)]",
-  amber: "bg-amber-50 text-amber-600",
+  amber: "bg-[var(--ev-amber-50)] text-[var(--ev-amber-dark)]",
   rose: "bg-rose-50 text-rose-600",
   violet: "bg-violet-50 text-violet-600",
   slate: "bg-slate-100 text-slate-700",
+};
+
+const AGENT_TONE: Record<string, Tone> = {
+  "Vérificateur": "blue",
+  "Caissier": "green",
+  "Gardien": "rose",
+  "Ama+": "amber",
+  "Tableau de Bord": "violet",
+  "Le Patron": "slate",
 };
 
 export default async function AdminOverviewPage() {
@@ -339,30 +347,56 @@ export default async function AdminOverviewPage() {
             </div>
           ) : (
             <div className="space-y-2">
-              {agentEscalations.map((esc) => (
-                <div
-                  key={esc.agent}
-                  className="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 px-4 py-3"
-                >
-                  <div className="flex items-center gap-3">
-                    <Cpu className="size-4 text-amber-600" />
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900">
-                        {esc.agent}
-                      </p>
-                      <p className="text-xs text-slate-600">
-                        {t("pendingDecisions", { count: esc.pending })}
-                      </p>
-                    </div>
-                  </div>
-                  <Link
-                    href={`/${locale}/dashboard/admin/agents`}
-                    className="text-sm font-medium text-amber-700 hover:underline"
+              {agentEscalations.map((esc) => {
+                const tone = AGENT_TONE[esc.agent] ?? "amber";
+                const toneClass = TONE_CLASSES[tone];
+                return (
+                  <div
+                    key={esc.agent}
+                    className={`flex items-center justify-between rounded-lg border px-4 py-3 ${
+                      tone === "rose"
+                        ? "border-rose-200 bg-rose-50"
+                        : tone === "green"
+                          ? "border-emerald-200 bg-emerald-50"
+                          : tone === "blue"
+                            ? "border-blue-200 bg-blue-50"
+                            : tone === "violet"
+                              ? "border-violet-200 bg-violet-50"
+                              : "border-amber-200 bg-amber-50"
+                    }`}
                   >
-                    {t("review")}
-                  </Link>
-                </div>
-              ))}
+                    <div className="flex items-center gap-3">
+                      <div className={`flex size-8 items-center justify-center rounded-md ${toneClass}`}>
+                        <Cpu className="size-4" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900">
+                          {esc.agent}
+                        </p>
+                        <p className="text-xs text-slate-600">
+                          {t("pendingDecisions", { count: esc.pending })}
+                        </p>
+                      </div>
+                    </div>
+                    <Link
+                      href={`/${locale}/dashboard/admin/agents`}
+                      className={`text-sm font-medium hover:underline ${
+                        tone === "rose"
+                          ? "text-rose-700"
+                          : tone === "green"
+                            ? "text-emerald-700"
+                            : tone === "blue"
+                              ? "text-blue-700"
+                              : tone === "violet"
+                                ? "text-violet-700"
+                                : "text-amber-700"
+                      }`}
+                    >
+                      {t("review")}
+                    </Link>
+                  </div>
+                );
+              })}
             </div>
           )}
         </section>

@@ -4,7 +4,6 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Link } from "@/i18n/routing";
 import {
-  Calendar,
   Clock,
   Users,
   Video,
@@ -14,8 +13,10 @@ import {
   Plus,
   BookOpen,
   Star,
+  ArrowUpRight,
 } from "lucide-react";
 import { SUBJECT_LABELS, type Subject } from "@/types/domain";
+import { EmptySessionsIllustration } from "@/components/common/empty-state-illustrations";
 
 export const dynamic = "force-dynamic";
 
@@ -63,8 +64,9 @@ export default async function TeacherDashboardPage() {
 
   // Upcoming + in-progress sessions. scheduled_at up to 8h in the past
   // still counts if end time is still in the future; JS filter narrows.
+  const now = new Date();
   const earliestWindow = new Date(
-    Date.now() - 8 * 60 * 60 * 1000
+    now.getTime() - 8 * 60 * 60 * 1000
   ).toISOString();
   const { data: sessionsRaw } = await admin
     .from("live_classes")
@@ -76,7 +78,7 @@ export default async function TeacherDashboardPage() {
     .gte("scheduled_at", earliestWindow)
     .order("scheduled_at", { ascending: true })
     .limit(10);
-  const nowMs = Date.now();
+  const nowMs = now.getTime();
   const sessions = (sessionsRaw ?? []).filter((s) => {
     const start = new Date(s.scheduled_at as string).getTime();
     const end = start + (s.duration_minutes as number) * 60 * 1000;
@@ -133,16 +135,16 @@ export default async function TeacherDashboardPage() {
     .maybeSingle();
 
   const firstName = (profile.display_name ?? user.email ?? "").split(" ")[0];
-  const now = Date.now();
+  const nowTime = new Date().getTime();
 
   const nextSession = sessions?.[0];
   const imminent =
     nextSession &&
-    new Date(nextSession.scheduled_at as string).getTime() - now <=
+    new Date(nextSession.scheduled_at as string).getTime() - nowTime <=
       15 * 60 * 1000 &&
     new Date(nextSession.scheduled_at as string).getTime() +
       (nextSession.duration_minutes as number) * 60 * 1000 >=
-      now;
+      nowTime;
 
   return (
     <div className="space-y-8 pb-16">
@@ -160,20 +162,26 @@ export default async function TeacherDashboardPage() {
 
       {/* Imminent session banner */}
       {imminent && nextSession && (
-        <section className="flex flex-col items-start justify-between gap-3 rounded-2xl border-2 border-amber-300 bg-amber-50 p-5 sm:flex-row sm:items-center">
-          <div>
-            <p className="text-sm font-semibold text-amber-900">
-              {t("imminentTitle")}
-            </p>
-            <p className="mt-0.5 text-xs text-amber-800">
-              {(nextSession.title as string) ??
-                SUBJECT_LABELS[nextSession.subject as Subject]}{" "}
-              · {formatCiDateTime(nextSession.scheduled_at as string)}
-            </p>
+        <section className="flex flex-col items-start justify-between gap-3 rounded-2xl border-2 border-[var(--ev-amber)] bg-[var(--ev-amber-50)] p-5 sm:flex-row sm:items-center">
+          <div className="flex items-center gap-3">
+            <span className="relative flex size-3">
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-[var(--ev-amber)] opacity-75" />
+              <span className="relative inline-flex size-3 rounded-full bg-[var(--ev-amber)]" />
+            </span>
+            <div>
+              <p className="text-sm font-semibold text-[var(--ev-amber-dark)]">
+                {t("imminentTitle")}
+              </p>
+              <p className="mt-0.5 text-xs text-amber-800">
+                {(nextSession.title as string) ??
+                  SUBJECT_LABELS[nextSession.subject as Subject]}{" "}
+                · {formatCiDateTime(nextSession.scheduled_at as string)}
+              </p>
+            </div>
           </div>
           <Link
             href={`/session/${nextSession.id}`}
-            className="inline-flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-amber-700"
+            className="inline-flex items-center gap-2 rounded-lg bg-[var(--ev-amber)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[var(--ev-amber-light)]"
           >
             <Video className="size-4" />
             {t("joinNow")}
@@ -231,27 +239,27 @@ export default async function TeacherDashboardPage() {
           </Link>
         </div>
         {!sessions || sessions.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-200 bg-white p-8 text-center">
-            <Calendar className="mx-auto mb-3 size-10 text-slate-300" />
-            <p className="text-sm font-semibold text-slate-700">
+          <div className="flex flex-col items-center rounded-2xl border border-dashed border-slate-200 bg-[var(--ev-blue-50)] p-10 text-center">
+            <EmptySessionsIllustration className="size-20" />
+            <p className="mt-4 text-base font-semibold text-[var(--ev-blue)]">
               {t("noUpcoming")}
             </p>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-sm text-slate-500">
               {t("noUpcomingHelper")}
             </p>
-            <div className="mt-4 flex justify-center gap-2">
+            <div className="mt-5 flex flex-wrap justify-center gap-3">
               <Link
                 href="/dashboard/teacher/availability"
-                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
               >
-                <CalendarDays className="size-3.5" />
+                <CalendarDays className="size-4" />
                 {t("setAvailability")}
               </Link>
               <Link
                 href="/dashboard/teacher/classes/new"
-                className="inline-flex items-center gap-1 rounded-lg bg-[var(--ev-blue)] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[var(--ev-blue-light)]"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--ev-blue)] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[var(--ev-blue-light)]"
               >
-                <Plus className="size-3.5" />
+                <Plus className="size-4" />
                 {t("createClass")}
               </Link>
             </div>
@@ -261,7 +269,7 @@ export default async function TeacherDashboardPage() {
             {sessions.map((s) => {
               const start = new Date(s.scheduled_at as string).getTime();
               const end = start + (s.duration_minutes as number) * 60 * 1000;
-              const isJoinable = now >= start - 15 * 60 * 1000 && now <= end;
+              const isJoinable = nowMs >= start - 15 * 60 * 1000 && nowMs <= end;
               const count = enrolledCountByClass.get(s.id as string) ?? 0;
               return (
                 <div
@@ -349,12 +357,12 @@ function StatCard({
       ? "bg-[var(--ev-green-50)] text-[var(--ev-green)]"
       : tone === "blue"
         ? "bg-[var(--ev-blue-50)] text-[var(--ev-blue)]"
-        : "bg-amber-50 text-amber-600";
+        : "bg-[var(--ev-amber-50)] text-[var(--ev-amber-dark)]";
 
   return (
     <Link
       href={href}
-      className="rounded-xl border border-slate-200 bg-white p-4 transition-shadow hover:shadow-md"
+      className="group rounded-xl border border-slate-200 bg-white p-4 transition-shadow hover:shadow-md"
     >
       <div className="flex items-center justify-between">
         <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
@@ -366,7 +374,10 @@ function StatCard({
           <Icon className="size-3.5" />
         </div>
       </div>
-      <p className="mt-2 text-xl font-bold text-slate-900">{value}</p>
+      <div className="mt-2 flex items-center gap-2">
+        <p className="text-xl font-bold text-slate-900">{value}</p>
+        <ArrowUpRight className="size-4 text-slate-300 opacity-0 transition-opacity group-hover:opacity-100" />
+      </div>
       <p className="mt-1 text-xs text-slate-500">{helper}</p>
     </Link>
   );

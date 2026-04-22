@@ -65,6 +65,7 @@ export function CourseCard({ course }: { course: CourseCardData }) {
           <img
             src={course.thumbnail_url}
             alt={course.title}
+            loading="lazy"
             className="size-full object-cover"
           />
         ) : (
@@ -92,7 +93,8 @@ export function CourseCard({ course }: { course: CourseCardData }) {
             {course.teacher_avatar ? (
               <img
                 src={course.teacher_avatar}
-                alt=""
+                alt={course.teacher_name}
+                loading="lazy"
                 className="size-full object-cover"
               />
             ) : (

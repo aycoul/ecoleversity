@@ -21,7 +21,8 @@ export default async function GroupClassCatalogPage({
   // for 60–90 min, so a class whose start time is in the past but whose
   // end time is still in the future should still appear as bookable.
   // The JS filter after the query narrows this properly.
-  const earliestWindow = new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString();
+  const now = new Date();
+  const earliestWindow = new Date(now.getTime() - 8 * 60 * 60 * 1000).toISOString();
 
   // Fetch group classes that are still upcoming or currently running
   let query = supabase
@@ -46,7 +47,7 @@ export default async function GroupClassCatalogPage({
   // JS filter — keep classes whose end time is still in the future.
   // A class scheduled 2h ago with duration_minutes=60 is already done,
   // but a class scheduled 2h ago with duration_minutes=90 is still live.
-  const nowMs = Date.now();
+  const nowMs = now.getTime();
   const classes = (classesRaw ?? []).filter((c) => {
     const start = new Date(c.scheduled_at as string).getTime();
     const end = start + (c.duration_minutes as number) * 60 * 1000;

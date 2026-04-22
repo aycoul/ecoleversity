@@ -55,7 +55,8 @@ export default async function ParentSessionsPage() {
   // is in the past, but end time is in the future). JS filter below
   // narrows to "upcoming OR in-progress" so past-and-done classes are
   // hidden without excluding an active session.
-  const earliestWindow = new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString();
+  const now = new Date();
+  const earliestWindow = new Date(now.getTime() - 8 * 60 * 60 * 1000).toISOString();
   const { data: sessionsRaw } =
     classIds.length > 0
       ? await admin
@@ -69,7 +70,7 @@ export default async function ParentSessionsPage() {
           .order("scheduled_at", { ascending: true })
       : { data: [] };
 
-  const nowMs = Date.now();
+  const nowMs = now.getTime();
   const sessions = (sessionsRaw ?? []).filter((s) => {
     const start = new Date(s.scheduled_at as string).getTime();
     const end = start + (s.duration_minutes as number) * 60 * 1000;
@@ -106,8 +107,6 @@ export default async function ParentSessionsPage() {
     arr.push(name);
     learnersByClass.set(clsId, arr);
   }
-
-  const now = Date.now();
 
   // Past sessions with a completed recording — separate section below
   // the upcoming list. Joined via session_recordings so we only surface
@@ -181,7 +180,7 @@ export default async function ParentSessionsPage() {
             const startMs = scheduledAt.getTime();
             const end =
               startMs + (session.duration_minutes as number) * 60 * 1000;
-            const isJoinable = now >= startMs - 15 * 60 * 1000 && now <= end;
+            const isJoinable = nowMs >= startMs - 15 * 60 * 1000 && nowMs <= end;
             const subjectLabel =
               SUBJECT_LABELS[session.subject as Subject] ??
               session.subject ??

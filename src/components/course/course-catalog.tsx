@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useTranslations } from "next-intl";
+import { useRouter, usePathname } from "next/navigation";
 import { CourseCard, type CourseCardData } from "./course-card";
 import {
   SUBJECT_LABELS,
@@ -45,12 +46,40 @@ export function CourseCatalog({
   initialSort,
 }: CourseCatalogProps) {
   const t = useTranslations("courseCatalog");
+  const router = useRouter();
+  const pathname = usePathname();
+
   const [subject, setSubject] = useState(initialSubject ?? "");
   const [grade, setGrade] = useState(initialGrade ?? "");
   const [exam, setExam] = useState(initialExam ?? "");
   const [sort, setSort] = useState<SortOption>(
     (initialSort as SortOption) ?? "popularity"
   );
+
+  const updateQueryParams = useCallback(
+    (updates: Record<string, string>) => {
+      const params = new URLSearchParams(window.location.search);
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value) {
+          params.set(key, value);
+        } else {
+          params.delete(key);
+        }
+      });
+      const query = params.toString();
+      router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    },
+    [pathname, router]
+  );
+
+  useEffect(() => {
+    updateQueryParams({
+      subject,
+      grade,
+      exam,
+      sort: sort === "popularity" ? "" : sort,
+    });
+  }, [subject, grade, exam, sort, updateQueryParams]);
 
   const filtered = useMemo(() => {
     let result = courses.filter((c) => {
@@ -100,6 +129,7 @@ export function CourseCatalog({
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
           className={selectClass}
+          name="subject"
         >
           <option value="">{t("allSubjects")}</option>
           {SUBJECTS.map((s) => (
@@ -117,6 +147,7 @@ export function CourseCatalog({
           value={grade}
           onChange={(e) => setGrade(e.target.value)}
           className={selectClass}
+          name="grade"
         >
           <option value="">{t("allGrades")}</option>
           {GRADE_LEVELS.map((g) => (
@@ -134,6 +165,7 @@ export function CourseCatalog({
           value={exam}
           onChange={(e) => setExam(e.target.value)}
           className={selectClass}
+          name="exam"
         >
           <option value="">{t("allExams")}</option>
           {TARGET_EXAMS.map((e) => (
@@ -151,6 +183,7 @@ export function CourseCatalog({
           value={sort}
           onChange={(e) => setSort(e.target.value as SortOption)}
           className={selectClass}
+          name="sort"
         >
           <option value="popularity">{t("sortPopularity")}</option>
           <option value="rating">{t("sortRating")}</option>
@@ -167,6 +200,7 @@ export function CourseCatalog({
             setSubject("");
             setGrade("");
             setExam("");
+            setSort("popularity");
           }}
         >
           <X className="mr-1 size-3" />

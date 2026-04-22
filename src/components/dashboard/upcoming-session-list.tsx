@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Video, Calendar, ChevronRight } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import { EmptyClassesIllustration } from "@/components/common/empty-state-illustrations";
 
 export type UpcomingSession = {
   id: string;
@@ -37,9 +38,20 @@ export async function UpcomingSessionList({
   const t = await getTranslations("dashboardCommon");
   if (sessions.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-slate-200 bg-white p-8 text-center text-sm text-slate-400">
-        {emptyMessage ??
-          (mode === "kid" ? t("emptyUpcomingKid") : t("emptyUpcomingParent"))}
+      <div className="flex flex-col items-center rounded-2xl border border-dashed border-slate-200 bg-[var(--ev-blue-50)] p-10 text-center">
+        <EmptyClassesIllustration className="size-20" />
+        <p className="mt-4 text-sm font-semibold text-[var(--ev-blue)]">
+          {emptyMessage ??
+            (mode === "kid" ? t("emptyUpcomingKid") : t("emptyUpcomingParent"))}
+        </p>
+        {mode !== "teacher" && (
+          <Link
+            href="/classes"
+            className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-white px-4 py-2 text-sm font-medium text-[var(--ev-blue)] shadow-sm hover:bg-[var(--ev-blue-50)]"
+          >
+            Parcourir les classes <ChevronRight className="size-4" />
+          </Link>
+        )}
       </div>
     );
   }

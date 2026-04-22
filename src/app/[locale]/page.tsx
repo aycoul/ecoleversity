@@ -14,11 +14,9 @@ import {
   Quote,
   GraduationCap,
   Users,
-  BookOpen,
   Clock,
   PlayCircle,
   PenTool,
-  X,
 } from "lucide-react";
 import { AnimateOnScroll } from "@/components/common/animate-on-scroll";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -77,7 +75,8 @@ function imageForSubject(subject: string | null, idx: number): string {
 async function loadFeaturedCards(): Promise<FeaturedCard[]> {
   const admin = createAdminClient();
 
-  const earliestWindow = new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString();
+  const now = new Date();
+  const earliestWindow = new Date(now.getTime() - 8 * 60 * 60 * 1000).toISOString();
   // Fetch more than we need: the end-time > now filter below runs in JS,
   // so classes already over still count against the limit. Bump to 12 and
   // slice after the filter to guarantee up to 4 truly upcoming classes.
@@ -110,7 +109,7 @@ async function loadFeaturedCards(): Promise<FeaturedCard[]> {
     ])
   );
 
-  const nowMs = Date.now();
+  const nowMs = now.getTime();
   // De-duplicate by subject so featured cards showcase distinct topics
   // (a visitor sees Français + Anglais + Maths + Sciences rather than
   // four Math classes in a row). Keep the earliest class per subject.
@@ -255,23 +254,27 @@ export default async function Home() {
               </p>
 
               {/* SEARCH BAR — like Outschool/Preply */}
-              <div className="mt-6 animate-fade-in-up animation-delay-150">
+              <form
+                action="/teachers"
+                method="GET"
+                className="mt-6 animate-fade-in-up animation-delay-150"
+              >
                 <div className="flex items-center gap-2 rounded-full border-2 border-slate-200 bg-white px-4 py-2 shadow-sm transition-all focus-within:border-[var(--ev-blue)] focus-within:shadow-md sm:px-5 sm:py-3">
                   <Search className="size-5 shrink-0 text-slate-400" />
                   <input
                     type="text"
+                    name="q"
                     placeholder={t("hero.searchPlaceholder")}
                     className="w-full bg-transparent text-base text-slate-800 outline-none placeholder:text-slate-400"
-                    readOnly
                   />
-                  <Link
-                    href="/teachers"
+                  <button
+                    type="submit"
                     className="shrink-0 rounded-full bg-[var(--ev-amber)] px-5 py-2 text-sm font-bold text-white transition-all hover:bg-[var(--ev-amber-light)]"
                   >
                     {t("hero.searchButton")}
-                  </Link>
+                  </button>
                 </div>
-              </div>
+              </form>
 
               <div className="mt-6 flex animate-fade-in-up flex-col gap-3 animation-delay-200 sm:flex-row sm:justify-center lg:justify-start">
                 <Link
@@ -308,7 +311,7 @@ export default async function Home() {
             <div className="animate-fade-in-up animation-delay-300 lg:order-last">
               <Image
                 src="/illustrations/hero.webp"
-                alt=""
+                alt="Élève ivoirien suivant un cours en ligne avec un enseignant sur son téléphone"
                 width={700}
                 height={400}
                 className="mx-auto w-full rounded-2xl shadow-xl shadow-[var(--ev-blue)]/10"
@@ -352,7 +355,7 @@ export default async function Home() {
                     <div className="relative aspect-[4/3] overflow-hidden">
                       <Image
                         src={card.image}
-                        alt=""
+                        alt={card.title}
                         width={300}
                         height={225}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -426,7 +429,7 @@ export default async function Home() {
                     <div className="aspect-[16/9] overflow-hidden">
                       <Image
                         src={service.src}
-                        alt=""
+                        alt={t(`services.${service.titleKey}`)}
                         width={400}
                         height={225}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -611,7 +614,7 @@ export default async function Home() {
               <div className="flex justify-center lg:order-first">
                 <Image
                   src="/illustrations/graduation.webp"
-                  alt=""
+                  alt="Diplôme de réussite scolaire"
                   width={400}
                   height={225}
                   className="w-full max-w-xs rounded-2xl"

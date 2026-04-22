@@ -15,6 +15,7 @@ import {
 } from "@/components/dashboard/continue-watching-rail";
 import { Award, PlayCircle, Video } from "lucide-react";
 import { GRADE_LEVEL_LABELS, type GradeLevel } from "@/types/domain";
+import { EmptyCoursesIllustration } from "@/components/common/empty-state-illustrations";
 
 type PageProps = {
   params: Promise<{ learner_id: string }>;
@@ -56,8 +57,9 @@ export default async function KidHomePage({ params }: PageProps) {
     .map((e) => e.live_class_id as string | null)
     .filter((id): id is string => !!id);
 
+  const now = new Date();
   const earliestWindow = new Date(
-    Date.now() - 8 * 60 * 60 * 1000
+    now.getTime() - 8 * 60 * 60 * 1000
   ).toISOString();
   const { data: liveClassesRaw } =
     enrolledClassIds.length > 0
@@ -72,7 +74,7 @@ export default async function KidHomePage({ params }: PageProps) {
           .order("scheduled_at", { ascending: true })
           .limit(5)
       : { data: [] };
-  const nowMs = Date.now();
+  const nowMs = now.getTime();
   const liveClasses = (liveClassesRaw ?? []).filter((c) => {
     const start = new Date(c.scheduled_at as string).getTime();
     const end = start + (c.duration_minutes as number) * 60 * 1000;
@@ -227,10 +229,21 @@ export default async function KidHomePage({ params }: PageProps) {
       </div>
 
       {!hasAnyContent && (
-        <div className="rounded-xl border border-dashed border-slate-200 p-8 text-center">
-          <p className="text-sm text-slate-500">
+        <div className="flex flex-col items-center rounded-2xl border border-dashed border-slate-200 bg-[var(--ev-blue-50)] p-10 text-center">
+          <EmptyCoursesIllustration className="size-20" />
+          <p className="mt-4 text-base font-semibold text-[var(--ev-blue)]">
             {t("noContent")}
           </p>
+          <p className="mt-1 text-sm text-slate-500">
+            Inscrivez-vous à un cours pour commencer à apprendre.
+          </p>
+          <Link
+            href="/courses"
+            className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[var(--ev-amber)] px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-[var(--ev-amber)]/20 transition-all hover:bg-[var(--ev-amber-light)] hover:shadow-lg"
+          >
+            <PlayCircle className="size-4" />
+            Découvrir les cours
+          </Link>
         </div>
       )}
     </div>

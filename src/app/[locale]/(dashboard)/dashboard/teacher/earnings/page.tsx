@@ -87,6 +87,28 @@ export default async function TeacherEarningsPage() {
   );
   const pendingPayout = totalEarned - totalPaidOut;
 
+  // Last 7 days earnings for bar chart
+  const last7Days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    d.setHours(0, 0, 0, 0);
+    return d;
+  });
+  const dailyEarnings = last7Days.map((day) => {
+    const nextDay = new Date(day);
+    nextDay.setDate(nextDay.getDate() + 1);
+    const dayTotal = confirmedTxs
+      .filter((tx) => {
+        const txDate = new Date(tx.created_at);
+        return txDate >= day && txDate < nextDay;
+      })
+      .reduce((sum, tx) => sum + tx.teacher_amount, 0);
+    return {
+      label: day.toLocaleDateString("fr-FR", { weekday: "short" }),
+      amount: dayTotal,
+    };
+  });
+
   return (
     <div className="pb-20 md:pb-0">
       <div className="mb-8 flex items-center gap-3">
@@ -99,6 +121,7 @@ export default async function TeacherEarningsPage() {
         thisMonth={thisMonth}
         pendingPayout={Math.max(0, pendingPayout)}
         transactions={enriched}
+        dailyEarnings={dailyEarnings}
       />
     </div>
   );

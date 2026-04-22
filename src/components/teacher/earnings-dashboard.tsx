@@ -14,11 +14,17 @@ type Transaction = {
   createdAt: string;
 };
 
+type DailyEarning = {
+  label: string;
+  amount: number;
+};
+
 type EarningsDashboardProps = {
   totalEarned: number;
   thisMonth: number;
   pendingPayout: number;
   transactions: Transaction[];
+  dailyEarnings?: DailyEarning[];
 };
 
 function formatDate(isoString: string): string {
@@ -60,8 +66,11 @@ export function EarningsDashboard({
   thisMonth,
   pendingPayout,
   transactions,
+  dailyEarnings,
 }: EarningsDashboardProps) {
   const t = useTranslations("earnings");
+
+  const maxDaily = Math.max(...(dailyEarnings ?? []).map((d) => d.amount), 1);
 
   return (
     <div className="space-y-8">
@@ -97,6 +106,36 @@ export function EarningsDashboard({
           </p>
         </div>
       </div>
+
+      {/* 7-day earnings chart */}
+      {dailyEarnings && dailyEarnings.length > 0 && (
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <h2 className="mb-4 text-sm font-semibold text-slate-700">
+            {t("last7Days") ?? "7 derniers jours"}
+          </h2>
+          <div className="flex items-end gap-2 h-32">
+            {dailyEarnings.map((day, i) => {
+              const pct = Math.round((day.amount / maxDaily) * 100);
+              return (
+                <div key={i} className="flex flex-1 flex-col items-center gap-1">
+                  <div className="w-full flex-1 flex items-end rounded-t-md bg-slate-100 overflow-hidden">
+                    <div
+                      className="w-full bg-[var(--ev-blue)] transition-all duration-500 rounded-t-md"
+                      style={{ height: `${Math.max(pct, 4)}%` }}
+                    />
+                  </div>
+                  <span className="text-[10px] text-slate-500 uppercase">{day.label}</span>
+                  {day.amount > 0 && (
+                    <span className="text-[10px] font-semibold text-[var(--ev-blue)]">
+                      {formatCurrency(day.amount)}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Commission info */}
       <div className="flex items-start gap-2 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-700">

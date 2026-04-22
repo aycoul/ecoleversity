@@ -12,7 +12,7 @@ import type { ChildProfile } from "./add-child-step";
 import { BookOpen, Sparkles } from "lucide-react";
 
 type RecommendationsStepProps = {
-  children: ChildProfile[];
+  childList: ChildProfile[];
 };
 
 function getGradeGroup(grade: GradeLevel): "primaire" | "college" | "lycee" {
@@ -21,7 +21,7 @@ function getGradeGroup(grade: GradeLevel): "primaire" | "college" | "lycee" {
   return "lycee";
 }
 
-export function RecommendationsStep({ children }: RecommendationsStepProps) {
+export function RecommendationsStep({ childList }: RecommendationsStepProps) {
   const t = useTranslations("onboarding.parent");
 
   return (
@@ -31,7 +31,7 @@ export function RecommendationsStep({ children }: RecommendationsStepProps) {
         <p className="text-sm text-slate-500">{t("recommendationsIntro")}</p>
       </div>
 
-      {children.map((child) => {
+      {childList.map((child) => {
         const group = getGradeGroup(child.grade_level);
         const subjects = [
           ...SUBJECTS_BY_LEVEL[group],
