@@ -81,6 +81,7 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
     analytics: t("analytics"),
     ai_services: "Services IA",
     ai_twins: "Jumeaux IA",
+    ai_settings: "Paramètres IA",
   };
   const ADMIN_PAGE_ICON: Record<AdminPage, string> = {
     overview: "layout-dashboard",
@@ -94,6 +95,7 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
     analytics: "bar-chart",
     ai_services: "cpu",
     ai_twins: "cpu",
+    ai_settings: "settings",
   };
   const adminPages = adminScope ? SCOPE_PAGES[adminScope] : [];
   const adminNav = adminPages.map((page) => ({

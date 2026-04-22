@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { signRecordingUrl } from "@/lib/video/r2-signing";
 import { transcribeRecording, TranscribeError } from "@/lib/ai/transcribe";
 import { buildTwinPayload } from "@/lib/ai/twin-payload";
+import { extractLessonStructure } from "@/lib/ai/lesson-extract";
 import { buildSessionSummary } from "@/lib/ai/session-summary";
 import { sendSessionSummaryEmail } from "@/lib/notifications/session-summary-email";
 import { SUBJECT_LABELS, type Subject } from "@/types/domain";
@@ -160,6 +161,10 @@ export async function POST(req: NextRequest) {
       gradeLevel: liveClass.grade_level,
     });
 
+    // Lesson-structure extraction — phases, exercise bank, explanation bank.
+    // Powers the future session-twin (scale teachers who sell out).
+    const lesson = await extractLessonStructure(payload);
+
     const { error: trainInsertErr } = await admin
       .from("ai_training_content")
       .insert({
@@ -169,6 +174,9 @@ export async function POST(req: NextRequest) {
         transcription: whisper.text,
         training_payload: payload,
         extracted_topics: payload.topics,
+        lesson_phases: lesson.phases,
+        exercises_extracted: lesson.exercises,
+        explanations_extracted: lesson.explanations,
         language: whisper.language,
         duration_seconds: whisper.durationSeconds,
         segment_count: payload.segments.length,

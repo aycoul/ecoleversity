@@ -41,6 +41,23 @@ type TrainingRow = {
       pedagogicalPatterns?: string[];
     };
   } | null;
+  lesson_phases: Array<{
+    label: string;
+    startSegmentIdx: number;
+    endSegmentIdx: number;
+    summary: string;
+  }> | null;
+  exercises_extracted: Array<{
+    statement: string;
+    workedSolution: string;
+    difficulty: string;
+    topic: string;
+  }> | null;
+  explanations_extracted: Array<{
+    concept: string;
+    explanation: string;
+    examples: string[];
+  }> | null;
   duration_seconds: number | null;
   segment_count: number | null;
   language: string | null;
@@ -100,7 +117,7 @@ export default async function AiTwinDetailPage({
   const { data: rows } = await admin
     .from("ai_training_content")
     .select(
-      "id, source_type, source_id, transcription, training_payload, duration_seconds, segment_count, language, processed_at, created_at"
+      "id, source_type, source_id, transcription, training_payload, lesson_phases, exercises_extracted, explanations_extracted, duration_seconds, segment_count, language, processed_at, created_at"
     )
     .eq("twin_id", twinId)
     .order("created_at", { ascending: false })
@@ -298,6 +315,109 @@ export default async function AiTwinDetailPage({
                         </div>
                         <div className="mt-1 text-slate-600">
                           R. {qa.answerSummary}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              )}
+
+              {(row.lesson_phases ?? []).length > 0 && (
+                <details className="mt-3 rounded-lg bg-slate-50 p-3">
+                  <summary className="cursor-pointer text-sm font-semibold text-slate-900">
+                    Phases pédagogiques ({(row.lesson_phases ?? []).length})
+                  </summary>
+                  <div className="mt-2 space-y-2 text-xs">
+                    {(row.lesson_phases ?? []).map((p, i) => (
+                      <div
+                        key={i}
+                        className="flex gap-3 rounded-lg bg-white p-2.5 ring-1 ring-slate-200"
+                      >
+                        <span
+                          className={`shrink-0 rounded px-1.5 py-0.5 text-[0.65rem] font-semibold uppercase ${
+                            p.label === "intro"
+                              ? "bg-sky-100 text-sky-800"
+                              : p.label === "explanation"
+                                ? "bg-blue-100 text-blue-800"
+                                : p.label === "example"
+                                  ? "bg-emerald-100 text-emerald-800"
+                                  : p.label === "practice"
+                                    ? "bg-amber-100 text-amber-800"
+                                    : p.label === "recap"
+                                      ? "bg-purple-100 text-purple-800"
+                                      : "bg-slate-200 text-slate-600"
+                          }`}
+                        >
+                          {p.label}
+                        </span>
+                        <span className="font-mono text-slate-400">
+                          #{p.startSegmentIdx}–{p.endSegmentIdx}
+                        </span>
+                        <span className="text-slate-700">{p.summary}</span>
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              )}
+
+              {(row.explanations_extracted ?? []).length > 0 && (
+                <details className="mt-3 rounded-lg bg-slate-50 p-3">
+                  <summary className="cursor-pointer text-sm font-semibold text-slate-900">
+                    Banque d&apos;explications ({(row.explanations_extracted ?? []).length})
+                  </summary>
+                  <div className="mt-2 space-y-2 text-xs">
+                    {(row.explanations_extracted ?? []).map((e, i) => (
+                      <div
+                        key={i}
+                        className="rounded-lg bg-white p-3 ring-1 ring-slate-200"
+                      >
+                        <div className="font-semibold text-slate-900">{e.concept}</div>
+                        <div className="mt-1 whitespace-pre-wrap text-slate-700">
+                          {e.explanation}
+                        </div>
+                        {e.examples.length > 0 && (
+                          <ul className="mt-2 list-inside list-disc text-slate-600">
+                            {e.examples.map((ex, j) => (
+                              <li key={j}>{ex}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              )}
+
+              {(row.exercises_extracted ?? []).length > 0 && (
+                <details className="mt-3 rounded-lg bg-slate-50 p-3">
+                  <summary className="cursor-pointer text-sm font-semibold text-slate-900">
+                    Banque d&apos;exercices ({(row.exercises_extracted ?? []).length})
+                  </summary>
+                  <div className="mt-2 space-y-2 text-xs">
+                    {(row.exercises_extracted ?? []).map((ex, i) => (
+                      <div
+                        key={i}
+                        className="rounded-lg bg-white p-3 ring-1 ring-slate-200"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-slate-900">{ex.topic}</span>
+                          <span
+                            className={`rounded-full px-2 py-0.5 text-[0.65rem] font-medium ${
+                              ex.difficulty === "easy"
+                                ? "bg-emerald-100 text-emerald-800"
+                                : ex.difficulty === "hard"
+                                  ? "bg-rose-100 text-rose-800"
+                                  : "bg-amber-100 text-amber-800"
+                            }`}
+                          >
+                            {ex.difficulty}
+                          </span>
+                        </div>
+                        <div className="mt-2 whitespace-pre-wrap text-slate-700">
+                          <span className="font-medium">Énoncé :</span> {ex.statement}
+                        </div>
+                        <div className="mt-1 whitespace-pre-wrap text-slate-600">
+                          <span className="font-medium">Solution :</span> {ex.workedSolution}
                         </div>
                       </div>
                     ))}
