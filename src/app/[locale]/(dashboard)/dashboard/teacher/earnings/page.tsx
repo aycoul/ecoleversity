@@ -128,7 +128,7 @@ export default async function TeacherEarningsPage() {
     <div className="pb-20 md:pb-0">
       <div className="mb-8 flex items-center gap-3">
         <Wallet className="size-7 text-[var(--ev-blue)]" />
-        <h1 className="text-2xl font-bold text-slate-900">{t("title")} [DEPLOY TEST]</h1>
+        <h1 className="text-2xl font-bold text-slate-900">{t("title")}</h1>
       </div>
 
       <EarningsDashboard
