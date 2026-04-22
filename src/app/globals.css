@@ -63,6 +63,11 @@
   --ev-blue-50: #EFF6FF;
   --ev-amber-50: #FFFBEB;
 
+  /* Elevation shadows */
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-card-hover: 0 12px 24px -8px rgba(30,64,175,0.12), 0 4px 8px rgba(0,0,0,0.04);
+  --shadow-elevated: 0 20px 40px -12px rgba(30,64,175,0.15);
+
   --background: #FFFFFF;
   --foreground: oklch(0.145 0 0);
   --card: #FFFFFF;
@@ -140,6 +145,23 @@
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.05); }
+}
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
 
 .animate-fade-in {
   animation: fade-in 0.6s ease-out both;
@@ -147,10 +169,18 @@
 .animate-fade-in-up {
   animation: fade-in-up 0.6s ease-out both;
 }
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
 .animation-delay-100 { animation-delay: 0.1s; }
 .animation-delay-200 { animation-delay: 0.2s; }
 .animation-delay-300 { animation-delay: 0.3s; }
 .animation-delay-400 { animation-delay: 0.4s; }
+.animation-delay-500 { animation-delay: 0.5s; }
+.animation-delay-600 { animation-delay: 0.6s; }
 
 @layer base {
   * {
@@ -163,11 +193,35 @@
   }
   html {
     @apply font-sans;
+    scroll-behavior: smooth;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
     font-weight: 700;
   }
+}
+
+/* Premium card hover utility */
+.ev-card {
+  box-shadow: var(--shadow-card);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+}
+.ev-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* Press feedback for all interactive elements */
+.ev-press:active:not(:disabled) {
+  transform: scale(0.98);
+  transition: transform 0.1s ease-out;
+}
+
+/* Shimmer loader */
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
 }
 
 /* Kid mode theme overrides */

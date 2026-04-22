@@ -142,13 +142,16 @@ export function DashboardShell({
                   <Link
                     href={link.href}
                     className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                      "relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150",
                       isActive
-                        ? "bg-[var(--ev-green)]/10 text-[var(--ev-blue)]"
+                        ? "bg-[var(--ev-blue)]/8 text-[var(--ev-blue)] font-semibold"
                         : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                     )}
                     aria-current={isActive ? "page" : undefined}
                   >
+                    {isActive && (
+                      <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-[var(--ev-blue)]" />
+                    )}
                     <Icon className="size-4" />
                     <span className="flex-1">{link.label}</span>
                     {!!link.badge && link.badge > 0 && (
@@ -201,7 +204,7 @@ export function DashboardShell({
       </main>
 
       {/* Mobile bottom nav */}
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] md:hidden">
         <ul className="flex items-center justify-around">
           {primaryLinks.map((link) => {
             const Icon = iconMap[link.icon] ?? User;
@@ -211,12 +214,15 @@ export function DashboardShell({
                 <Link
                   href={link.href}
                   className={cn(
-                    "relative flex flex-col items-center gap-0.5 px-3 py-2 text-[0.65rem]",
+                    "relative flex flex-col items-center gap-0.5 px-3 py-2 text-[0.65rem] transition-all duration-200",
                     isActive
-                      ? "text-[var(--ev-blue)]"
+                      ? "text-[var(--ev-blue)] font-semibold"
                       : "text-slate-400"
                   )}
                 >
+                  {isActive && (
+                    <span className="absolute inset-x-3 -top-px h-0.5 rounded-b-full bg-[var(--ev-blue)]" />
+                  )}
                   <div className="relative">
                     <Icon className="size-5" />
                     {!!link.badge && link.badge > 0 && (

@@ -228,7 +228,7 @@ export function LoginForm() {
                         setCountryCode(raw.startsWith("+") ? raw : `+${raw}`);
                       }}
                       maxLength={5}
-                      className="w-20 text-center"
+                      className="w-20 text-center transition-all duration-200 focus:ring-2 focus:ring-[var(--ev-blue)]/20 focus:border-[var(--ev-blue)]"
                       aria-label="Indicatif pays"
                     />
                     <Input
@@ -237,7 +237,6 @@ export function LoginForm() {
                       value={phone}
                       onChange={(e) => {
                         const raw = e.target.value.replace(/\D/g, "").slice(0, 10);
-                        // Format as 07 XX XX XX XX
                         let formatted = raw;
                         if (raw.length > 2) formatted = `${raw.slice(0, 2)} ${raw.slice(2)}`;
                         if (raw.length > 4) formatted = `${raw.slice(0, 2)} ${raw.slice(2, 4)} ${raw.slice(4)}`;
@@ -249,6 +248,7 @@ export function LoginForm() {
                       autoComplete="tel"
                       autoFocus
                       pattern="[0-9]{2} [0-9]{2} [0-9]{2} [0-9]{2} [0-9]{2}"
+                      className="transition-all duration-200 focus:ring-2 focus:ring-[var(--ev-blue)]/20 focus:border-[var(--ev-blue)]"
                     />
                   </div>
                 </div>
@@ -290,12 +290,11 @@ export function LoginForm() {
                       const val = e.target.value.replace(/\D/g, "");
                       setOtp(val);
                       if (val.length === 6) {
-                        // Use a microtask to ensure state is committed before verify reads it
                         queueMicrotask(() => handleVerifyOtp(val));
                       }
                     }}
                     placeholder="000000"
-                    className="text-center text-2xl tracking-[0.5em]"
+                    className="text-center text-2xl tracking-[0.5em] transition-all duration-200 focus:ring-2 focus:ring-[var(--ev-blue)]/20 focus:border-[var(--ev-blue)] focus:scale-[1.02]"
                     autoFocus
                     autoComplete="one-time-code"
                   />

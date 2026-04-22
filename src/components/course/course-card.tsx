@@ -6,6 +6,7 @@ import { BookOpen, Clock, Star, Users } from "lucide-react";
 import { SUBJECT_LABELS, GRADE_LEVEL_LABELS } from "@/types/domain";
 import type { Subject, GradeLevel } from "@/types/domain";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export type CourseCardData = {
   id: string;
@@ -23,27 +24,40 @@ export type CourseCardData = {
   total_duration_minutes: number;
 };
 
-const SUBJECT_COLORS: Record<string, { bg: string; text: string }> = {
-  francais: { bg: "bg-blue-100", text: "text-blue-700" },
-  mathematiques: { bg: "bg-purple-100", text: "text-purple-700" },
-  sciences: { bg: "bg-green-100", text: "text-green-700" },
-  anglais: { bg: "bg-red-100", text: "text-red-700" },
-  physique_chimie: { bg: "bg-orange-100", text: "text-orange-700" },
-  svt: { bg: "bg-teal-100", text: "text-teal-700" },
+const SUBJECT_ACCENT: Record<string, { border: string; gradient: string; light: string }> = {
+  francais: { border: "border-blue-500", gradient: "from-blue-500 to-blue-700", light: "bg-blue-50 text-blue-700" },
+  mathematiques: { border: "border-purple-500", gradient: "from-purple-500 to-purple-700", light: "bg-purple-50 text-purple-700" },
+  sciences: { border: "border-emerald-500", gradient: "from-emerald-500 to-emerald-700", light: "bg-emerald-50 text-emerald-700" },
+  anglais: { border: "border-rose-500", gradient: "from-rose-500 to-rose-700", light: "bg-rose-50 text-rose-700" },
+  physique_chimie: { border: "border-orange-500", gradient: "from-orange-500 to-orange-700", light: "bg-orange-50 text-orange-700" },
+  svt: { border: "border-teal-500", gradient: "from-teal-500 to-teal-700", light: "bg-teal-50 text-teal-700" },
+  histoire_geo: { border: "border-amber-500", gradient: "from-amber-500 to-amber-700", light: "bg-amber-50 text-amber-700" },
+  philosophie: { border: "border-indigo-500", gradient: "from-indigo-500 to-indigo-700", light: "bg-indigo-50 text-indigo-700" },
 };
 
-function getSubjectGradient(subject: string): string {
-  const gradients: Record<string, string> = {
-    francais: "from-blue-400 to-blue-600",
-    mathematiques: "from-purple-400 to-purple-600",
-    sciences: "from-green-400 to-green-600",
-    anglais: "from-red-400 to-red-600",
-    physique_chimie: "from-orange-400 to-orange-600",
-    svt: "from-teal-400 to-teal-600",
-    histoire_geo: "from-amber-400 to-amber-600",
-    philosophie: "from-indigo-400 to-indigo-600",
-  };
-  return gradients[subject] ?? "from-slate-400 to-slate-600";
+function StarRating({ rating }: { rating: number }) {
+  const fullStars = Math.floor(rating);
+  const hasHalf = rating - fullStars >= 0.5;
+  return (
+    <div className="flex items-center gap-0.5">
+      {Array.from({ length: 5 }).map((_, i) => {
+        const isFilled = i < fullStars;
+        const isHalf = i === fullStars && hasHalf;
+        return (
+          <Star
+            key={i}
+            className={`size-3.5 ${
+              isFilled
+                ? "fill-amber-400 text-amber-400"
+                : isHalf
+                ? "fill-amber-400/50 text-amber-400"
+                : "fill-slate-200 text-slate-200"
+            }`}
+          />
+        );
+      })}
+    </div>
+  );
 }
 
 export function CourseCard({ course }: { course: CourseCardData }) {
@@ -52,110 +66,112 @@ export function CourseCard({ course }: { course: CourseCardData }) {
   const hours = Math.floor(course.total_duration_minutes / 60);
   const minutes = course.total_duration_minutes % 60;
 
-  const subjectColor = SUBJECT_COLORS[course.subject] ?? {
-    bg: "bg-[var(--ev-green-50)]",
-    text: "text-[var(--ev-blue)]",
+  const accent = SUBJECT_ACCENT[course.subject] ?? {
+    border: "border-[var(--ev-blue)]",
+    gradient: "from-[var(--ev-blue)] to-[var(--ev-blue-dark)]",
+    light: "bg-[var(--ev-blue-50)] text-[var(--ev-blue)]",
   };
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
-      {/* Thumbnail or gradient placeholder */}
-      <div className="relative h-36 w-full">
+    <div className="group flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[var(--ev-blue)]/10">
+      {/* Thumbnail */}
+      <div className="relative h-44 w-full overflow-hidden">
         {course.thumbnail_url ? (
           <img
             src={course.thumbnail_url}
             alt={course.title}
             loading="lazy"
-            className="size-full object-cover"
+            className="size-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
         ) : (
           <div
-            className={`flex size-full items-center justify-center bg-gradient-to-br ${getSubjectGradient(course.subject)}`}
+            className={`flex size-full items-center justify-center bg-gradient-to-br ${accent.gradient}`}
           >
-            <BookOpen className="size-10 text-white/80" />
+            <BookOpen className="size-12 text-white/70" />
           </div>
         )}
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+
         {/* Lesson count badge */}
-        <div className="absolute bottom-2 right-2 rounded-md bg-black/60 px-2 py-0.5 text-xs font-medium text-white">
+        <div className="absolute bottom-3 right-3 rounded-lg bg-black/60 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
           {t("lessons", { count: course.lesson_count })}
+        </div>
+
+        {/* Subject badge on image */}
+        <div className="absolute left-3 top-3">
+          <span className={`inline-flex items-center rounded-lg border-l-4 ${accent.border} bg-white/90 px-2.5 py-1 text-xs font-bold text-slate-800 backdrop-blur-sm shadow-sm`}>
+            {SUBJECT_LABELS[course.subject as Subject] ?? course.subject}
+          </span>
         </div>
       </div>
 
       <div className="flex flex-1 flex-col p-4 space-y-3">
         {/* Title */}
-        <h3 className="font-semibold text-slate-800 line-clamp-2 leading-snug">
+        <h3 className="font-bold text-slate-900 line-clamp-2 leading-snug text-[15px]">
           {course.title}
         </h3>
 
         {/* Teacher */}
-        <div className="flex items-center gap-2">
-          <div className="flex size-6 items-center justify-center overflow-hidden rounded-full bg-slate-200 text-xs font-bold text-slate-500">
-            {course.teacher_avatar ? (
-              <img
-                src={course.teacher_avatar}
-                alt={course.teacher_name}
-                loading="lazy"
-                className="size-full object-cover"
-              />
-            ) : (
-              course.teacher_name.charAt(0).toUpperCase()
-            )}
-          </div>
-          <span className="text-sm text-slate-600">{course.teacher_name}</span>
+        <div className="flex items-center gap-2.5">
+          <Avatar className="size-7">
+            <AvatarImage src={course.teacher_avatar ?? undefined} alt={course.teacher_name} />
+            <AvatarFallback className="bg-slate-100 text-slate-600 text-xs font-bold">
+              {course.teacher_name.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <span className="text-sm text-slate-600 font-medium">{course.teacher_name}</span>
         </div>
 
-        {/* Badges */}
-        <div className="flex flex-wrap gap-1.5">
-          <span
-            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${subjectColor.bg} ${subjectColor.text}`}
-          >
-            {SUBJECT_LABELS[course.subject as Subject] ?? course.subject}
+        {/* Grade + enrolled */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${accent.light}`}>
+            {GRADE_LEVEL_LABELS[course.grade_level as GradeLevel] ?? course.grade_level}
           </span>
-          <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
-            {GRADE_LEVEL_LABELS[course.grade_level as GradeLevel] ??
-              course.grade_level}
+          <span className="inline-flex items-center gap-1 text-xs text-slate-400">
+            <Users className="size-3" />
+            {t("enrolledStudents", { count: course.enrollment_count })}
           </span>
         </div>
 
         {/* Rating + Duration */}
-        <div className="flex items-center justify-between text-sm text-slate-500">
-          <div className="flex items-center gap-1">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
             {course.rating_count > 0 ? (
               <>
-                <Star className="size-3.5 fill-amber-400 text-amber-400" />
-                <span className="font-medium text-slate-700">
+                <StarRating rating={course.rating_avg} />
+                <span className="text-sm font-semibold text-slate-700">
                   {Number(course.rating_avg).toFixed(1)}
                 </span>
-                <span>({course.rating_count})</span>
+                <span className="text-xs text-slate-400">({course.rating_count})</span>
               </>
             ) : (
-              <span className="text-xs text-slate-400">--</span>
+              <span className="text-xs text-slate-400">{t("noRating")}</span>
             )}
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 text-xs text-slate-400">
             <Clock className="size-3.5" />
-            <span>
-              {t("totalDuration", { hours, minutes })}
-            </span>
+            <span>{t("totalDuration", { hours, minutes })}</span>
           </div>
-        </div>
-
-        {/* Enrolled */}
-        <div className="flex items-center gap-1 text-xs text-slate-400">
-          <Users className="size-3" />
-          {t("enrolledStudents", { count: course.enrollment_count })}
-        </div>
-
-        {/* Price */}
-        <div className="text-base font-bold text-slate-800">
-          {course.price_xof.toLocaleString("fr-CI")} FCFA
         </div>
       </div>
 
-      {/* Action */}
-      <div className="border-t border-slate-100 p-3">
+      {/* Action bar */}
+      <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50/50 px-4 py-3">
+        <div className="flex flex-col">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+            {t("priceLabel")}
+          </span>
+          <span className="text-lg font-extrabold text-[var(--ev-blue)]">
+            {course.price_xof.toLocaleString("fr-CI")}
+            <span className="ml-0.5 text-sm font-bold text-slate-500">FCFA</span>
+          </span>
+        </div>
         <Link href={`/courses/${course.id}`} className="block">
-          <Button className="w-full bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]">
+          <Button
+            size="sm"
+            className="rounded-xl bg-[var(--ev-blue)] px-5 text-sm font-bold text-white shadow-md shadow-[var(--ev-blue)]/20 transition-all hover:bg-[var(--ev-blue-light)] hover:shadow-lg hover:shadow-[var(--ev-blue)]/30"
+          >
             {t("viewCourse")}
           </Button>
         </Link>

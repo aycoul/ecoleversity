@@ -230,6 +230,10 @@ export default async function Home() {
       {/* ─── SECTION 1: HERO ─── */}
       <section className="relative overflow-hidden bg-white">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(30,64,175,0.04),transparent)]" />
+        {/* Floating gradient orbs */}
+        <div className="pointer-events-none absolute -left-32 top-20 h-72 w-72 rounded-full bg-[var(--ev-blue)]/5 blur-3xl animate-float" />
+        <div className="pointer-events-none absolute -right-20 top-40 h-64 w-64 rounded-full bg-[var(--ev-amber)]/5 blur-3xl animate-float animation-delay-200" />
+        <div className="pointer-events-none absolute left-1/2 bottom-0 h-56 w-56 -translate-x-1/2 rounded-full bg-[var(--ev-green)]/5 blur-3xl animate-float animation-delay-400" />
 
         <div className="relative mx-auto max-w-6xl px-4 pb-8 pt-10 sm:px-6 sm:pb-16 sm:pt-14 lg:pb-20 lg:pt-16">
           <div className="grid items-center gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10">
@@ -314,7 +318,7 @@ export default async function Home() {
                 alt="Élève ivoirien suivant un cours en ligne avec un enseignant sur son téléphone"
                 width={700}
                 height={400}
-                className="mx-auto w-full rounded-2xl shadow-xl shadow-[var(--ev-blue)]/10"
+                className="mx-auto w-full rounded-2xl shadow-2xl shadow-[var(--ev-blue)]/15 transition-shadow duration-500"
                 priority
               />
             </div>
@@ -425,19 +429,19 @@ export default async function Home() {
               const Icon = service.icon;
               return (
                 <AnimateOnScroll key={service.titleKey} delay={i * 80}>
-                  <div className="group overflow-hidden rounded-2xl border border-slate-100 bg-white transition-all hover:border-[var(--ev-blue)]/10 hover:shadow-lg hover:shadow-[var(--ev-blue)]/5">
+                  <div className="group overflow-hidden rounded-2xl border border-slate-100 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[var(--ev-blue)]/10">
                     <div className="aspect-[16/9] overflow-hidden">
                       <Image
                         src={service.src}
                         alt={t(`services.${service.titleKey}`)}
                         width={400}
                         height={225}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                       />
                     </div>
                     <div className="p-5">
                       <div className="mb-2 flex items-center gap-2">
-                        <div className="flex size-8 items-center justify-center rounded-lg bg-[var(--ev-green)]/10 text-[var(--ev-green)]">
+                        <div className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--ev-green)]/15 to-[var(--ev-green)]/5 text-[var(--ev-green)] transition-all duration-300 group-hover:from-[var(--ev-green)] group-hover:to-[var(--ev-green-light)] group-hover:text-white">
                           <Icon className="size-4" />
                         </div>
                         <h3 className="text-lg font-bold text-[var(--ev-blue)]">
@@ -470,30 +474,36 @@ export default async function Home() {
             </div>
           </AnimateOnScroll>
 
-          <div className="mt-14 grid gap-10 sm:grid-cols-3 sm:gap-8">
-            {steps.map((step, i) => {
-              const Icon = step.icon;
-              return (
-                <AnimateOnScroll key={step.num} delay={i * 100}>
-                  <div className="flex flex-col items-center text-center">
-                    <div className="relative">
-                      <div className="flex size-16 items-center justify-center rounded-2xl bg-[var(--ev-blue)] text-white shadow-lg shadow-[var(--ev-blue)]/20">
-                        <Icon className="size-7" />
+          <div className="relative mt-14">
+            {/* Connecting dotted line — desktop only */}
+            <div className="pointer-events-none absolute left-0 right-0 top-8 hidden sm:block">
+              <div className="mx-auto w-2/3 border-t-2 border-dashed border-[var(--ev-blue)]/15" />
+            </div>
+            <div className="grid gap-10 sm:grid-cols-3 sm:gap-8">
+              {steps.map((step, i) => {
+                const Icon = step.icon;
+                return (
+                  <AnimateOnScroll key={step.num} delay={i * 100}>
+                    <div className="relative flex flex-col items-center text-center">
+                      <div className="relative z-10">
+                        <div className="flex size-16 items-center justify-center rounded-2xl bg-[var(--ev-blue)] text-white shadow-lg shadow-[var(--ev-blue)]/20 transition-transform duration-300 hover:scale-105">
+                          <Icon className="size-7" />
+                        </div>
+                        <span className="absolute -right-2 -top-2 flex size-7 items-center justify-center rounded-full bg-[var(--ev-amber)] text-xs font-bold text-white animate-pulse-soft">
+                          {step.num}
+                        </span>
                       </div>
-                      <span className="absolute -right-2 -top-2 flex size-7 items-center justify-center rounded-full bg-[var(--ev-amber)] text-xs font-bold text-white">
-                        {step.num}
-                      </span>
+                      <h3 className="mt-5 text-xl font-bold text-[var(--ev-blue)]">
+                        {t(`howItWorks.${step.titleKey}`)}
+                      </h3>
+                      <p className="mt-2 text-base leading-7 text-slate-600">
+                        {t(`howItWorks.${step.descKey}`)}
+                      </p>
                     </div>
-                    <h3 className="mt-5 text-xl font-bold text-[var(--ev-blue)]">
-                      {t(`howItWorks.${step.titleKey}`)}
-                    </h3>
-                    <p className="mt-2 text-base leading-7 text-slate-600">
-                      {t(`howItWorks.${step.descKey}`)}
-                    </p>
-                  </div>
-                </AnimateOnScroll>
-              );
-            })}
+                  </AnimateOnScroll>
+                );
+              })}
+            </div>
           </div>
 
           <div className="mt-16 grid gap-5 sm:grid-cols-2">
@@ -501,8 +511,8 @@ export default async function Home() {
               const Icon = feature.icon;
               return (
                 <AnimateOnScroll key={feature.titleKey} delay={i * 80}>
-                  <div className="group flex items-start gap-4 rounded-2xl border border-slate-100 bg-white p-5 transition-all hover:border-[var(--ev-blue)]/10 hover:shadow-lg hover:shadow-[var(--ev-blue)]/5 sm:p-6">
-                    <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[var(--ev-green)]/10 text-[var(--ev-green)] transition-colors group-hover:bg-[var(--ev-green)] group-hover:text-white">
+                  <div className="group flex items-start gap-4 rounded-2xl border border-slate-100 bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[var(--ev-blue)]/10 sm:p-6">
+                    <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--ev-green)]/15 to-[var(--ev-green)]/5 text-[var(--ev-green)] transition-all duration-300 group-hover:from-[var(--ev-green)] group-hover:to-[var(--ev-green-light)] group-hover:text-white">
                       <Icon className="size-5" />
                     </div>
                     <div>
@@ -568,13 +578,14 @@ export default async function Home() {
 
           <div className="mt-12 grid gap-8 sm:grid-cols-2">
             <AnimateOnScroll delay={0}>
-              <div className="relative rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8">
+              <div className="relative rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg sm:p-8">
+                <div className="absolute inset-y-0 left-0 w-1 rounded-l-2xl bg-gradient-to-b from-[var(--ev-green)] to-[var(--ev-green-light)]" />
                 <Quote className="absolute right-6 top-6 size-8 text-[var(--ev-green)]/20" />
                 <p className="text-lg leading-8 text-slate-700">
                   &ldquo;{t("testimonial.quote")}&rdquo;
                 </p>
                 <div className="mt-6 flex items-center gap-3">
-                  <div className="flex size-12 items-center justify-center rounded-full bg-[var(--ev-blue-50)] text-sm font-bold text-[var(--ev-blue)]">
+                  <div className="flex size-12 items-center justify-center rounded-full bg-gradient-to-br from-[var(--ev-blue-50)] to-white text-sm font-bold text-[var(--ev-blue)] ring-2 ring-[var(--ev-blue)]/10">
                     KA
                   </div>
                   <div>
@@ -586,13 +597,14 @@ export default async function Home() {
             </AnimateOnScroll>
 
             <AnimateOnScroll delay={150}>
-              <div className="relative rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8">
+              <div className="relative rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg sm:p-8">
+                <div className="absolute inset-y-0 left-0 w-1 rounded-l-2xl bg-gradient-to-b from-[var(--ev-green)] to-[var(--ev-green-light)]" />
                 <Quote className="absolute right-6 top-6 size-8 text-[var(--ev-green)]/20" />
                 <p className="text-lg leading-8 text-slate-700">
                   &ldquo;{t("testimonial.quoteStudent")}&rdquo;
                 </p>
                 <div className="mt-6 flex items-center gap-3">
-                  <div className="flex size-12 items-center justify-center rounded-full bg-[var(--ev-blue-50)] text-sm font-bold text-[var(--ev-blue)]">
+                  <div className="flex size-12 items-center justify-center rounded-full bg-gradient-to-br from-[var(--ev-blue-50)] to-white text-sm font-bold text-[var(--ev-blue)] ring-2 ring-[var(--ev-blue)]/10">
                     TI
                   </div>
                   <div>
@@ -607,7 +619,10 @@ export default async function Home() {
       </section>
 
       {/* ─── SECTION 7: FINAL CTA ─── */}
-      <section className="bg-gradient-to-br from-[var(--ev-blue)] via-[var(--ev-blue-dark)] to-[var(--ev-blue)]">
+      <section className="relative overflow-hidden bg-gradient-to-br from-[var(--ev-blue)] via-[var(--ev-blue-dark)] to-[var(--ev-blue)]">
+        {/* Animated accent orbs */}
+        <div className="pointer-events-none absolute -left-20 top-10 h-64 w-64 rounded-full bg-[var(--ev-amber)]/10 blur-3xl animate-float" />
+        <div className="pointer-events-none absolute -right-16 bottom-10 h-56 w-56 rounded-full bg-white/5 blur-3xl animate-float animation-delay-300" />
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
           <div className="grid items-center gap-10 lg:grid-cols-2">
             <AnimateOnScroll>

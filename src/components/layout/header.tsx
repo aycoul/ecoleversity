@@ -80,26 +80,26 @@ export function Header({ user = null }: HeaderProps) {
           <nav className="hidden items-center gap-1 lg:flex">
             <Link
               href="/teachers"
-              className="rounded-lg px-4 py-2 text-[15px] font-semibold text-slate-700 transition-all hover:bg-[var(--ev-blue-50)] hover:text-[var(--ev-blue)]"
+              className="rounded-lg px-4 py-2 text-[15px] font-semibold text-slate-700 transition-all duration-200 hover:bg-[var(--ev-blue-50)] hover:text-[var(--ev-blue)]"
             >
               {t("findTeacher")}
             </Link>
             <Link
               href="/courses"
-              className="rounded-lg px-4 py-2 text-[15px] font-semibold text-slate-700 transition-all hover:bg-[var(--ev-blue-50)] hover:text-[var(--ev-blue)]"
+              className="rounded-lg px-4 py-2 text-[15px] font-semibold text-slate-700 transition-all duration-200 hover:bg-[var(--ev-blue-50)] hover:text-[var(--ev-blue)]"
             >
               {t("ourCourses")}
             </Link>
             <Link
               href="/exams"
-              className="rounded-lg px-4 py-2 text-[15px] font-semibold text-slate-700 transition-all hover:bg-[var(--ev-blue-50)] hover:text-[var(--ev-blue)]"
+              className="rounded-lg px-4 py-2 text-[15px] font-semibold text-slate-700 transition-all duration-200 hover:bg-[var(--ev-blue-50)] hover:text-[var(--ev-blue)]"
             >
               {t("examPrep")}
             </Link>
             {showTeachCta && (
               <Link
                 href="/register?role=teacher"
-                className="rounded-lg px-4 py-2 text-[15px] font-semibold text-[var(--ev-green-dark)] transition-all hover:bg-[var(--ev-green-50)]"
+                className="rounded-lg px-4 py-2 text-[15px] font-semibold text-[var(--ev-green-dark)] transition-all duration-200 hover:bg-[var(--ev-green-50)]"
               >
                 {t("teach")}
               </Link>
@@ -159,7 +159,7 @@ export function Header({ user = null }: HeaderProps) {
         {/* Mobile hamburger */}
         <button
           onClick={() => setMobileOpen(true)}
-          className="flex items-center justify-center rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100 lg:hidden"
+          className="flex items-center justify-center rounded-lg p-2 text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:scale-105 active:scale-95 lg:hidden"
           aria-label="Menu"
         >
           <Menu className="size-6" />
