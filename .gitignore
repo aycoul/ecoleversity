@@ -60,3 +60,7 @@ credentials.json
 .claude/
 /*.png
 !public/**/*.png
+
+# Playwright / screenshot audits — regenerated per run, don't version
+scripts/screenshots/
+scripts/audit-results/
