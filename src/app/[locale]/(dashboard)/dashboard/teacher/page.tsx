@@ -243,7 +243,7 @@ export default async function TeacherDashboardPage() {
                 {t("setAvailability")}
               </Link>
               <Link
-                href="/dashboard/teacher/classes/new"
+                href="/dashboard/teacher/create"
                 className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--ev-blue)] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[var(--ev-blue-light)]"
               >
                 <Plus className="size-4" />

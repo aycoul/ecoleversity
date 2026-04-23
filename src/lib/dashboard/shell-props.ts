@@ -5,6 +5,7 @@ import type { AvatarSwitcherLearner } from "@/components/nav/avatar-switcher";
 import {
   PAGE_PATHS,
   SCOPE_PAGES,
+  canAccess,
   type AdminPage,
   type AdminScope,
 } from "@/lib/admin/scopes";
@@ -133,6 +134,26 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
     icon: ADMIN_PAGE_ICON[page],
     section: ADMIN_PAGE_SECTION[page],
   }));
+  // Add refunds link for scopes that can access payments
+  if (canAccess(adminScope, "payments")) {
+    adminNav.push({
+      href: "/dashboard/admin/refunds",
+      label: "Remboursements",
+      icon: "rotate-ccw",
+      section: "Finances",
+    });
+  }
+
+  // Add featured teachers link for founders
+  if (canAccess(adminScope, "analytics")) {
+    adminNav.push({
+      href: "/dashboard/admin/featured-teachers",
+      label: "En vedette",
+      icon: "sparkles",
+      section: "Opérations",
+    });
+  }
+
   adminNav.push({
     href: "/dashboard/settings/notifications",
     label: t("settings"),
@@ -149,7 +170,7 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
       { href: "/dashboard/teacher", label: t("myProfile"), icon: "user" },
       { href: "/dashboard/teacher/availability", label: t("schedule"), icon: "calendar", section: "Enseignement" },
       { href: "/dashboard/teacher/sessions", label: t("upcomingSessions"), icon: "video", section: "Enseignement" },
-      { href: "/dashboard/teacher/classes", label: t("myCourses"), icon: "book-open", section: "Enseignement" },
+      { href: "/dashboard/teacher/classes", label: "Cours en direct", icon: "video", section: "Enseignement" },
       { href: "/dashboard/teacher/courses", label: t("recordedCourses"), icon: "play-circle", section: "Enseignement" },
       { href: "/dashboard/teacher/earnings", label: t("earnings"), icon: "wallet", section: "Finances" },
       { href: "/dashboard/teacher/transactions", label: t("payments"), icon: "receipt", section: "Finances" },
@@ -160,7 +181,9 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
       { href: "/dashboard/parent", label: t("myChildren"), icon: "users" },
       { href: "/teachers", label: t("findTeacher"), icon: "search", section: "Apprentissage" },
       { href: "/dashboard/parent/sessions", label: t("upcomingSessions"), icon: "calendar", section: "Apprentissage" },
+      { href: "/dashboard/parent/recordings", label: "Enregistrements", icon: "video", section: "Apprentissage" },
       { href: "/dashboard/parent/courses", label: t("recordedCourses"), icon: "play-circle", section: "Apprentissage" },
+      { href: "/dashboard/parent/saved-classes", label: t("savedClasses"), icon: "bookmark", section: "Apprentissage" },
       { href: "/dashboard/parent/payments", label: t("payments"), icon: "receipt", badge: pendingPaymentsCount, section: "Finances" },
       { href: "/dashboard/parent/spending", label: t("spending"), icon: "trending-up", section: "Finances" },
       { href: "/dashboard/parent/wallet", label: t("wallet"), icon: "wallet", section: "Finances" },

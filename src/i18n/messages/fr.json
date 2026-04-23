@@ -262,6 +262,7 @@
       "payouts": "Versements",
       "comingSoon": "Bientôt disponible",
       "recordedCourses": "Cours vidéo",
+      "savedClasses": "Favoris",
       "wallet": "Portefeuille",
       "settings": "Paramètres"
     }
@@ -478,6 +479,21 @@
     "statusFailed": "Échoué",
     "statusRefunded": "Remboursé"
   },
+  "refund": {
+    "title": "Demander un remboursement",
+    "description": "Vous pouvez demander un remboursement selon notre politique d'annulation.",
+    "reason": "Motif (optionnel)",
+    "reasonPlaceholder": "Expliquez pourquous vous souhaitez annuler...",
+    "policyNote": "> 24h avant le cours = 100% · 2-24h = 50% · < 2h = 0%",
+    "request": "Rembourser",
+    "submit": "Confirmer",
+    "cancel": "Annuler",
+    "error": "Erreur lors de la demande",
+    "requested": "Demande envoyée — montant : {amount} FCFA",
+    "alreadyRefunded": "Déjà remboursé",
+    "requestPending": "Demande en cours",
+    "classCompleted": "Cours terminé"
+  },
   "groupClass": {
     "title": "Cours de groupe",
     "createClass": "Créer un cours de groupe",
@@ -538,7 +554,31 @@
     "oneStudentFixed": "1 élève (fixé)",
     "pricePerSession": "Prix par séance (FCFA)",
     "sessionsCount": "Nombre de séances",
-    "sessionsOver": "sur {count} semaines"
+    "sessionsOver": "sur {count} semaines",
+    "trialSession": "Session d'essai gratuite",
+    "trialSessionDesc": "Offrez un cours d'essai gratuit de 30 min en 1-to-1. Chaque famille ne peut réserver qu'un essai par enseignant.",
+    "createTrialClass": "Créer une session d'essai",
+    "oneStudentTrial": "1 élève (essai)",
+    "free": "Gratuit",
+    "trialDurationFixed": "Les sessions d'essai durent exactement 30 minutes.",
+    "trialRecurrenceFixed": "Les sessions d'essai sont uniquement ponctuelles.",
+    "freeTrial": "Essai gratuit",
+    "bookTrial": "Réserver l'essai gratuit",
+    "trialAlreadyUsed": "Vous avez déjà utilisé votre essai gratuit avec cet enseignant. Réservez un cours payant pour continuer.",
+    "savedClasses": "Cours favoris",
+    "noSavedClasses": "Aucun cours favori. Parcourez le catalogue et ajoutez des cours à vos favoris.",
+    "browseClasses": "Parcourir les cours",
+    "viewDetails": "Voir les détails"
+  },
+  "teacherCreate": {
+    "title": "Créer un cours",
+    "subtitle": "Choisissez le type de cours que vous souhaitez proposer.",
+    "liveGroup": "Cours en direct — Groupe",
+    "liveGroupDesc": "Jusqu'à 15 élèves, prix partagé, horaire fixé.",
+    "liveOneOnOne": "Cours en direct — Particulier",
+    "liveOneOnOneDesc": "Un seul élève, attention personnalisée, horaire fixé.",
+    "videoCourse": "Cours vidéo (à la demande)",
+    "videoCourseDesc": "Contenu pré-enregistré accessible à tout moment."
   },
   "course": {
     "title": "Mes cours",

@@ -17,12 +17,11 @@ export default async function TeacherClassesPage() {
 
   if (!user) redirect("/login");
 
-  // Fetch teacher's group classes
+  // Fetch teacher's live classes (all formats: group + one_on_one)
   const { data: classes } = await supabase
     .from("live_classes")
     .select("*")
     .eq("teacher_id", user.id)
-    .eq("format", "group")
     .order("scheduled_at", { ascending: false });
 
   const now = new Date().toISOString();
@@ -48,10 +47,10 @@ export default async function TeacherClassesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-slate-900">{t("myClasses")}</h1>
-        <Link href="/dashboard/teacher/classes/new">
+        <Link href="/dashboard/teacher/create">
           <Button className="bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]">
             <Plus className="mr-2 size-4" />
-            {t("createClass")}
+            Créer un cours
           </Button>
         </Link>
       </div>
@@ -112,6 +111,7 @@ function ClassRow({
     duration_minutes: number;
     max_students: number;
     price_xof: number;
+    format?: string;
   };
   enrolledCount: number;
 }) {
@@ -137,6 +137,9 @@ function ClassRow({
           </span>
           <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
             {GRADE_LEVEL_LABELS[cls.grade_level as GradeLevel] ?? cls.grade_level}
+          </span>
+          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${cls.format === "one_on_one" ? "bg-amber-50 text-amber-700" : "bg-purple-50 text-purple-700"}`}>
+            {cls.format === "one_on_one" ? "Particulier" : "Groupe"}
           </span>
         </div>
         <div className="flex items-center gap-1.5">

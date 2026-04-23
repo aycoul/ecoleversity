@@ -262,6 +262,7 @@
       "payouts": "Payouts",
       "comingSoon": "Coming soon",
       "recordedCourses": "Video courses",
+      "savedClasses": "Saved",
       "wallet": "Wallet",
       "settings": "Settings"
     }
@@ -478,6 +479,21 @@
     "statusFailed": "Failed",
     "statusRefunded": "Refunded"
   },
+  "refund": {
+    "title": "Request a refund",
+    "description": "You can request a refund according to our cancellation policy.",
+    "reason": "Reason (optional)",
+    "reasonPlaceholder": "Explain why you want to cancel...",
+    "policyNote": "> 24h before class = 100% · 2-24h = 50% · < 2h = 0%",
+    "request": "Refund",
+    "submit": "Confirm",
+    "cancel": "Cancel",
+    "error": "Error submitting request",
+    "requested": "Request sent — amount: {amount} FCFA",
+    "alreadyRefunded": "Already refunded",
+    "requestPending": "Request pending",
+    "classCompleted": "Class completed"
+  },
   "groupClass": {
     "title": "Group Classes",
     "createClass": "Create a group class",
@@ -538,7 +554,31 @@
     "oneStudentFixed": "1 student (fixed)",
     "pricePerSession": "Price per session (FCFA)",
     "sessionsCount": "Number of sessions",
-    "sessionsOver": "over {count} weeks"
+    "sessionsOver": "over {count} weeks",
+    "trialSession": "Free trial session",
+    "trialSessionDesc": "Offer a free 30-minute 1-on-1 trial. Each family can only book one trial per teacher.",
+    "createTrialClass": "Create trial session",
+    "oneStudentTrial": "1 student (trial)",
+    "free": "Free",
+    "trialDurationFixed": "Trial sessions are exactly 30 minutes.",
+    "trialRecurrenceFixed": "Trial sessions are one-time only.",
+    "freeTrial": "Free trial",
+    "bookTrial": "Book free trial",
+    "trialAlreadyUsed": "You have already used your free trial with this teacher. Book a paid class to continue.",
+    "savedClasses": "Saved classes",
+    "noSavedClasses": "No saved classes yet. Browse the catalog and bookmark classes you're interested in.",
+    "browseClasses": "Browse classes",
+    "viewDetails": "View details"
+  },
+  "teacherCreate": {
+    "title": "Create a course",
+    "subtitle": "Choose the type of course you want to offer.",
+    "liveGroup": "Live class — Group",
+    "liveGroupDesc": "Up to 15 students, shared price, fixed schedule.",
+    "liveOneOnOne": "Live class — Private",
+    "liveOneOnOneDesc": "One student, personalized attention, fixed schedule.",
+    "videoCourse": "Video course (on-demand)",
+    "videoCourseDesc": "Pre-recorded content available anytime."
   },
   "course": {
     "title": "My Courses",

@@ -47,7 +47,7 @@ export default async function TeacherCoursesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-slate-900">{t("title")}</h1>
-        <Link href="/dashboard/teacher/courses/new">
+        <Link href="/dashboard/teacher/create">
           <Button className="bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]">
             <Plus className="mr-2 size-4" />
             {t("createCourse")}
