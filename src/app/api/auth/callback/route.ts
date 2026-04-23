@@ -36,17 +36,20 @@ export async function GET(request: NextRequest) {
     }
   );
 
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
-  if (error) {
+  if (error || !data.user) {
     return NextResponse.redirect(`${origin}/fr/login`);
   }
 
-  // If role was set during registration, update user metadata
+  // If role was set during registration, update the profiles table.
+  // The trigger created the profile with the default 'parent' role
+  // before the cookie was read, so we patch it here.
   if (role) {
-    await supabase.auth.updateUser({
-      data: { role },
-    });
+    await supabase
+      .from("profiles")
+      .update({ role })
+      .eq("id", data.user.id);
   }
 
   // Clear the role cookie
