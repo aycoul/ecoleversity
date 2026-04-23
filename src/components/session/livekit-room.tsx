@@ -16,7 +16,7 @@ import "@livekit/components-styles";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { ModeratedChat } from "./moderated-chat";
-import { Hand, Users, Loader2, Presentation, LayoutGrid, Maximize2, Pin, PinOff } from "lucide-react";
+import { Hand, Users, Loader2, Presentation, LayoutGrid, Maximize2, Pin, PinOff, ChevronRight, ChevronLeft } from "lucide-react";
 import { Whiteboard } from "./whiteboard";
 
 type LiveKitRoomEmbedProps = {
@@ -307,10 +307,14 @@ function PresentationLayout({
   tracks,
   pinnedKey,
   onPin,
+  thumbnailsHidden,
+  onToggleThumbnails,
 }: {
   tracks: TrackReferenceOrPlaceholder[];
   pinnedKey: string | null;
   onPin: (key: string | null) => void;
+  thumbnailsHidden: boolean;
+  onToggleThumbnails: () => void;
 }) {
   const t = useTranslations("session");
 
@@ -352,9 +356,33 @@ function PresentationLayout({
         )}
       </div>
 
+      {/* Show-thumbnails toggle when strip is hidden */}
+      {others.length > 0 && thumbnailsHidden && (
+        <button
+          type="button"
+          onClick={onToggleThumbnails}
+          className="absolute right-3 top-1/2 z-10 inline-flex -translate-y-1/2 items-center gap-1 rounded-full bg-black/60 px-2 py-2 text-xs font-medium text-white backdrop-blur hover:bg-black/80"
+          title={t("showThumbnails")}
+          aria-label={t("showThumbnails")}
+        >
+          <ChevronLeft className="size-4" />
+          <span className="pr-1">{others.length}</span>
+        </button>
+      )}
+
       {/* Thumbnail strip */}
-      {others.length > 0 && (
-        <div className="flex w-36 shrink-0 flex-col gap-2 overflow-y-auto pr-0.5 md:w-44">
+      {others.length > 0 && !thumbnailsHidden && (
+        <div className="relative flex w-36 shrink-0 flex-col gap-2 overflow-y-auto pr-0.5 md:w-44">
+          <button
+            type="button"
+            onClick={onToggleThumbnails}
+            className="sticky top-0 z-10 -mx-0.5 flex items-center justify-center gap-1 rounded-md bg-white/10 py-1 text-[10px] font-medium uppercase tracking-wide text-white/70 backdrop-blur hover:bg-white/20 hover:text-white"
+            title={t("hideThumbnails")}
+            aria-label={t("hideThumbnails")}
+          >
+            <ChevronRight className="size-3" />
+            {t("hideThumbnails")}
+          </button>
           {others.map((trackRef) => {
             const key = getTrackKey(trackRef);
             const isPinned = pinnedKey === key;
@@ -554,6 +582,7 @@ function RoomLayout({
   const [whiteboardOpen, setWhiteboardOpen] = useState(false);
   const [layoutMode, setLayoutMode] = useState<"speaker" | "grid">("speaker");
   const [pinnedKey, setPinnedKey] = useState<string | null>(null);
+  const [thumbnailsHidden, setThumbnailsHidden] = useState(false);
 
   const tracks = useTracks(
     [
@@ -604,6 +633,8 @@ function RoomLayout({
               tracks={tracks}
               pinnedKey={pinnedKey}
               onPin={setPinnedKey}
+              thumbnailsHidden={thumbnailsHidden}
+              onToggleThumbnails={() => setThumbnailsHidden((v) => !v)}
             />
           ) : (
             <GridLayout tracks={tracks} style={{ height: "100%" }}>

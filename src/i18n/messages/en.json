@@ -435,7 +435,9 @@
     "switchToSpeaker": "Switch to speaker view",
     "pinTooltip": "Pin this participant",
     "unpinTooltip": "Unpin",
-    "unpin": "Unpin"
+    "unpin": "Unpin",
+    "hideThumbnails": "Hide",
+    "showThumbnails": "Show participants"
   },
   "rating": {
     "title": "Rate your session",

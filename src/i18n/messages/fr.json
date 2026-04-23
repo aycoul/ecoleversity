@@ -435,7 +435,9 @@
     "switchToSpeaker": "Passer en mode intervenant",
     "pinTooltip": "Épingler ce participant",
     "unpinTooltip": "Désépingler",
-    "unpin": "Désépingler"
+    "unpin": "Désépingler",
+    "hideThumbnails": "Masquer",
+    "showThumbnails": "Afficher les participants"
   },
   "rating": {
     "title": "Évaluer votre cours",
