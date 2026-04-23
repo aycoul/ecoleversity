@@ -4,6 +4,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Link } from "@/i18n/routing";
 import { Receipt, ArrowRight } from "lucide-react";
+import { RefundButton } from "@/components/payments/refund-button";
 import { formatCurrency } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -51,10 +52,37 @@ export default async function ParentPaymentsPage() {
   const { data: transactions } = await admin
     .from("transactions")
     .select(
-      "id, amount_xof, status, payment_reference, created_at, teacher_id"
+      "id, amount_xof, status, payment_reference, created_at, teacher_id, live_class_id"
     )
     .eq("parent_id", user.id)
     .order("created_at", { ascending: false });
+
+  // Fetch class start times for refund eligibility
+  const liveClassIds = Array.from(
+    new Set((transactions ?? []).map((tx) => tx.live_class_id).filter(Boolean))
+  ) as string[];
+
+  const { data: classRows } = liveClassIds.length > 0
+    ? await admin.from("live_classes").select("id, scheduled_at").in("id", liveClassIds)
+    : { data: [] };
+
+  const classTimeById = new Map(
+    (classRows ?? []).map((c) => [c.id as string, c.scheduled_at as string])
+  );
+
+  // Fetch existing refund requests
+  const txIds = (transactions ?? []).map((tx) => tx.id as string);
+  const { data: refundRows } = txIds.length > 0
+    ? await admin
+        .from("refund_requests")
+        .select("transaction_id, status")
+        .in("transaction_id", txIds)
+        .in("status", ["pending", "approved", "partial"])
+    : { data: [] };
+
+  const refundStatusByTx = new Map(
+    (refundRows ?? []).map((r) => [r.transaction_id as string, r.status as string])
+  );
 
   // Batch teacher display names (no N+1)
   const teacherIds = Array.from(
@@ -74,10 +102,16 @@ export default async function ParentPaymentsPage() {
     ])
   );
 
-  const enriched = (transactions ?? []).map((tx) => ({
-    ...tx,
-    teacherName: nameById.get(tx.teacher_id as string) ?? "—",
-  }));
+  const enriched = (transactions ?? []).map((tx) => {
+    const startTime = classTimeById.get(tx.live_class_id as string);
+    return {
+      ...tx,
+      teacherName: nameById.get(tx.teacher_id as string) ?? "—",
+      classStartTime: startTime,
+      refundRequested: refundStatusByTx.has(tx.id as string),
+      isPast: startTime ? new Date(startTime).getTime() < +new Date() : false,
+    };
+  });
 
   const statusLabel = (status: string): string => {
     const key = `status${status.charAt(0).toUpperCase()}${status.slice(1)}` as
@@ -166,6 +200,14 @@ export default async function ParentPaymentsPage() {
                     >
                       {statusLabel(tx.status)}
                     </span>
+                  </td>
+                  <td className="px-3 py-3">
+                    <RefundButton
+                      transactionId={tx.id as string}
+                      status={tx.status as string}
+                      alreadyRequested={tx.refundRequested}
+                      isPast={tx.isPast}
+                    />
                   </td>
                 </tr>
               ))}
