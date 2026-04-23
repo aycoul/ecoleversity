@@ -428,7 +428,14 @@
     "whiteboardClearAll": "Clear all",
     "whiteboardClose": "Close",
     "chatPanelTitle": "Chat",
-    "chatPanelClose": "Close chat"
+    "chatPanelClose": "Close chat",
+    "layoutSpeaker": "Speaker",
+    "layoutGrid": "Grid",
+    "switchToGrid": "Switch to grid view",
+    "switchToSpeaker": "Switch to speaker view",
+    "pinTooltip": "Pin this participant",
+    "unpinTooltip": "Unpin",
+    "unpin": "Unpin"
   },
   "rating": {
     "title": "Rate your session",

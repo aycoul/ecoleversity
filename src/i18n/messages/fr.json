@@ -428,7 +428,14 @@
     "whiteboardClearAll": "Effacer tout",
     "whiteboardClose": "Fermer",
     "chatPanelTitle": "Discussion",
-    "chatPanelClose": "Fermer la discussion"
+    "chatPanelClose": "Fermer la discussion",
+    "layoutSpeaker": "Intervenant",
+    "layoutGrid": "Grille",
+    "switchToGrid": "Passer en mode grille",
+    "switchToSpeaker": "Passer en mode intervenant",
+    "pinTooltip": "Épingler ce participant",
+    "unpinTooltip": "Désépingler",
+    "unpin": "Désépingler"
   },
   "rating": {
     "title": "Évaluer votre cours",

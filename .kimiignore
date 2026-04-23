@@ -1,0 +1,6 @@
+# Ignore icon files (unsupported image format for LLM context)
+*.ico
+
+# Ignore build artifacts and dependencies that may contain icons
+.next/
+node_modules/

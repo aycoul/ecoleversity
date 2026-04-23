@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import {
   LiveKitRoom,
   RoomAudioRenderer,
@@ -9,13 +9,14 @@ import {
   ControlBar,
   useTracks,
   useRoomContext,
+  type TrackReferenceOrPlaceholder,
 } from "@livekit/components-react";
 import { Track, RoomEvent, type DataPublishOptions, type RemoteParticipant } from "livekit-client";
 import "@livekit/components-styles";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { ModeratedChat } from "./moderated-chat";
-import { Hand, Users, Loader2, Presentation } from "lucide-react";
+import { Hand, Users, Loader2, Presentation, LayoutGrid, Maximize2, Pin, PinOff } from "lucide-react";
 import { Whiteboard } from "./whiteboard";
 
 type LiveKitRoomEmbedProps = {
@@ -289,6 +290,106 @@ function RaisedHandsPanel({ userRole }: { userRole: "parent" | "teacher" }) {
   );
 }
 
+// ─── Presentation / speaker layout ────────────────────────────────────
+// Focus-and-thumbnail layout à la Zoom: one big tile + a strip of thumbnails.
+// Auto-focus priority:
+//   1. User-pinned participant (click any thumbnail)
+//   2. Any active screen share
+//   3. First remote participant
+//   4. First track (fallback to local if nobody else is in the room yet)
+// ──────────────────────────────────────────────────────────────────────
+
+function getTrackKey(t: TrackReferenceOrPlaceholder): string {
+  return `${t.participant.identity}:${t.source}`;
+}
+
+function PresentationLayout({
+  tracks,
+  pinnedKey,
+  onPin,
+}: {
+  tracks: TrackReferenceOrPlaceholder[];
+  pinnedKey: string | null;
+  onPin: (key: string | null) => void;
+}) {
+  const t = useTranslations("session");
+
+  const focused = useMemo(() => {
+    if (pinnedKey) {
+      const p = tracks.find((tr) => getTrackKey(tr) === pinnedKey);
+      if (p) return p;
+    }
+    const screenShare = tracks.find(
+      (tr) => tr.source === Track.Source.ScreenShare && tr.publication?.track
+    );
+    if (screenShare) return screenShare;
+    const remote = tracks.find((tr) => !tr.participant.isLocal);
+    return remote ?? tracks[0];
+  }, [tracks, pinnedKey]);
+
+  const others = useMemo(
+    () => tracks.filter((tr) => getTrackKey(tr) !== getTrackKey(focused)),
+    [tracks, focused]
+  );
+
+  if (!focused) return null;
+
+  return (
+    <div className="flex h-full w-full gap-2 p-1">
+      {/* Big focus tile */}
+      <div className="relative flex-1 min-w-0 overflow-hidden rounded-lg bg-slate-900">
+        <ParticipantTile trackRef={focused} className="!h-full !w-full" />
+        {pinnedKey && (
+          <button
+            type="button"
+            onClick={() => onPin(null)}
+            className="absolute right-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-black/60 px-3 py-1.5 text-xs font-medium text-white backdrop-blur hover:bg-black/80"
+            title={t("unpinTooltip")}
+          >
+            <PinOff className="size-3" />
+            {t("unpin")}
+          </button>
+        )}
+      </div>
+
+      {/* Thumbnail strip */}
+      {others.length > 0 && (
+        <div className="flex w-36 shrink-0 flex-col gap-2 overflow-y-auto pr-0.5 md:w-44">
+          {others.map((trackRef) => {
+            const key = getTrackKey(trackRef);
+            const isPinned = pinnedKey === key;
+            return (
+              <div
+                key={key}
+                role="button"
+                tabIndex={0}
+                onClick={() => onPin(isPinned ? null : key)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onPin(isPinned ? null : key);
+                  }
+                }}
+                className={`group relative aspect-video shrink-0 cursor-pointer overflow-hidden rounded-md bg-slate-900 ring-2 transition-all ${
+                  isPinned
+                    ? "ring-[var(--ev-amber)]"
+                    : "ring-transparent hover:ring-white/40"
+                }`}
+                title={isPinned ? t("unpinTooltip") : t("pinTooltip")}
+              >
+                <ParticipantTile trackRef={trackRef} className="!h-full !w-full" />
+                <div className="pointer-events-none absolute right-1 top-1 rounded-full bg-black/60 p-1 opacity-0 transition-opacity group-hover:opacity-100">
+                  <Pin className="size-3 text-white" />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Main embed ───
 export function LiveKitRoomEmbed({
   liveClassId,
@@ -451,6 +552,8 @@ function RoomLayout({
   const t = useTranslations("session");
   const [chatOpen, setChatOpen] = useState(false);
   const [whiteboardOpen, setWhiteboardOpen] = useState(false);
+  const [layoutMode, setLayoutMode] = useState<"speaker" | "grid">("speaker");
+  const [pinnedKey, setPinnedKey] = useState<string | null>(null);
 
   const tracks = useTracks(
     [
@@ -460,15 +563,53 @@ function RoomLayout({
     { onlySubscribed: false }
   );
 
+  // Auto-switch to speaker view the moment someone starts screen sharing —
+  // grid view hides the shared screen in a tiny tile, which is never what
+  // the presenter wants. Switch back to whatever the user had when the
+  // screen share ends.
+  const screenShareActive = tracks.some(
+    (tr) => tr.source === Track.Source.ScreenShare && tr.publication?.track
+  );
+  const previousModeBeforeShareRef = useRef<"speaker" | "grid" | null>(null);
+  useEffect(() => {
+    if (screenShareActive) {
+      if (layoutMode !== "speaker") {
+        previousModeBeforeShareRef.current = layoutMode;
+        setLayoutMode("speaker");
+      }
+    } else if (previousModeBeforeShareRef.current) {
+      setLayoutMode(previousModeBeforeShareRef.current);
+      previousModeBeforeShareRef.current = null;
+    }
+  }, [screenShareActive, layoutMode]);
+
+  // If the pinned participant leaves, drop the pin so we fall back to auto-focus.
+  useEffect(() => {
+    if (!pinnedKey) return;
+    const stillPresent = tracks.some((tr) => getTrackKey(tr) === pinnedKey);
+    if (!stillPresent) setPinnedKey(null);
+  }, [tracks, pinnedKey]);
+
+  // Solo in the room → grid is simpler than a single big tile + empty strip.
+  const effectiveMode = tracks.length <= 1 ? "grid" : layoutMode;
+
   return (
     <div className="flex h-full w-full flex-col">
       <div className="relative flex min-h-0 flex-1">
         <div className="relative min-w-0 flex-1">
           {userRole === "teacher" && <TeacherWaitingList liveClassId={liveClassId} />}
           <RaisedHandsPanel userRole={userRole} />
-          <GridLayout tracks={tracks} style={{ height: "100%" }}>
-            <ParticipantTile />
-          </GridLayout>
+          {effectiveMode === "speaker" ? (
+            <PresentationLayout
+              tracks={tracks}
+              pinnedKey={pinnedKey}
+              onPin={setPinnedKey}
+            />
+          ) : (
+            <GridLayout tracks={tracks} style={{ height: "100%" }}>
+              <ParticipantTile />
+            </GridLayout>
+          )}
         </div>
 
         {/* Chat panel stays mounted even when hidden so useChat() keeps
@@ -523,6 +664,27 @@ function RoomLayout({
           }}
         />
         <RaiseHandButton />
+        <button
+          type="button"
+          onClick={() =>
+            setLayoutMode((prev) => (prev === "speaker" ? "grid" : "speaker"))
+          }
+          disabled={tracks.length <= 1}
+          className="lk-button flex items-center gap-1.5 rounded-md bg-white/10 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20 disabled:opacity-40"
+          title={effectiveMode === "speaker" ? t("switchToGrid") : t("switchToSpeaker")}
+        >
+          {effectiveMode === "speaker" ? (
+            <>
+              <LayoutGrid className="size-4" />
+              {t("layoutGrid")}
+            </>
+          ) : (
+            <>
+              <Maximize2 className="size-4" />
+              {t("layoutSpeaker")}
+            </>
+          )}
+        </button>
         <button
           type="button"
           onClick={() => setWhiteboardOpen((v) => !v)}
