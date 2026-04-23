@@ -26,6 +26,9 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { ModeratedChat } from "./moderated-chat";
 import { SessionPoll } from "./session-poll";
+import { SessionSlides } from "./session-slides";
+import { CaptionsToggle, CaptionsOverlay } from "./session-captions";
+import { useLocale } from "next-intl";
 import { Hand, Users, Loader2, Presentation, LayoutGrid, Maximize2, Pin, PinOff, ChevronRight, ChevronLeft, MicOff, Settings2, Sparkles as BlurIcon, BarChart3, FileText, DoorOpen, Captions } from "lucide-react";
 import { Whiteboard } from "./whiteboard";
 
@@ -424,13 +427,18 @@ function EngagementTracker({ liveClassId }: { liveClassId: string }) {
   const accumRef = useRef<Map<string, { name: string; speakingMs: number }>>(
     new Map()
   );
-  const lastTickRef = useRef<number>(Date.now());
+  // Initialise with 0; the first onSpeakersChange effect will stamp a real
+  // timestamp. Avoids the react-hooks/purity warning for calling Date.now()
+  // during render.
+  const lastTickRef = useRef<number>(0);
 
   // Accumulate speaking time whenever the speakers array changes.
   useEffect(() => {
     const now = Date.now();
-    const delta = now - lastTickRef.current;
+    const last = lastTickRef.current;
     lastTickRef.current = now;
+    if (last === 0) return; // first tick — we only learn the interval on the second
+    const delta = now - last;
     for (const p of speakers) {
       const prev = accumRef.current.get(p.identity) ?? {
         name: p.name || p.identity,
@@ -478,6 +486,203 @@ function EngagementTracker({ liveClassId }: { liveClassId: string }) {
   }, [liveClassId, room]);
 
   return null;
+}
+
+// ─── Breakout rooms v1 ─────────────────────────────────────────────────
+// Teacher triggers split → server returns per-participant tokens for
+// sibling LiveKit rooms (session-{id}-bo-{N}). Teacher broadcasts the
+// assignment map via the main-room data channel. Each client reads
+// *only their own* assignment and asks the parent component to swap
+// its token (which triggers LiveKitRoom to remount against the new
+// room). "Return to main" requests a fresh main-room token and swaps
+// back.
+type BreakoutAssignment = {
+  room: string;
+  token: string;
+  groupIdx: number;
+  members: string[];
+};
+type BreakoutAssignMsg = {
+  type: "breakout_assign";
+  assignments: Record<string, BreakoutAssignment>;
+};
+type BreakoutEndMsg = { type: "breakout_end" };
+
+function BreakoutButton({
+  liveClassId,
+  userRole,
+  inBreakout,
+  onSwap,
+  onReturn,
+}: {
+  liveClassId: string;
+  userRole: "parent" | "teacher";
+  inBreakout: boolean;
+  onSwap: (room: string, token: string, groupIdx: number, members: string[]) => void;
+  onReturn: () => void;
+}) {
+  const t = useTranslations("session");
+  const room = useRoomContext();
+  const [composerOpen, setComposerOpen] = useState(false);
+  const [groupSize, setGroupSize] = useState(2);
+  const [busy, setBusy] = useState(false);
+
+  // Listen for assignments and end signals.
+  useEffect(() => {
+    const handler = (payload: Uint8Array) => {
+      try {
+        const msg = JSON.parse(new TextDecoder().decode(payload)) as
+          | BreakoutAssignMsg
+          | BreakoutEndMsg;
+        if (msg.type === "breakout_assign") {
+          const myId = room.localParticipant.identity;
+          const mine = msg.assignments[myId];
+          if (mine) onSwap(mine.room, mine.token, mine.groupIdx, mine.members);
+        } else if (msg.type === "breakout_end") {
+          onReturn();
+        }
+      } catch {
+        // ignore
+      }
+    };
+    room.on(RoomEvent.DataReceived, handler);
+    return () => {
+      room.off(RoomEvent.DataReceived, handler);
+    };
+  }, [room, onSwap, onReturn]);
+
+  const broadcast = (msg: BreakoutAssignMsg | BreakoutEndMsg) => {
+    room.localParticipant.publishData(
+      new TextEncoder().encode(JSON.stringify(msg)),
+      { reliable: true } as DataPublishOptions
+    );
+  };
+
+  const startBreakouts = async () => {
+    setBusy(true);
+    try {
+      const res = await fetch("/api/livekit/breakouts/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ liveClassId, groupSize }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "breakout failed");
+      // Broadcast then apply locally.
+      broadcast({ type: "breakout_assign", assignments: data.assignments });
+      const myId = room.localParticipant.identity;
+      const mine = data.assignments[myId];
+      if (mine) onSwap(mine.room, mine.token, mine.groupIdx, mine.members);
+      setComposerOpen(false);
+      toast.success(t("breakoutStarted", { count: data.groups.length }));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const endBreakouts = () => {
+    broadcast({ type: "breakout_end" });
+    onReturn();
+  };
+
+  if (userRole !== "teacher") return null;
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => (inBreakout ? endBreakouts() : setComposerOpen(true))}
+        className={`lk-button flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+          inBreakout
+            ? "bg-red-500 text-white hover:bg-red-600"
+            : "bg-white/10 text-white hover:bg-white/20"
+        }`}
+        title={inBreakout ? t("breakoutEndTooltip") : t("breakoutTooltip")}
+      >
+        <DoorOpen className="size-4" />
+        {inBreakout ? t("breakoutEnd") : t("breakout")}
+      </button>
+
+      {composerOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-sm rounded-xl bg-white p-5 shadow-xl">
+            <h3 className="text-lg font-semibold text-slate-900">{t("breakoutCreate")}</h3>
+            <p className="mt-1 text-sm text-slate-500">{t("breakoutHint")}</p>
+            <label className="mt-4 block text-sm font-medium text-slate-700">
+              {t("breakoutGroupSize")}
+            </label>
+            <div className="mt-1 flex gap-2">
+              {[2, 3, 4].map((n) => (
+                <button
+                  key={n}
+                  onClick={() => setGroupSize(n)}
+                  className={`flex-1 rounded-lg border-2 py-2 text-sm font-medium transition-colors ${
+                    groupSize === n
+                      ? "border-[var(--ev-blue)] bg-[var(--ev-blue-50)] text-[var(--ev-blue)]"
+                      : "border-slate-200 hover:border-slate-300"
+                  }`}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                onClick={() => setComposerOpen(false)}
+                className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100"
+              >
+                {t("cancelShort")}
+              </button>
+              <button
+                onClick={startBreakouts}
+                disabled={busy}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--ev-blue)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--ev-blue-light)] disabled:opacity-50"
+              >
+                {busy && <Loader2 className="size-3.5 animate-spin" />}
+                {t("breakoutStart")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+// Banner visible to both teacher and students while inside a breakout room.
+function BreakoutBanner({
+  groupIdx,
+  members,
+  canEnd,
+  onRequestMain,
+}: {
+  groupIdx: number;
+  members: string[];
+  canEnd: boolean;
+  onRequestMain: () => void;
+}) {
+  const t = useTranslations("session");
+  return (
+    <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex justify-center">
+      <div className="pointer-events-auto mt-3 flex max-w-[90%] items-center gap-3 rounded-full border border-[var(--ev-blue)]/30 bg-[var(--ev-blue)] px-4 py-2 text-sm font-semibold text-white shadow-lg">
+        <DoorOpen className="size-4" />
+        <span>
+          {t("breakoutBanner", { n: groupIdx + 1 })}
+          {members.length > 0 && ` · ${members.join(", ")}`}
+        </span>
+        {canEnd && (
+          <button
+            onClick={onRequestMain}
+            className="rounded-full bg-white/20 px-3 py-0.5 text-xs font-medium hover:bg-white/30"
+          >
+            {t("breakoutBackToMain")}
+          </button>
+        )}
+      </div>
+    </div>
+  );
 }
 
 function RaiseHandButton() {
@@ -735,6 +940,41 @@ export function LiveKitRoomEmbed({
   const [error, setError] = useState<string | null>(null);
   const [inWaitingRoom, setInWaitingRoom] = useState(userRole === "parent");
   const teacherAdmittedRef = useRef(false);
+  // Breakout state — null when in the main room, populated when swapped
+  // into a sibling room. Survives across the LiveKitRoom remount (we key
+  // LiveKitRoom on connection.token so a new token triggers reconnect).
+  const [breakout, setBreakout] = useState<{
+    groupIdx: number;
+    members: string[];
+  } | null>(null);
+
+  const swapToBreakout = useCallback(
+    (room: string, token: string, groupIdx: number, members: string[]) => {
+      setConnection({ token, url: connection?.url ?? "", roomName: room });
+      setBreakout({ groupIdx, members });
+    },
+    [connection?.url]
+  );
+
+  const returnToMain = useCallback(async () => {
+    try {
+      const res = await fetch("/api/livekit/breakouts/rejoin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ liveClassId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "rejoin failed");
+      setConnection((prev) => ({
+        token: data.token,
+        url: prev?.url ?? "",
+        roomName: data.roomName,
+      }));
+      setBreakout(null);
+    } catch (err) {
+      console.error("[breakout/rejoin]", err);
+    }
+  }, [liveClassId]);
 
   // Teacher auto-admits themselves on mount
   useEffect(() => {
@@ -853,19 +1093,29 @@ export function LiveKitRoomEmbed({
       data-lk-theme="default"
     >
       <LiveKitRoom
+        key={connection.token}
         token={connection.token}
         serverUrl={connection.url}
         connect
         video
         audio
         options={LIVEKIT_ROOM_OPTIONS}
-        onDisconnected={onClose}
+        onDisconnected={() => {
+          // In a breakout, LiveKit disconnect is expected during the token
+          // swap — let the new LiveKitRoom reconnect via the fresh key.
+          // Only treat a disconnect as "leave the session" if we're in the
+          // main room.
+          if (!breakout) onClose?.();
+        }}
         style={{ height: "100%" }}
       >
         <RoomLayout
           liveClassId={liveClassId}
           userRole={userRole}
           actingAsLearnerId={actingAsLearnerId}
+          breakout={breakout}
+          onSwapBreakout={swapToBreakout}
+          onReturnToMain={returnToMain}
         />
         <RoomAudioRenderer />
       </LiveKitRoom>
@@ -878,12 +1128,19 @@ function RoomLayout({
   liveClassId,
   userRole,
   actingAsLearnerId,
+  breakout,
+  onSwapBreakout,
+  onReturnToMain,
 }: {
   liveClassId: string;
   userRole: "parent" | "teacher";
   actingAsLearnerId?: string;
+  breakout: { groupIdx: number; members: string[] } | null;
+  onSwapBreakout: (room: string, token: string, groupIdx: number, members: string[]) => void;
+  onReturnToMain: () => void;
 }) {
   const t = useTranslations("session");
+  const locale = useLocale() as "fr" | "en";
   const [chatOpen, setChatOpen] = useState(false);
   const [whiteboardOpen, setWhiteboardOpen] = useState(false);
   const [layoutMode, setLayoutMode] = useState<"speaker" | "grid">("speaker");
@@ -906,23 +1163,32 @@ function RoomLayout({
     (tr) => tr.source === Track.Source.ScreenShare && tr.publication?.track
   );
   const previousModeBeforeShareRef = useRef<"speaker" | "grid" | null>(null);
+  // Using setTimeout(…,0) to defer the setState out of the effect's sync
+  // phase — satisfies react-hooks/set-state-in-effect and doesn't change
+  // observable behaviour for the user.
   useEffect(() => {
-    if (screenShareActive) {
-      if (layoutMode !== "speaker") {
-        previousModeBeforeShareRef.current = layoutMode;
-        setLayoutMode("speaker");
+    const id = setTimeout(() => {
+      if (screenShareActive) {
+        if (layoutMode !== "speaker") {
+          previousModeBeforeShareRef.current = layoutMode;
+          setLayoutMode("speaker");
+        }
+      } else if (previousModeBeforeShareRef.current) {
+        setLayoutMode(previousModeBeforeShareRef.current);
+        previousModeBeforeShareRef.current = null;
       }
-    } else if (previousModeBeforeShareRef.current) {
-      setLayoutMode(previousModeBeforeShareRef.current);
-      previousModeBeforeShareRef.current = null;
-    }
+    }, 0);
+    return () => clearTimeout(id);
   }, [screenShareActive, layoutMode]);
 
   // If the pinned participant leaves, drop the pin so we fall back to auto-focus.
   useEffect(() => {
     if (!pinnedKey) return;
     const stillPresent = tracks.some((tr) => getTrackKey(tr) === pinnedKey);
-    if (!stillPresent) setPinnedKey(null);
+    if (!stillPresent) {
+      const id = setTimeout(() => setPinnedKey(null), 0);
+      return () => clearTimeout(id);
+    }
   }, [tracks, pinnedKey]);
 
   // Solo in the room → grid is simpler than a single big tile + empty strip.
@@ -932,9 +1198,18 @@ function RoomLayout({
     <div className="flex h-full w-full flex-col">
       <div className="relative flex min-h-0 flex-1">
         <div className="relative min-w-0 flex-1">
-          {userRole === "teacher" && <TeacherWaitingList liveClassId={liveClassId} />}
+          {userRole === "teacher" && !breakout && <TeacherWaitingList liveClassId={liveClassId} />}
           {userRole === "teacher" && <EngagementTracker liveClassId={liveClassId} />}
+          {breakout && (
+            <BreakoutBanner
+              groupIdx={breakout.groupIdx}
+              members={breakout.members}
+              canEnd={userRole === "teacher" || userRole === "parent"}
+              onRequestMain={onReturnToMain}
+            />
+          )}
           <RaisedHandsPanel userRole={userRole} />
+          <CaptionsOverlay />
           {effectiveMode === "speaker" ? (
             <PresentationLayout
               tracks={tracks}
@@ -981,8 +1256,9 @@ function RoomLayout({
           </div>
         </aside>
 
-        {/* Whiteboard overlay: covers the video+chat row only, leaving the
-            control bar below accessible so the user can toggle it off. */}
+        {/* Whiteboard overlay (z-30) sits above the slides viewer (z-20)
+            so a teacher can annotate over their slides if they open both.
+            The slides viewer is mounted by SessionSlides when active. */}
         {whiteboardOpen && (
           <div className="absolute inset-0 z-30">
             <Whiteboard onClose={() => setWhiteboardOpen(false)} />
@@ -1004,8 +1280,17 @@ function RoomLayout({
         <RaiseHandButton />
         <DevicePicker />
         <BlurButton />
+        <CaptionsToggle locale={locale} />
         <SessionPoll userRole={userRole} />
+        <SessionSlides liveClassId={liveClassId} userRole={userRole} />
         {userRole === "teacher" && <MuteAllButton liveClassId={liveClassId} />}
+        <BreakoutButton
+          liveClassId={liveClassId}
+          userRole={userRole}
+          inBreakout={!!breakout}
+          onSwap={onSwapBreakout}
+          onReturn={onReturnToMain}
+        />
         <button
           type="button"
           onClick={() =>
