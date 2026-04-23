@@ -584,6 +584,7 @@
   "courseCatalog": {
     "title": "Recorded Courses",
     "subtitle": "Learn at your own pace",
+    "priceLabel": "Price",
     "filterSubject": "Subject",
     "filterGrade": "Grade",
     "filterExam": "Exam",

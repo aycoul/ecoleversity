@@ -584,6 +584,7 @@
   "courseCatalog": {
     "title": "Cours enregistrés",
     "subtitle": "Apprenez à votre rythme",
+    "priceLabel": "Prix",
     "filterSubject": "Matière",
     "filterGrade": "Niveau",
     "filterExam": "Examen",
