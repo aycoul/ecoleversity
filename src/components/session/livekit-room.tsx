@@ -9,15 +9,42 @@ import {
   ControlBar,
   useTracks,
   useRoomContext,
+  useMediaDeviceSelect,
+  useSpeakingParticipants,
   type TrackReferenceOrPlaceholder,
 } from "@livekit/components-react";
-import { Track, RoomEvent, type DataPublishOptions, type RemoteParticipant } from "livekit-client";
+import {
+  Track,
+  RoomEvent,
+  VideoPresets,
+  type DataPublishOptions,
+  type RemoteParticipant,
+  type RoomOptions,
+} from "livekit-client";
 import "@livekit/components-styles";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { ModeratedChat } from "./moderated-chat";
-import { Hand, Users, Loader2, Presentation, LayoutGrid, Maximize2, Pin, PinOff, ChevronRight, ChevronLeft } from "lucide-react";
+import { SessionPoll } from "./session-poll";
+import { Hand, Users, Loader2, Presentation, LayoutGrid, Maximize2, Pin, PinOff, ChevronRight, ChevronLeft, MicOff, Settings2, Sparkles as BlurIcon, BarChart3, FileText, DoorOpen, Captions } from "lucide-react";
 import { Whiteboard } from "./whiteboard";
+
+// LiveKit room options. Simulcast is on by default in the JS client but we
+// pin the ladder explicitly so low-bandwidth subscribers (3G mobile in CI)
+// fall back to the 180p layer without guessing. Adaptive stream lets the
+// SFU pick the layer based on the subscriber's rendered tile size — a
+// thumbnail subscriber gets the low layer, focus-tile subscribers get HD.
+const LIVEKIT_ROOM_OPTIONS: RoomOptions = {
+  adaptiveStream: true,
+  dynacast: true,
+  publishDefaults: {
+    videoSimulcastLayers: [VideoPresets.h180, VideoPresets.h360],
+    videoCodec: "vp8",
+  },
+  videoCaptureDefaults: {
+    resolution: VideoPresets.h720.resolution,
+  },
+};
 
 type LiveKitRoomEmbedProps = {
   liveClassId: string;
@@ -174,6 +201,284 @@ function TeacherWaitingList({ liveClassId }: { liveClassId: string }) {
 // ──────────────────────────────────────────────────────────────────────
 
 type RaisedHand = { identity: string; name: string; raisedAt: number };
+
+// ─── Teacher-only: mute every student's mic in one click ──────────────
+function MuteAllButton({ liveClassId }: { liveClassId: string }) {
+  const t = useTranslations("session");
+  const [busy, setBusy] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+
+  const run = async () => {
+    setBusy(true);
+    try {
+      const res = await fetch("/api/livekit/mute-all", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ liveClassId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "mute-all failed");
+      toast.success(t("muteAllDone", { count: data.muted ?? 0 }));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur");
+    } finally {
+      setBusy(false);
+      setConfirming(false);
+    }
+  };
+
+  if (!confirming) {
+    return (
+      <button
+        type="button"
+        onClick={() => setConfirming(true)}
+        className="lk-button flex items-center gap-1.5 rounded-md bg-white/10 px-3 py-2 text-sm font-medium text-white hover:bg-red-500/30"
+        title={t("muteAllTooltip")}
+      >
+        <MicOff className="size-4" />
+        {t("muteAll")}
+      </button>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-1">
+      <button
+        type="button"
+        onClick={run}
+        disabled={busy}
+        className="lk-button flex items-center gap-1.5 rounded-md bg-red-500 px-3 py-2 text-sm font-medium text-white hover:bg-red-600 disabled:opacity-50"
+      >
+        {busy ? <Loader2 className="size-4 animate-spin" /> : <MicOff className="size-4" />}
+        {t("muteAllConfirm")}
+      </button>
+      <button
+        type="button"
+        onClick={() => setConfirming(false)}
+        disabled={busy}
+        className="lk-button rounded-md px-2 py-2 text-xs text-white/70 hover:bg-white/10"
+      >
+        {t("cancelShort")}
+      </button>
+    </div>
+  );
+}
+
+// ─── Device picker: camera + mic + speaker ─────────────────────────────
+function DevicePicker() {
+  const t = useTranslations("session");
+  const [open, setOpen] = useState(false);
+  const cam = useMediaDeviceSelect({ kind: "videoinput" });
+  const mic = useMediaDeviceSelect({ kind: "audioinput" });
+  const spk = useMediaDeviceSelect({ kind: "audiooutput" });
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="lk-button flex items-center gap-1.5 rounded-md bg-white/10 px-3 py-2 text-sm font-medium text-white hover:bg-white/20"
+        title={t("devicePickerTooltip")}
+        aria-expanded={open}
+      >
+        <Settings2 className="size-4" />
+        {t("devicePicker")}
+      </button>
+      {open && (
+        <>
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            className="fixed inset-0 z-30 cursor-default bg-transparent"
+            aria-label={t("cancelShort")}
+          />
+          <div className="absolute bottom-full right-0 z-40 mb-2 w-72 rounded-lg border border-slate-700 bg-slate-900 p-3 shadow-xl">
+            <DeviceSection
+              label={t("deviceCamera")}
+              devices={cam.devices}
+              active={cam.activeDeviceId}
+              onPick={(id) => cam.setActiveMediaDevice(id)}
+            />
+            <DeviceSection
+              label={t("deviceMic")}
+              devices={mic.devices}
+              active={mic.activeDeviceId}
+              onPick={(id) => mic.setActiveMediaDevice(id)}
+            />
+            {spk.devices.length > 0 && (
+              <DeviceSection
+                label={t("deviceSpeaker")}
+                devices={spk.devices}
+                active={spk.activeDeviceId}
+                onPick={(id) => spk.setActiveMediaDevice(id)}
+              />
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function DeviceSection({
+  label,
+  devices,
+  active,
+  onPick,
+}: {
+  label: string;
+  devices: MediaDeviceInfo[];
+  active: string;
+  onPick: (id: string) => void;
+}) {
+  return (
+    <div className="mb-3 last:mb-0">
+      <div className="mb-1 text-[0.65rem] font-semibold uppercase tracking-wider text-slate-400">
+        {label}
+      </div>
+      <div className="flex flex-col gap-1">
+        {devices.length === 0 && (
+          <div className="text-xs text-slate-500">—</div>
+        )}
+        {devices.map((d) => {
+          const selected = d.deviceId === active;
+          return (
+            <button
+              key={d.deviceId}
+              type="button"
+              onClick={() => onPick(d.deviceId)}
+              className={`flex items-center justify-between gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors ${
+                selected
+                  ? "bg-[var(--ev-blue)]/20 text-white"
+                  : "text-slate-200 hover:bg-white/10"
+              }`}
+            >
+              <span className="truncate">{d.label || d.deviceId.slice(0, 8)}</span>
+              {selected && <span className="text-[var(--ev-amber)]">●</span>}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─── Background blur toggle ────────────────────────────────────────────
+// Uses @livekit/track-processors BackgroundBlur. Client-side only; loads
+// the processor lazily so first-paint of the room isn't delayed.
+function BlurButton() {
+  const t = useTranslations("session");
+  const room = useRoomContext();
+  const [enabled, setEnabled] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  const toggle = async () => {
+    setBusy(true);
+    try {
+      const track = room.localParticipant.getTrackPublication(Track.Source.Camera)?.track;
+      if (!track) {
+        toast.error(t("blurNoCamera"));
+        return;
+      }
+      if (enabled) {
+        await track.stopProcessor();
+        setEnabled(false);
+      } else {
+        const { BackgroundBlur } = await import("@livekit/track-processors");
+        await track.setProcessor(BackgroundBlur(10));
+        setEnabled(true);
+      }
+    } catch (err) {
+      console.error("[blur] error:", err);
+      toast.error(err instanceof Error ? err.message : t("blurUnsupported"));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      disabled={busy}
+      className={`lk-button flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors disabled:opacity-50 ${
+        enabled
+          ? "bg-[var(--ev-blue)] text-white"
+          : "bg-white/10 text-white hover:bg-white/20"
+      }`}
+      title={enabled ? t("blurOffTooltip") : t("blurOnTooltip")}
+    >
+      {busy ? <Loader2 className="size-4 animate-spin" /> : <BlurIcon className="size-4" />}
+      {t("blur")}
+    </button>
+  );
+}
+
+// ─── Engagement tracker (teacher only, invisible) ──────────────────────
+// Tracks how long each participant has been the active speaker and POSTs
+// the roll-up to /api/sessions/engagement at unmount. Runs only in the
+// teacher's browser so we have one authoritative source, not n copies.
+function EngagementTracker({ liveClassId }: { liveClassId: string }) {
+  const room = useRoomContext();
+  const speakers = useSpeakingParticipants();
+  const accumRef = useRef<Map<string, { name: string; speakingMs: number }>>(
+    new Map()
+  );
+  const lastTickRef = useRef<number>(Date.now());
+
+  // Accumulate speaking time whenever the speakers array changes.
+  useEffect(() => {
+    const now = Date.now();
+    const delta = now - lastTickRef.current;
+    lastTickRef.current = now;
+    for (const p of speakers) {
+      const prev = accumRef.current.get(p.identity) ?? {
+        name: p.name || p.identity,
+        speakingMs: 0,
+      };
+      accumRef.current.set(p.identity, {
+        name: prev.name,
+        speakingMs: prev.speakingMs + delta,
+      });
+    }
+  }, [speakers]);
+
+  // Flush on unmount (teacher leaves) or page-hide.
+  useEffect(() => {
+    const flush = () => {
+      const engagement: Record<string, { name: string; speakingMs: number }> =
+        {};
+      for (const [identity, val] of accumRef.current.entries()) {
+        engagement[identity] = val;
+      }
+      if (Object.keys(engagement).length === 0) return;
+      try {
+        const body = JSON.stringify({ liveClassId, engagement });
+        navigator.sendBeacon?.(
+          "/api/sessions/engagement",
+          new Blob([body], { type: "application/json" })
+        ) ||
+          fetch("/api/sessions/engagement", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body,
+            keepalive: true,
+          }).catch(() => {});
+      } catch {
+        // best-effort
+      }
+    };
+    window.addEventListener("pagehide", flush);
+    room.on(RoomEvent.Disconnected, flush);
+    return () => {
+      flush();
+      window.removeEventListener("pagehide", flush);
+      room.off(RoomEvent.Disconnected, flush);
+    };
+  }, [liveClassId, room]);
+
+  return null;
+}
 
 function RaiseHandButton() {
   const t = useTranslations("session");
@@ -553,6 +858,7 @@ export function LiveKitRoomEmbed({
         connect
         video
         audio
+        options={LIVEKIT_ROOM_OPTIONS}
         onDisconnected={onClose}
         style={{ height: "100%" }}
       >
@@ -627,6 +933,7 @@ function RoomLayout({
       <div className="relative flex min-h-0 flex-1">
         <div className="relative min-w-0 flex-1">
           {userRole === "teacher" && <TeacherWaitingList liveClassId={liveClassId} />}
+          {userRole === "teacher" && <EngagementTracker liveClassId={liveClassId} />}
           <RaisedHandsPanel userRole={userRole} />
           {effectiveMode === "speaker" ? (
             <PresentationLayout
@@ -695,6 +1002,10 @@ function RoomLayout({
           }}
         />
         <RaiseHandButton />
+        <DevicePicker />
+        <BlurButton />
+        <SessionPoll userRole={userRole} />
+        {userRole === "teacher" && <MuteAllButton liveClassId={liveClassId} />}
         <button
           type="button"
           onClick={() =>
