@@ -10,9 +10,10 @@ import {
   useTracks,
   useRoomContext,
 } from "@livekit/components-react";
-import { Track, RoomEvent, type DataPublishOptions } from "livekit-client";
+import { Track, RoomEvent, type DataPublishOptions, type RemoteParticipant } from "livekit-client";
 import "@livekit/components-styles";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 import { ModeratedChat } from "./moderated-chat";
 import { Hand, Users, Loader2, Presentation } from "lucide-react";
 import { Whiteboard } from "./whiteboard";
@@ -32,6 +33,7 @@ type TokenResponse = {
 
 // ─── Waiting room overlay for learners ───
 function WaitingRoom({ liveClassId, onAdmitted }: { liveClassId: string; onAdmitted: () => void }) {
+  const t = useTranslations("session");
   const [status, setStatus] = useState<"checking" | "waiting" | "admitted">("checking");
 
   useEffect(() => {
@@ -87,9 +89,9 @@ function WaitingRoom({ liveClassId, onAdmitted }: { liveClassId: string; onAdmit
   return (
     <div className="flex h-[600px] flex-col items-center justify-center gap-4 rounded-xl border border-[var(--ev-amber)]/20 bg-[var(--ev-amber)]/5 p-8 text-center">
       <Users className="size-12 text-[var(--ev-amber)]" />
-      <h3 className="text-lg font-semibold text-slate-900">Salle d&apos;attente</h3>
+      <h3 className="text-lg font-semibold text-slate-900">{t("waitingRoomTitle")}</h3>
       <p className="max-w-xs text-sm text-slate-600">
-        Le professeur n&apos;est pas encore arrivé. Vous serez automatiquement admis dès qu&apos;il rejoint la session.
+        {t("waitingRoomSubtitle")}
       </p>
       <div className="mt-2">
         <div className="size-6 animate-spin rounded-full border-2 border-[var(--ev-amber)]/20 border-t-[var(--ev-amber)]" />
@@ -100,6 +102,7 @@ function WaitingRoom({ liveClassId, onAdmitted }: { liveClassId: string; onAdmit
 
 // ─── Teacher waiting list panel ───
 function TeacherWaitingList({ liveClassId }: { liveClassId: string }) {
+  const t = useTranslations("session");
   const [waiting, setWaiting] = useState<Array<{ user_id: string; display_name: string }>>([]);
   const room = useRoomContext();
 
@@ -144,7 +147,7 @@ function TeacherWaitingList({ liveClassId }: { liveClassId: string }) {
   return (
     <div className="absolute left-4 top-4 z-20 max-w-xs rounded-lg border border-[var(--ev-amber)]/30 bg-white/95 p-3 shadow-lg backdrop-blur">
       <h4 className="mb-2 text-xs font-semibold text-[var(--ev-amber)]">
-        En attente ({waiting.length})
+        {t("teacherWaitingListTitle", { count: waiting.length })}
       </h4>
       <div className="space-y-1.5">
         {waiting.map((w) => (
@@ -154,7 +157,7 @@ function TeacherWaitingList({ liveClassId }: { liveClassId: string }) {
               onClick={() => admit(w.user_id)}
               className="shrink-0 rounded bg-[var(--ev-blue)] px-2 py-0.5 text-[10px] font-medium text-white hover:bg-[var(--ev-blue-light)]"
             >
-              Admettre
+              {t("admitButton")}
             </button>
           </div>
         ))}
@@ -163,22 +166,18 @@ function TeacherWaitingList({ liveClassId }: { liveClassId: string }) {
   );
 }
 
-// ─── Raise hand button using LiveKit data messages ───
+// ─── Raise-hand notification system ───────────────────────────────────
+// Broadcasts: { type: "raise_hand", raised: boolean, timestamp: number }
+// Receivers (everyone else) pop a toast when a new hand goes up and render
+// a persistent amber pill listing currently-raised hands in the video area.
+// ──────────────────────────────────────────────────────────────────────
+
+type RaisedHand = { identity: string; name: string; raisedAt: number };
+
 function RaiseHandButton() {
+  const t = useTranslations("session");
   const room = useRoomContext();
   const [raised, setRaised] = useState(false);
-
-  // Listen for raise hand messages from other participants
-  useEffect(() => {
-    const handler = () => {
-      // Handled by tile overlay or could trigger toast
-    };
-
-    room.on(RoomEvent.DataReceived, handler);
-    return () => {
-      room.off(RoomEvent.DataReceived, handler);
-    };
-  }, [room]);
 
   const toggleRaiseHand = useCallback(() => {
     const newState = !raised;
@@ -197,16 +196,98 @@ function RaiseHandButton() {
           ? "bg-[var(--ev-amber)] text-white"
           : "bg-white/10 text-white hover:bg-white/20"
       }`}
-      title={raised ? "Baisser la main" : "Lever la main"}
+      title={raised ? t("raiseHandTooltipRaised") : t("raiseHandTooltipLower")}
     >
       <Hand className={`size-4 ${raised ? "fill-current" : ""}`} />
-      {raised ? "Main levée" : "Lever la main"}
+      {raised ? t("handRaised") : t("raiseHand")}
     </button>
   );
 }
 
-// ─── Participant tile with raise hand indicator ───
+function RaisedHandsPanel({ userRole }: { userRole: "parent" | "teacher" }) {
+  const t = useTranslations("session");
+  const room = useRoomContext();
+  const [raised, setRaised] = useState<Record<string, RaisedHand>>({});
 
+  useEffect(() => {
+    const handler = (payload: Uint8Array, participant?: RemoteParticipant) => {
+      if (!participant) return;
+      try {
+        const msg = JSON.parse(new TextDecoder().decode(payload));
+        if (msg.type !== "raise_hand") return;
+
+        const identity = participant.identity;
+        const name = participant.name || identity;
+
+        if (msg.raised) {
+          setRaised((prev) => {
+            if (prev[identity]) return prev; // already tracking, no duplicate toast
+            // Teachers get a longer-lasting toast than students so they don't miss a raised hand.
+            if (userRole === "teacher") {
+              toast(t("handRaisedToastTitle", { name }), {
+                description: t("handRaisedToastDesc"),
+                duration: 6000,
+              });
+            } else {
+              toast(t("handRaisedToastTitle", { name }), { duration: 3000 });
+            }
+            return { ...prev, [identity]: { identity, name, raisedAt: Date.now() } };
+          });
+        } else {
+          setRaised((prev) => {
+            if (!prev[identity]) return prev;
+            const next = { ...prev };
+            delete next[identity];
+            return next;
+          });
+        }
+      } catch {
+        // ignore non-JSON / unrelated data packets
+      }
+    };
+
+    room.on(RoomEvent.DataReceived, handler);
+    return () => {
+      room.off(RoomEvent.DataReceived, handler);
+    };
+  }, [room, userRole]);
+
+  // If a raised-hand participant disconnects, clear their entry so the pill
+  // doesn't linger after they've left the room.
+  useEffect(() => {
+    const onDisconnect = (p: RemoteParticipant) => {
+      setRaised((prev) => {
+        if (!prev[p.identity]) return prev;
+        const next = { ...prev };
+        delete next[p.identity];
+        return next;
+      });
+    };
+    room.on(RoomEvent.ParticipantDisconnected, onDisconnect);
+    return () => {
+      room.off(RoomEvent.ParticipantDisconnected, onDisconnect);
+    };
+  }, [room]);
+
+  const hands = Object.values(raised);
+  if (hands.length === 0) return null;
+
+  return (
+    <div className="pointer-events-none absolute inset-x-0 top-3 z-20 flex justify-center">
+      <div className="pointer-events-auto flex max-w-[90%] items-center gap-2 rounded-full border border-[var(--ev-amber)]/30 bg-[var(--ev-amber)] px-4 py-2 text-sm font-semibold text-white shadow-lg">
+        <Hand className="size-4 animate-pulse" />
+        <span className="truncate">
+          {hands.length === 1
+            ? t("handRaisedPillOne", { name: hands[0].name })
+            : t("handRaisedPillMany", {
+                count: hands.length,
+                names: hands.map((h) => h.name).join(", "),
+              })}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 // ─── Main embed ───
 export function LiveKitRoomEmbed({
@@ -367,6 +448,7 @@ function RoomLayout({
   userRole: "parent" | "teacher";
   actingAsLearnerId?: string;
 }) {
+  const t = useTranslations("session");
   const [chatOpen, setChatOpen] = useState(false);
   const [whiteboardOpen, setWhiteboardOpen] = useState(false);
 
@@ -383,35 +465,42 @@ function RoomLayout({
       <div className="relative flex min-h-0 flex-1">
         <div className="relative min-w-0 flex-1">
           {userRole === "teacher" && <TeacherWaitingList liveClassId={liveClassId} />}
+          <RaisedHandsPanel userRole={userRole} />
           <GridLayout tracks={tracks} style={{ height: "100%" }}>
             <ParticipantTile />
           </GridLayout>
         </div>
 
-        {chatOpen ? (
-          <aside
-            className="flex w-80 flex-col border-l border-white/10 bg-[var(--lk-bg,#111)] sm:w-96"
-            style={{ minWidth: "288px" }}
-          >
-            <div className="flex items-center justify-between border-b border-white/10 px-3 py-2 text-sm font-medium text-white">
-              <span>Discussion</span>
-              <button
-                type="button"
-                onClick={() => setChatOpen(false)}
-                className="rounded p-1 text-white/70 hover:bg-white/10 hover:text-white"
-                aria-label="Fermer la discussion"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="flex-1 overflow-hidden">
-              <ModeratedChat
-                liveClassId={liveClassId}
-                actingAsLearnerId={actingAsLearnerId}
-              />
-            </div>
-          </aside>
-        ) : null}
+        {/* Chat panel stays mounted even when hidden so useChat() keeps
+            accumulating messages — otherwise closing + reopening the panel
+            wipes the entire conversation. Layout space is collapsed via
+            display:none when closed. */}
+        <aside
+          className="flex w-80 flex-col border-l border-white/10 bg-[var(--lk-bg,#111)] sm:w-96"
+          style={{
+            minWidth: chatOpen ? "288px" : "0",
+            display: chatOpen ? "flex" : "none",
+          }}
+          aria-hidden={!chatOpen}
+        >
+          <div className="flex items-center justify-between border-b border-white/10 px-3 py-2 text-sm font-medium text-white">
+            <span>{t("chatPanelTitle")}</span>
+            <button
+              type="button"
+              onClick={() => setChatOpen(false)}
+              className="rounded p-1 text-white/70 hover:bg-white/10 hover:text-white"
+              aria-label={t("chatPanelClose")}
+            >
+              ✕
+            </button>
+          </div>
+          <div className="flex-1 overflow-hidden">
+            <ModeratedChat
+              liveClassId={liveClassId}
+              actingAsLearnerId={actingAsLearnerId}
+            />
+          </div>
+        </aside>
 
         {/* Whiteboard overlay: covers the video+chat row only, leaving the
             control bar below accessible so the user can toggle it off. */}
@@ -442,10 +531,10 @@ function RoomLayout({
               ? "bg-[var(--ev-green)] text-white"
               : "bg-white/10 text-white hover:bg-white/20"
           }`}
-          title="Tableau blanc"
+          title={t("whiteboardTooltip")}
         >
           <Presentation className="size-4" />
-          Tableau
+          {t("whiteboardButton")}
         </button>
         <button
           type="button"

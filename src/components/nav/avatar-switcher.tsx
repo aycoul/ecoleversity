@@ -108,27 +108,32 @@ export function AvatarSwitcher({
       </button>
 
       {open && (
-        <div className={`absolute right-0 ${dropdownPosition === "top" ? "top-full mt-2" : "bottom-full mb-2"} w-52 rounded-lg border border-slate-200 bg-white shadow-lg z-50`}>
-          {/* Self row — clickable only for parents (switch back from kid mode) */}
+        <div className={`absolute right-0 ${dropdownPosition === "top" ? "top-full mt-2" : "bottom-full mb-2"} w-64 rounded-xl border border-slate-200 bg-white shadow-lg z-50 overflow-hidden`}>
+          {/* ── Section 1: Parent account ────────────────────────────── */}
           {isParent ? (
-            <button
-              onClick={() => switchTo(null)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-slate-50 ${
-                activeLearnerId === null ? "bg-[var(--ev-green-50)]" : ""
-              }`}
-              disabled={switching !== null}
-            >
-              <div className="flex size-9 items-center justify-center rounded-full bg-[var(--ev-blue)] text-sm font-bold text-white">
-                {userInitial}
+            <>
+              <div className="bg-slate-50 px-3 pt-2.5 pb-1 text-[0.65rem] font-semibold uppercase tracking-wider text-slate-500">
+                Compte parent
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-slate-900 truncate">{userName}</div>
-                <div className="text-xs text-slate-500">{t("parentMode")}</div>
-              </div>
-              {activeLearnerId === null && (
-                <div className="size-2 rounded-full bg-[var(--ev-green)]" />
-              )}
-            </button>
+              <button
+                onClick={() => switchTo(null)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-slate-50 ${
+                  activeLearnerId === null ? "bg-[var(--ev-blue-50)]" : ""
+                }`}
+                disabled={switching !== null}
+              >
+                <div className="flex size-9 items-center justify-center rounded-full bg-[var(--ev-blue)] text-sm font-bold text-white">
+                  {userInitial}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium text-slate-900 truncate">{userName}</div>
+                  <div className="text-xs text-slate-500">{t("parentMode")}</div>
+                </div>
+                {activeLearnerId === null && (
+                  <div className="size-2 rounded-full bg-[var(--ev-blue)]" />
+                )}
+              </button>
+            </>
           ) : (
             <div className="flex items-center gap-3 px-3 py-2.5">
               <div className="flex size-9 items-center justify-center rounded-full bg-[var(--ev-blue)] text-sm font-bold text-white">
@@ -141,45 +146,49 @@ export function AvatarSwitcher({
             </div>
           )}
 
-          {/* Learners (only if parent) */}
-          {isParent && learners.length > 0 && (
-            <>
-              <div className="border-t border-slate-100" />
-              {learners.map((learner) => (
-                <button
-                  key={learner.id}
-                  onClick={() => switchTo(learner.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-slate-50 ${
-                    activeLearnerId === learner.id ? "bg-[var(--ev-green-50)]" : ""
-                  }`}
-                  disabled={switching !== null}
-                >
-                  <div className="flex size-9 items-center justify-center rounded-full bg-[var(--ev-green)] text-sm font-bold text-white">
-                    {learner.first_name[0].toUpperCase()}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-slate-900 truncate">
-                      {learner.first_name}
-                    </div>
-                    <div className="text-xs text-slate-500">
-                      {GRADE_LEVEL_LABELS[learner.grade_level]}
-                    </div>
-                  </div>
-                  {activeLearnerId === learner.id && (
-                    <div className="size-2 rounded-full bg-[var(--ev-green)]" />
-                  )}
-                </button>
-              ))}
-            </>
-          )}
-
-          {/* Parent actions */}
+          {/* ── Section 2: Kid profiles (prominent, kid-friendly) ─────── */}
           {isParent && (
             <>
               <div className="border-t border-slate-100" />
+              <div className="bg-[var(--ev-green-50)] px-3 pt-2.5 pb-1 text-[0.65rem] font-semibold uppercase tracking-wider text-[var(--ev-green-dark)]">
+                Mode enfant
+              </div>
+              {learners.length === 0 ? (
+                <div className="px-3 py-3 text-xs text-slate-500">
+                  Aucun enfant enregistré. Ajoutez un profil pour activer le mode enfant.
+                </div>
+              ) : (
+                learners.map((learner) => (
+                  <button
+                    key={learner.id}
+                    onClick={() => switchTo(learner.id)}
+                    className={`w-full flex items-center gap-3 px-3 py-3 text-left transition-colors hover:bg-[var(--ev-green-50)]/60 ${
+                      activeLearnerId === learner.id ? "bg-[var(--ev-green-50)]" : ""
+                    }`}
+                    disabled={switching !== null}
+                  >
+                    <div className="flex size-11 items-center justify-center rounded-full bg-gradient-to-br from-[var(--ev-green)] to-[var(--ev-green-dark)] text-base font-bold text-white shadow-sm ring-2 ring-white">
+                      {learner.first_name[0].toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-semibold text-slate-900 truncate">
+                        {learner.first_name}
+                      </div>
+                      <div className="text-xs text-slate-500">
+                        {GRADE_LEVEL_LABELS[learner.grade_level]}
+                      </div>
+                    </div>
+                    {activeLearnerId === learner.id && (
+                      <div className="rounded-full bg-[var(--ev-green)] px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide text-white">
+                        Actif
+                      </div>
+                    )}
+                  </button>
+                ))
+              )}
               <Link
                 href="/dashboard/parent/children"
-                className="flex items-center gap-3 px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
+                className="flex items-center gap-3 px-3 py-2.5 text-sm text-[var(--ev-blue)] hover:bg-slate-50"
               >
                 <Plus className="size-4" />
                 {t("addChild")}
@@ -187,6 +196,7 @@ export function AvatarSwitcher({
             </>
           )}
 
+          {/* ── Section 3: Account actions ──────────────────────────── */}
           <div className="border-t border-slate-100" />
           <Link
             href="/dashboard/settings/notifications"
@@ -197,7 +207,7 @@ export function AvatarSwitcher({
           </Link>
           <button
             onClick={logout}
-            className="flex w-full items-center gap-3 px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-b-lg text-left"
+            className="flex w-full items-center gap-3 px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 text-left"
           >
             <LogOut className="size-4" />
             {t("logout")}

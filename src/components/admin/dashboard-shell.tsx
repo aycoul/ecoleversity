@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Link, usePathname } from "@/i18n/routing";
+import { Link, usePathname, useRouter } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import type { UserRole } from "@/types/domain";
@@ -40,6 +40,9 @@ import {
   Menu,
   LogOut,
   Sparkles,
+  ArrowLeft,
+  RotateCcw,
+  Bookmark,
 } from "lucide-react";
 
 type NavLink = {
@@ -88,7 +91,19 @@ const iconMap: Record<string, React.ElementType> = {
   "trending-up": TrendingUp,
   award: Award,
   search: Search,
+  sparkles: Sparkles,
+  "rotate-ccw": RotateCcw,
+  bookmark: Bookmark,
 };
+
+// Pages where a Back button makes no sense (user is already "home" for their role).
+const ROOT_DASHBOARD_PATHS = new Set([
+  "/dashboard/parent",
+  "/dashboard/parent/overview",
+  "/dashboard/teacher",
+  "/dashboard/admin",
+  "/dashboard/admin/verification",
+]);
 
 const ROLE_GREETING: Record<UserRole | "kid", { emoji: string; subtitle: string }> = {
   teacher: { emoji: "👨‍🏫", subtitle: "Votre espace enseignant — gérez vos cours, disponibilités et revenus." },
@@ -145,9 +160,14 @@ export function DashboardShell({
   children,
 }: DashboardShellProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const userInitial = userName.charAt(0).toUpperCase() || "?";
   const [moreOpen, setMoreOpen] = useState(false);
   const logout = useLogout();
+
+  // Hide the Back button on role-root pages; everywhere else it helps users
+  // escape deep sub-sections that don't always have an in-page "back" link.
+  const showBack = !ROOT_DASHBOARD_PATHS.has(pathname);
 
   const hasOverflow = links.length > 5;
   const primaryLinks = hasOverflow ? links.slice(0, 4) : links.slice(0, 5);
@@ -158,7 +178,9 @@ export function DashboardShell({
       {/* Desktop sidebar */}
       <aside className="hidden w-64 shrink-0 border-r border-slate-200 bg-slate-50 md:flex md:flex-col">
         <div className="border-b border-slate-200 px-4 py-4">
-          <Image src="/logo.png" alt="écoleVersity" width={180} height={48} className="h-11 w-auto" />
+          <Link href="/" aria-label="Retour à l'accueil écoleVersity" className="inline-block">
+            <Image src="/logo.png" alt="écoleVersity" width={180} height={48} className="h-11 w-auto" />
+          </Link>
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3 py-4">
@@ -225,8 +247,21 @@ export function DashboardShell({
 
       {/* Main content */}
       <main className="flex-1 overflow-auto bg-white p-4 pb-24 md:p-8">
-        {/* Top-right header bar with avatar */}
-        <div className="mb-4 flex items-center justify-end">
+        {/* Top bar: back button on the left, avatar on the right. */}
+        <div className="mb-4 flex items-center justify-between gap-3">
+          {showBack ? (
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 shadow-sm transition-colors hover:border-slate-300 hover:text-slate-900"
+              aria-label="Retour"
+            >
+              <ArrowLeft className="size-4" />
+              <span>Retour</span>
+            </button>
+          ) : (
+            <span />
+          )}
           <AvatarSwitcher
             userName={userName}
             userInitial={userInitial}

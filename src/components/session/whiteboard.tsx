@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useRoomContext } from "@livekit/components-react";
 import { RoomEvent, type DataPublishOptions } from "livekit-client";
+import { useTranslations } from "next-intl";
 import { Pen, Eraser, Trash2, X } from "lucide-react";
 
 interface Point {
@@ -36,6 +37,7 @@ function drawStroke(ctx: CanvasRenderingContext2D, stroke: Stroke, w: number, h:
 }
 
 export function Whiteboard({ onClose }: WhiteboardProps) {
+  const t = useTranslations("session");
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [tool, setTool] = useState<"pen" | "eraser">("pen");
@@ -199,14 +201,14 @@ export function Whiteboard({ onClose }: WhiteboardProps) {
         <button
           onClick={() => setTool("pen")}
           className={`rounded p-1.5 ${tool === "pen" ? "bg-slate-100" : "hover:bg-slate-50"}`}
-          title="Stylo"
+          title={t("whiteboardPen")}
         >
           <Pen className="size-4" />
         </button>
         <button
           onClick={() => setTool("eraser")}
           className={`rounded p-1.5 ${tool === "eraser" ? "bg-slate-100" : "hover:bg-slate-50"}`}
-          title="Gomme"
+          title={t("whiteboardEraser")}
         >
           <Eraser className="size-4" />
         </button>
@@ -232,14 +234,14 @@ export function Whiteboard({ onClose }: WhiteboardProps) {
         <button
           onClick={clearBoard}
           className="rounded p-1.5 text-red-500 hover:bg-red-50"
-          title="Effacer tout"
+          title={t("whiteboardClearAll")}
         >
           <Trash2 className="size-4" />
         </button>
         <button
           onClick={onClose}
           className="rounded p-1.5 hover:bg-slate-100"
-          title="Fermer"
+          title={t("whiteboardClose")}
         >
           <X className="size-4" />
         </button>
