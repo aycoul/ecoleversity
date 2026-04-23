@@ -19,7 +19,11 @@
     "error": "Une erreur est survenue",
     "success": "Opération réussie",
     "fcfa": "{amount} FCFA",
-    "back": "Retour"
+    "back": "Retour",
+    "pwaPromptTitle": "Installer écoleVersity",
+    "pwaPromptSubtitle": "Accédez plus rapidement et utilisez l'application hors ligne.",
+    "pwaPromptInstall": "Installer",
+    "pwaPromptLater": "Plus tard"
   },
   "landing": {
     "banner": "Essai gratuit pendant 30 jours — sans engagement",

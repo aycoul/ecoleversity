@@ -19,7 +19,11 @@
     "error": "An error occurred",
     "success": "Operation successful",
     "fcfa": "{amount} FCFA",
-    "back": "Back"
+    "back": "Back",
+    "pwaPromptTitle": "Install écoleVersity",
+    "pwaPromptSubtitle": "Faster access and offline use.",
+    "pwaPromptInstall": "Install",
+    "pwaPromptLater": "Later"
   },
   "landing": {
     "banner": "Free trial for 30 days — no commitment",

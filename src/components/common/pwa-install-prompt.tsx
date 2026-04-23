@@ -68,11 +68,10 @@ export function PwaInstallPrompt() {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-slate-900">
-            {t("pwaPromptTitle") ?? "Installer écoleVersity"}
+            {t("pwaPromptTitle")}
           </p>
           <p className="mt-0.5 text-xs text-slate-500">
-            {t("pwaPromptSubtitle") ??
-              "Accédez plus rapidement et utilisez hors ligne."}
+            {t("pwaPromptSubtitle")}
           </p>
           <div className="mt-2 flex gap-2">
             <Button
@@ -80,7 +79,7 @@ export function PwaInstallPrompt() {
               onClick={handleInstall}
               className="bg-[var(--ev-blue)] text-white hover:bg-[var(--ev-blue-light)]"
             >
-              {t("pwaPromptInstall") ?? "Installer"}
+              {t("pwaPromptInstall")}
             </Button>
             <Button
               size="sm"
@@ -88,7 +87,7 @@ export function PwaInstallPrompt() {
               onClick={handleDismiss}
               className="text-slate-500 hover:text-slate-700"
             >
-              {t("pwaPromptLater") ?? "Plus tard"}
+              {t("pwaPromptLater")}
             </Button>
           </div>
         </div>
