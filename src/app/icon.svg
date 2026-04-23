@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!--
+    écoleVersity favicon — the happy sun from the logo.
+    Amber body (#FBBF24), amber rays (#F59E0B), navy-blue face (#1E3A8A).
+    Stroke widths are tuned so the smile and eyes still read at 16×16.
+  -->
+  <g fill="#F59E0B">
+    <path d="M32 2 L35 11 L29 11 Z"/>
+    <path d="M32 62 L29 53 L35 53 Z"/>
+    <path d="M2 32 L11 29 L11 35 Z"/>
+    <path d="M62 32 L53 29 L53 35 Z"/>
+    <path d="M11 11 L18 14 L14 18 Z"/>
+    <path d="M53 11 L50 18 L46 14 Z"/>
+    <path d="M11 53 L14 46 L18 50 Z"/>
+    <path d="M53 53 L46 50 L50 46 Z"/>
+  </g>
+  <circle cx="32" cy="32" r="18" fill="#FBBF24"/>
+  <path d="M22 29 Q26 24 30 29" stroke="#1E3A8A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <path d="M34 29 Q38 24 42 29" stroke="#1E3A8A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <path d="M22 37 Q32 46 42 37" stroke="#1E3A8A" stroke-width="4" fill="none" stroke-linecap="round"/>
+</svg>
