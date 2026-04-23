@@ -24,13 +24,13 @@ export default async function GroupClassCatalogPage({
   const now = new Date();
   const earliestWindow = new Date(now.getTime() - 8 * 60 * 60 * 1000).toISOString();
 
-  // Fetch group classes that are still upcoming or currently running
+  // Fetch group classes AND trial sessions that are still upcoming or currently running
   let query = supabase
     .from("live_classes")
     .select(
-      "id, title, subject, grade_level, scheduled_at, duration_minutes, max_students, price_xof, teacher_id"
+      "id, title, subject, grade_level, scheduled_at, duration_minutes, max_students, price_xof, teacher_id, format, is_trial"
     )
-    .eq("format", "group")
+    .or("format.eq.group,and(format.eq.one_on_one,is_trial.eq.true)")
     .eq("status", "scheduled")
     .gte("scheduled_at", earliestWindow)
     .order("scheduled_at", { ascending: true });
@@ -91,6 +91,18 @@ export default async function GroupClassCatalogPage({
       (enrollmentCounts[e.live_class_id] ?? 0) + 1;
   });
 
+  // Fetch saved status for current user
+  let savedClassIds = new Set<string>();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    const { data: saved } = await supabase
+      .from("saved_classes")
+      .select("live_class_id")
+      .eq("parent_id", user.id)
+      .in("live_class_id", classIds);
+    savedClassIds = new Set((saved ?? []).map((s) => s.live_class_id));
+  }
+
   // Build card data
   const cardData: ClassCardData[] = classes.map((c) => {
     const teacher = teacherMap.get(c.teacher_id);
@@ -106,6 +118,8 @@ export default async function GroupClassCatalogPage({
       enrolled_count: enrollmentCounts[c.id] ?? 0,
       teacher_name: teacher?.display_name ?? "Enseignant",
       teacher_avatar: teacher?.avatar_url ?? null,
+      is_trial: c.is_trial ?? false,
+      is_saved: savedClassIds.has(c.id),
     };
   });
 

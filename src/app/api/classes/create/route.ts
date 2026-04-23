@@ -10,7 +10,7 @@ const createClassSchema = z.object({
   subject: z.string().min(1),
   gradeLevel: z.string().min(1),
   maxStudents: z.number().int().min(1).max(15),
-  priceXof: z.number().int().min(500),
+  priceXof: z.number().int().min(0),
   scheduledAt: z.string().datetime(),
   durationMinutes: z.number().refine((v) => [30, 60, 90].includes(v), {
     message: "Duration must be 30, 60, or 90 minutes",
@@ -19,6 +19,7 @@ const createClassSchema = z.object({
   // How many weekly sessions to generate when recurrence=weekly.
   // Ignored for one_time. Capped at 52 to prevent runaway series.
   sessionsCount: z.number().int().min(1).max(52).default(4),
+  isTrial: z.boolean().default(false),
 });
 
 export async function POST(request: NextRequest) {
@@ -45,10 +46,34 @@ export async function POST(request: NextRequest) {
       durationMinutes,
       recurrence,
       sessionsCount,
+      isTrial,
     } = parsed.data;
+
+    // Trial session rules
+    if (isTrial) {
+      if (format !== "one_on_one") {
+        return NextResponse.json(
+          { error: "Les sessions d'essai sont uniquement en 1-to-1" },
+          { status: 400 }
+        );
+      }
+      if (recurrence !== "one_time") {
+        return NextResponse.json(
+          { error: "Les sessions d'essai sont uniquement ponctuelles" },
+          { status: 400 }
+        );
+      }
+      if (durationMinutes !== 30) {
+        return NextResponse.json(
+          { error: "Les sessions d'essai durent exactement 30 minutes" },
+          { status: 400 }
+        );
+      }
+    }
 
     // Enforce invariant: 1-to-1 format = exactly 1 student slot
     const effectiveMaxStudents = format === "one_on_one" ? 1 : maxStudents;
+    const effectivePrice = isTrial ? 0 : priceXof;
 
     const supabase = await createServerSupabaseClient();
 
@@ -90,7 +115,8 @@ export async function POST(request: NextRequest) {
         grade_level: gradeLevel,
         format,
         max_students: effectiveMaxStudents,
-        price_xof: priceXof,
+        price_xof: effectivePrice,
+        is_trial: isTrial,
         scheduled_at: sessionDate.toISOString(),
         duration_minutes: durationMinutes,
         recurrence,

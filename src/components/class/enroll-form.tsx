@@ -12,12 +12,18 @@ type EnrollFormProps = {
   classId: string;
   learners: Array<{ id: string; first_name: string; grade_level: string }>;
   alreadyEnrolledIds: string[];
+  isTrial?: boolean;
+  trialEligibilityLoading?: boolean;
+  trialEligible?: boolean;
 };
 
 export function EnrollForm({
   classId,
   learners,
   alreadyEnrolledIds,
+  isTrial,
+  trialEligibilityLoading,
+  trialEligible,
 }: EnrollFormProps) {
   const t = useTranslations("groupClass");
   const tCommon = useTranslations("common");
@@ -76,6 +82,12 @@ export function EnrollForm({
         return;
       }
 
+      if (data.isTrial) {
+        // Trial session — no payment needed, go to sessions page
+        router.push("/dashboard/parent/sessions");
+        return;
+      }
+
       // Redirect to payment
       router.push(`/payment/${data.transactionId}`);
     } catch {
@@ -111,15 +123,21 @@ export function EnrollForm({
         </div>
       )}
 
+      {isTrial && !trialEligible && !trialEligibilityLoading && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+          {t("trialAlreadyUsed")}
+        </div>
+      )}
+
       <Button
         onClick={handleEnroll}
-        disabled={isSubmitting || !selectedLearner}
-        className="w-full bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]"
+        disabled={isSubmitting || !selectedLearner || (isTrial && trialEligible === false)}
+        className={`w-full ${isTrial ? "bg-[var(--ev-green)] hover:bg-[var(--ev-green)]/90" : "bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]"}`}
       >
         {isSubmitting ? (
           <Loader2 className="mr-2 size-4 animate-spin" />
         ) : null}
-        {t("confirmEnroll")}
+        {isTrial ? t("bookTrial") : t("confirmEnroll")}
       </Button>
     </div>
   );

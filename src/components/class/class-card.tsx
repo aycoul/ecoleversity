@@ -2,10 +2,11 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import { Calendar, Clock, Users } from "lucide-react";
+import { Calendar, Clock, Users, Sparkles } from "lucide-react";
 import { SUBJECT_LABELS, GRADE_LEVEL_LABELS } from "@/types/domain";
 import type { Subject, GradeLevel } from "@/types/domain";
 import { Button } from "@/components/ui/button";
+import { SaveClassButton } from "./save-class-button";
 
 export type ClassCardData = {
   id: string;
@@ -19,6 +20,8 @@ export type ClassCardData = {
   enrolled_count: number;
   teacher_name: string;
   teacher_avatar: string | null;
+  is_trial?: boolean;
+  is_saved?: boolean;
 };
 
 export function ClassCard({ cls }: { cls: ClassCardData }) {
@@ -50,10 +53,13 @@ export function ClassCard({ cls }: { cls: ClassCardData }) {
   return (
     <div className="flex flex-col rounded-xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
       <div className="flex-1 p-4 space-y-3">
-        {/* Title */}
-        <h3 className="font-semibold text-slate-800 line-clamp-2">
-          {cls.title}
-        </h3>
+        {/* Title + Save */}
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="font-semibold text-slate-800 line-clamp-2">
+            {cls.title}
+          </h3>
+          <SaveClassButton classId={cls.id} initialSaved={cls.is_saved} size="sm" />
+        </div>
 
         {/* Teacher */}
         <div className="flex items-center gap-2">
@@ -73,6 +79,12 @@ export function ClassCard({ cls }: { cls: ClassCardData }) {
 
         {/* Badges */}
         <div className="flex flex-wrap gap-1.5">
+          {cls.is_trial && (
+            <span className="inline-flex items-center gap-0.5 rounded-full bg-[var(--ev-amber)]/10 px-2 py-0.5 text-xs font-medium text-[var(--ev-amber)]">
+              <Sparkles className="size-3" />
+              {t("freeTrial")}
+            </span>
+          )}
           <span className="inline-flex items-center rounded-full bg-[var(--ev-green-50)] px-2 py-0.5 text-xs font-medium text-[var(--ev-blue)]">
             {SUBJECT_LABELS[cls.subject as Subject] ?? cls.subject}
           </span>
@@ -95,11 +107,17 @@ export function ClassCard({ cls }: { cls: ClassCardData }) {
 
         {/* Price */}
         <div className="text-base font-bold text-slate-800">
-          {cls.price_xof.toLocaleString("fr-CI")} FCFA
-          <span className="text-sm font-normal text-slate-400">
-            {" "}
-            {t("perStudent")}
-          </span>
+          {cls.is_trial ? (
+            <span className="text-[var(--ev-green)]">{t("free")}</span>
+          ) : (
+            <>
+              {cls.price_xof.toLocaleString("fr-CI")} FCFA
+              <span className="text-sm font-normal text-slate-400">
+                {" "}
+                {t("perStudent")}
+              </span>
+            </>
+          )}
         </div>
 
         {/* Spots */}
@@ -139,7 +157,7 @@ export function ClassCard({ cls }: { cls: ClassCardData }) {
                 : "bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]"
             }`}
           >
-            {isFull ? t("joinWaitlist") : t("enroll")}
+            {isFull ? t("joinWaitlist") : cls.is_trial ? t("bookTrial") : t("enroll")}
           </Button>
         </Link>
       </div>

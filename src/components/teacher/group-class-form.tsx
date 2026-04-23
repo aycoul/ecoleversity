@@ -3,13 +3,14 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { SUBJECT_LABELS, GRADE_LEVEL_LABELS } from "@/types/domain";
 import type { Subject, GradeLevel } from "@/types/domain";
-import { Loader2, CheckCircle, Users, User } from "lucide-react";
+import { Loader2, CheckCircle, Users, User, Sparkles } from "lucide-react";
 
 type GroupClassFormProps = {
   subjects: string[];
@@ -23,8 +24,12 @@ export function GroupClassForm({ subjects, gradeLevels }: GroupClassFormProps) {
   const t = useTranslations("groupClass");
   const tCommon = useTranslations("common");
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const [format, setFormat] = useState<ClassFormat>("group");
+  const initialFormat: ClassFormat =
+    searchParams.get("format") === "one_on_one" ? "one_on_one" : "group";
+
+  const [format, setFormat] = useState<ClassFormat>(initialFormat);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [subject, setSubject] = useState(subjects[0] ?? "");
@@ -35,6 +40,7 @@ export function GroupClassForm({ subjects, gradeLevels }: GroupClassFormProps) {
   const [durationMinutes, setDurationMinutes] = useState<number>(60);
   const [recurrence, setRecurrence] = useState<Recurrence>("one_time");
   const [sessionsCount, setSessionsCount] = useState<number>(4);
+  const [isTrial, setIsTrial] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -58,11 +64,12 @@ export function GroupClassForm({ subjects, gradeLevels }: GroupClassFormProps) {
           subject,
           gradeLevel,
           maxStudents: effectiveMaxStudents,
-          priceXof,
+          priceXof: isTrial ? 0 : priceXof,
           scheduledAt: new Date(scheduledAt).toISOString(),
-          durationMinutes,
-          recurrence,
-          sessionsCount: effectiveSessionsCount,
+          durationMinutes: isTrial ? 30 : durationMinutes,
+          recurrence: isTrial ? "one_time" : recurrence,
+          sessionsCount: isTrial ? 1 : effectiveSessionsCount,
+          isTrial,
         }),
       });
 
@@ -89,7 +96,7 @@ export function GroupClassForm({ subjects, gradeLevels }: GroupClassFormProps) {
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <CheckCircle className="mb-4 size-12 text-[var(--ev-green)]" />
         <p className="text-lg font-semibold text-[var(--ev-blue)]">{t("created")}</p>
-        {recurrence === "weekly" && (
+        {recurrence === "weekly" && !isTrial && (
           <p className="mt-2 text-sm text-slate-500">
             {t("weeklySessionsDynamic", { count: effectiveSessionsCount })}
           </p>
@@ -103,6 +110,35 @@ export function GroupClassForm({ subjects, gradeLevels }: GroupClassFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Trial session toggle */}
+      <div className="rounded-lg border-2 border-[var(--ev-amber)]/30 bg-[var(--ev-amber)]/5 p-4">
+        <label className="flex cursor-pointer items-start gap-3">
+          <input
+            type="checkbox"
+            checked={isTrial}
+            onChange={(e) => {
+              const checked = e.target.checked;
+              setIsTrial(checked);
+              if (checked) {
+                setFormat("one_on_one");
+                setDurationMinutes(30);
+                setRecurrence("one_time");
+              }
+            }}
+            className="mt-0.5 size-4 accent-[var(--ev-amber)]"
+          />
+          <div>
+            <span className="flex items-center gap-1.5 text-sm font-semibold text-[var(--ev-amber)]">
+              <Sparkles className="size-4" />
+              {t("trialSession")}
+            </span>
+            <p className="text-xs text-slate-600">
+              {t("trialSessionDesc")}
+            </p>
+          </div>
+        </label>
+      </div>
+
       {/* Format picker — group vs 1-to-1 */}
       <div className="space-y-2">
         <Label>{t("format")}</Label>
@@ -117,12 +153,15 @@ export function GroupClassForm({ subjects, gradeLevels }: GroupClassFormProps) {
               <button
                 key={opt.value}
                 type="button"
-                onClick={() => setFormat(opt.value)}
+                onClick={() => {
+                  if (!isTrial) setFormat(opt.value);
+                }}
+                disabled={isTrial}
                 className={`rounded-lg border-2 p-4 text-left transition-all ${
                   selected
                     ? "border-[var(--ev-green)] bg-[var(--ev-green-50)]"
                     : "border-slate-200 bg-white hover:border-slate-300"
-                }`}
+                } ${isTrial && opt.value === "group" ? "opacity-50 cursor-not-allowed" : ""}`}
               >
                 <div className="flex items-center gap-2">
                   <Icon className={`size-4 ${selected ? "text-[var(--ev-green)]" : "text-slate-500"}`} />
@@ -218,7 +257,7 @@ export function GroupClassForm({ subjects, gradeLevels }: GroupClassFormProps) {
           <div className="space-y-2">
             <Label>{t("maxStudents")}</Label>
             <div className="flex h-9 items-center rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-600">
-              {t("oneStudentFixed")}
+              {isTrial ? t("oneStudentTrial") : t("oneStudentFixed")}
             </div>
           </div>
         )}
@@ -226,15 +265,21 @@ export function GroupClassForm({ subjects, gradeLevels }: GroupClassFormProps) {
           <Label htmlFor="priceXof">
             {format === "one_on_one" ? t("pricePerSession") : t("pricePerStudent")}
           </Label>
-          <Input
-            id="priceXof"
-            type="number"
-            min={500}
-            step={500}
-            value={priceXof}
-            onChange={(e) => setPriceXof(Number(e.target.value))}
-            required
-          />
+          {isTrial ? (
+            <div className="flex h-9 items-center rounded-lg border border-[var(--ev-green)]/30 bg-[var(--ev-green-50)] px-3 text-sm font-semibold text-[var(--ev-green)]">
+              {t("free")}
+            </div>
+          ) : (
+            <Input
+              id="priceXof"
+              type="number"
+              min={500}
+              step={500}
+              value={priceXof}
+              onChange={(e) => setPriceXof(Number(e.target.value))}
+              required
+            />
+          )}
         </div>
       </div>
 
@@ -258,17 +303,25 @@ export function GroupClassForm({ subjects, gradeLevels }: GroupClassFormProps) {
             <button
               key={d}
               type="button"
-              onClick={() => setDurationMinutes(d)}
+              onClick={() => {
+                if (!isTrial) setDurationMinutes(d);
+              }}
+              disabled={isTrial}
               className={`flex-1 rounded-lg border-2 px-4 py-2.5 text-center text-sm font-medium transition-all ${
                 durationMinutes === d
                   ? "border-[var(--ev-green)] bg-[var(--ev-green-50)] text-[var(--ev-blue)]"
                   : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
-              }`}
+              } ${isTrial && d !== 30 ? "opacity-50 cursor-not-allowed" : ""}`}
             >
               {d === 30 ? t("minutes30") : d === 60 ? t("minutes60") : t("minutes90")}
             </button>
           ))}
         </div>
+        {isTrial && (
+          <p className="text-xs text-[var(--ev-amber)]">
+            {t("trialDurationFixed")}
+          </p>
+        )}
       </div>
 
       {/* Recurrence */}
@@ -279,21 +332,29 @@ export function GroupClassForm({ subjects, gradeLevels }: GroupClassFormProps) {
             <button
               key={r}
               type="button"
-              onClick={() => setRecurrence(r)}
+              onClick={() => {
+                if (!isTrial) setRecurrence(r);
+              }}
+              disabled={isTrial}
               className={`flex-1 rounded-lg border-2 px-4 py-2.5 text-center text-sm font-medium transition-all ${
                 recurrence === r
                   ? "border-[var(--ev-green)] bg-[var(--ev-green-50)] text-[var(--ev-blue)]"
                   : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
-              }`}
+              } ${isTrial && r !== "one_time" ? "opacity-50 cursor-not-allowed" : ""}`}
             >
               {r === "one_time" ? t("oneTime") : t("weekly")}
             </button>
           ))}
         </div>
+        {isTrial && (
+          <p className="text-xs text-[var(--ev-amber)]">
+            {t("trialRecurrenceFixed")}
+          </p>
+        )}
       </div>
 
       {/* Weekly-only: sessions count */}
-      {recurrence === "weekly" && (
+      {recurrence === "weekly" && !isTrial && (
         <div className="space-y-2 rounded-lg border border-[var(--ev-green)]/20 bg-[var(--ev-green-50)]/40 p-4">
           <Label htmlFor="sessionsCount">{t("sessionsCount")}</Label>
           <div className="flex items-center gap-3">
@@ -348,7 +409,7 @@ export function GroupClassForm({ subjects, gradeLevels }: GroupClassFormProps) {
         className="w-full bg-[var(--ev-blue)] hover:bg-[var(--ev-blue-light)]"
       >
         {isSubmitting ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
-        {t("createClass")}
+        {isTrial ? t("createTrialClass") : t("createClass")}
       </Button>
     </form>
   );

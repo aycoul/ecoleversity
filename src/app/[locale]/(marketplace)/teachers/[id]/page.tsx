@@ -18,6 +18,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { SendMessageButton } from "@/components/messaging/send-message-button";
 import { loadGroupClasses } from "@/lib/marketplace/group-classes-data";
 import { GroupClassListCard } from "@/components/marketplace/group-class-card";
+import { Sparkles } from "lucide-react";
 
 export default async function TeacherProfilePage({
   params,
@@ -63,6 +64,18 @@ export default async function TeacherProfilePage({
 
   // Fetch upcoming group classes this teacher has published
   const groupClasses = await loadGroupClasses({ teacherId: id, limit: 12 });
+
+  // Fetch upcoming trial sessions
+  const now = new Date().toISOString();
+  const { data: trialClasses } = await supabase
+    .from("live_classes")
+    .select("id, title, subject, grade_level, scheduled_at, duration_minutes")
+    .eq("teacher_id", id)
+    .eq("is_trial", true)
+    .eq("status", "scheduled")
+    .gte("scheduled_at", now)
+    .order("scheduled_at", { ascending: true })
+    .limit(3);
 
   // Fetch recent reviews
   const { data: reviews } = await supabase
@@ -173,6 +186,44 @@ export default async function TeacherProfilePage({
           </div>
         )}
       </div>
+
+      {/* Upcoming trial sessions */}
+      {trialClasses && trialClasses.length > 0 && (
+        <div className="mt-6 rounded-xl border-2 border-[var(--ev-amber)]/20 bg-[var(--ev-amber)]/5 p-6 shadow-sm">
+          <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-[var(--ev-amber)]">
+            <Sparkles className="size-4" />
+            Sessions d&apos;essai gratuites
+          </h2>
+          <div className="space-y-3">
+            {trialClasses.map((c) => (
+              <Link
+                key={c.id}
+                href={`/classes/${c.id}`}
+                className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-3 transition-colors hover:border-[var(--ev-amber)]/40"
+              >
+                <div>
+                  <p className="text-sm font-medium text-slate-800">{c.title}</p>
+                  <p className="text-xs text-slate-500">
+                    {SUBJECT_LABELS[c.subject as Subject] ?? c.subject} —{" "}
+                    {new Date(c.scheduled_at).toLocaleDateString("fr-CI", {
+                      weekday: "short",
+                      day: "numeric",
+                      month: "short",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      timeZone: "Africa/Abidjan",
+                    })}
+                    {" "}· {c.duration_minutes} min
+                  </p>
+                </div>
+                <span className="rounded-full bg-[var(--ev-green-50)] px-3 py-1 text-xs font-semibold text-[var(--ev-green)]">
+                  Gratuit
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Upcoming group classes */}
       {groupClasses.length > 0 && (

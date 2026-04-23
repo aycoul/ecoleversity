@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     // Fetch class details
     const { data: liveClass } = await supabase
       .from("live_classes")
-      .select("id, teacher_id, max_students, price_xof, status, format")
+      .select("id, teacher_id, max_students, price_xof, status, format, is_trial")
       .eq("id", classId)
       .single();
 
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = enrollResult as { error?: string; success?: boolean; enrollment_id?: string; current_count?: number };
+    const result = enrollResult as { error?: string; success?: boolean; enrollment_id?: string; current_count?: number; is_trial?: boolean };
 
     if (result.error === "already_enrolled") {
       return NextResponse.json(
@@ -157,9 +157,25 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Enrollment succeeded via RPC — now create the transaction
+    // Enrollment succeeded via RPC
 
-    // Get teacher commission rate
+    // If trial session, record eligibility and skip payment
+    if (result.is_trial || liveClass.is_trial) {
+      await adminSupabase
+        .from("trial_eligibilities")
+        .upsert(
+          { parent_id: user.id, teacher_id: liveClass.teacher_id },
+          { onConflict: "parent_id, teacher_id" }
+        );
+
+      return NextResponse.json({
+        waitlisted: false,
+        isTrial: true,
+        enrollmentId: result.enrollment_id,
+      });
+    }
+
+    // Paid session — create transaction
     const { data: teacherProfile } = await adminSupabase
       .from("teacher_profiles")
       .select("commission_rate")
@@ -173,7 +189,6 @@ export async function POST(request: NextRequest) {
     );
     const paymentReference = generatePaymentReference();
 
-    // Create transaction (pending — admin confirms later via Mark as Paid)
     const { data: transaction, error: txError } = await adminSupabase
       .from("transactions")
       .insert({

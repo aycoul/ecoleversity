@@ -1,12 +1,13 @@
 import { getTranslations } from "next-intl/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
-import { Calendar, Clock, Users, ArrowLeft } from "lucide-react";
+import { Calendar, Clock, Users, ArrowLeft, Sparkles } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { SUBJECT_LABELS, GRADE_LEVEL_LABELS } from "@/types/domain";
 import type { Subject, GradeLevel } from "@/types/domain";
 import { EnrollForm } from "@/components/class/enroll-form";
 import { WaitlistButton } from "@/components/class/waitlist-button";
+import { SaveClassButton } from "@/components/class/save-class-button";
 
 type Params = Promise<{ id: string }>;
 
@@ -53,6 +54,8 @@ export default async function ClassDetailPage({
 
   let learners: Array<{ id: string; first_name: string; grade_level: string }> = [];
   let alreadyEnrolledLearnerIds: string[] = [];
+  let trialEligible = true;
+  let isSaved = false;
 
   if (user) {
     const { data: children } = await supabase
@@ -75,6 +78,26 @@ export default async function ClassDetailPage({
         (e) => e.learner_id
       );
     }
+
+    // Check trial eligibility for trial sessions
+    if (liveClass.is_trial) {
+      const { data: trialUsed } = await supabase
+        .from("trial_eligibilities")
+        .select("id")
+        .eq("parent_id", user.id)
+        .eq("teacher_id", liveClass.teacher_id)
+        .maybeSingle();
+      trialEligible = !trialUsed;
+    }
+
+    // Check if class is saved
+    const { data: saved } = await supabase
+      .from("saved_classes")
+      .select("id")
+      .eq("parent_id", user.id)
+      .eq("live_class_id", id)
+      .maybeSingle();
+    isSaved = !!saved;
   }
 
   const date = new Date(liveClass.scheduled_at);
@@ -103,7 +126,10 @@ export default async function ClassDetailPage({
 
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         {/* Header */}
-        <h1 className="text-2xl font-bold text-slate-900">{liveClass.title}</h1>
+        <div className="flex items-start justify-between gap-3">
+          <h1 className="text-2xl font-bold text-slate-900">{liveClass.title}</h1>
+          {user && <SaveClassButton classId={id} initialSaved={isSaved} />}
+        </div>
 
         {/* Teacher */}
         {teacher && (
@@ -130,6 +156,12 @@ export default async function ClassDetailPage({
 
         {/* Badges */}
         <div className="mt-4 flex flex-wrap gap-2">
+          {liveClass.is_trial && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--ev-amber)]/10 px-3 py-1 text-sm font-medium text-[var(--ev-amber)]">
+              <Sparkles className="size-3.5" />
+              {t("freeTrial")}
+            </span>
+          )}
           <span className="inline-flex items-center rounded-full bg-[var(--ev-green-50)] px-3 py-1 text-sm font-medium text-[var(--ev-blue)]">
             {SUBJECT_LABELS[liveClass.subject as Subject] ?? liveClass.subject}
           </span>
@@ -170,10 +202,16 @@ export default async function ClassDetailPage({
             </span>
           </div>
           <div className="text-lg font-bold text-[var(--ev-blue)]">
-            {liveClass.price_xof.toLocaleString("fr-CI")} FCFA
-            <span className="text-sm font-normal text-slate-400">
-              {" "}{t("perStudent")}
-            </span>
+            {liveClass.is_trial ? (
+              <span className="text-[var(--ev-green)]">{t("free")}</span>
+            ) : (
+              <>
+                {liveClass.price_xof.toLocaleString("fr-CI")} FCFA
+                <span className="text-sm font-normal text-slate-400">
+                  {" "}{t("perStudent")}
+                </span>
+              </>
+            )}
           </div>
         </div>
 
@@ -211,6 +249,8 @@ export default async function ClassDetailPage({
               classId={id}
               learners={learners}
               alreadyEnrolledIds={alreadyEnrolledLearnerIds}
+              isTrial={liveClass.is_trial}
+              trialEligible={trialEligible}
             />
           )}
         </div>
