@@ -17,6 +17,8 @@ import {
   Clock,
   PlayCircle,
   PenTool,
+  Star,
+  BadgeCheck,
 } from "lucide-react";
 import { AnimateOnScroll } from "@/components/common/animate-on-scroll";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -190,9 +192,61 @@ async function loadFeaturedCards(): Promise<FeaturedCard[]> {
   return cards;
 }
 
+type FeaturedTeacher = {
+  id: string;
+  display_name: string;
+  avatar_url: string | null;
+  city: string | null;
+  subjects: string[];
+  rating_avg: number;
+  rating_count: number;
+};
+
+async function loadFeaturedTeachers(): Promise<FeaturedTeacher[]> {
+  const admin = createAdminClient();
+  const today = new Date().toISOString().split("T")[0];
+
+  const { data: featured } = await admin
+    .from("featured_teachers")
+    .select("teacher_id")
+    .eq("active", true)
+    .lte("start_date", today)
+    .gte("end_date", today)
+    .limit(6);
+
+  const teacherIds = (featured ?? []).map((f) => f.teacher_id as string);
+  if (teacherIds.length === 0) return [];
+
+  const { data: teachers } = await admin
+    .from("teacher_profiles")
+    .select("id, subjects, rating_avg, rating_count")
+    .in("id", teacherIds);
+
+  const { data: profiles } = await admin
+    .from("profiles")
+    .select("id, display_name, avatar_url, city")
+    .in("id", teacherIds);
+
+  const profileById = new Map((profiles ?? []).map((p) => [p.id as string, p]));
+
+  return (teachers ?? []).map((t) => {
+    const prof = profileById.get(t.id as string);
+    return {
+      id: t.id as string,
+      display_name: (prof?.display_name as string | null) ?? "Enseignant",
+      avatar_url: (prof?.avatar_url as string | null) ?? null,
+      city: (prof?.city as string | null) ?? "Côte d'Ivoire",
+      subjects: (t.subjects as string[] | null) ?? [],
+      rating_avg: Number(t.rating_avg ?? 0),
+      rating_count: Number(t.rating_count ?? 0),
+    };
+  });
+}
+
 export default async function Home() {
   const t = await getTranslations("landing");
   const featuredCards = await loadFeaturedCards();
+  const featuredTeachers = await loadFeaturedTeachers();
 
   const steps = [
     { icon: Search, titleKey: "step1Title" as const, descKey: "step1Desc" as const, num: "01" },
@@ -410,7 +464,86 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ─── SECTION 3: SERVICES ─── */}
+      {/* ─── SECTION 3: FEATURED TEACHERS ─── */}
+      {featuredTeachers.length > 0 && (
+        <section className="border-t border-slate-100 bg-white">
+          <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+            <AnimateOnScroll>
+              <div className="mb-8 flex items-end justify-between">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-widest text-[var(--ev-amber)]">
+                    Enseignants en vedette
+                  </p>
+                  <h2 className="mt-2 text-2xl font-bold text-slate-900">
+                    Nos profs recommandés
+                  </h2>
+                </div>
+                <Link
+                  href="/teachers"
+                  className="hidden items-center gap-1 text-sm font-semibold text-[var(--ev-blue)] hover:underline sm:flex"
+                >
+                  Tous les enseignants <ArrowRight className="size-4" />
+                </Link>
+              </div>
+            </AnimateOnScroll>
+
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {featuredTeachers.map((teacher, i) => {
+                const firstSubject = teacher.subjects[0];
+                const subjectLabel = firstSubject
+                  ? SUBJECT_LABELS[firstSubject as Subject] ?? firstSubject
+                  : "Plusieurs matières";
+                return (
+                  <AnimateOnScroll key={teacher.id} delay={i * 80}>
+                    <Link
+                      href={`/teachers/${teacher.id}`}
+                      className="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 transition-all hover:shadow-lg hover:shadow-[var(--ev-blue)]/5"
+                    >
+                      <div className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-slate-100">
+                        {teacher.avatar_url ? (
+                          <Image
+                            src={teacher.avatar_url}
+                            alt={teacher.display_name}
+                            width={64}
+                            height={64}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-lg font-bold text-slate-400">
+                            {teacher.display_name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <h3 className="text-sm font-bold text-slate-900">
+                            {teacher.display_name}
+                          </h3>
+                          <BadgeCheck className="size-3.5 shrink-0 text-[var(--ev-blue)]" />
+                        </div>
+                        <p className="text-xs text-slate-500">{teacher.city}</p>
+                        <div className="mt-1 flex items-center gap-2">
+                          <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+                            {subjectLabel}
+                          </span>
+                          {teacher.rating_count > 0 && (
+                            <span className="flex items-center gap-0.5 text-xs text-amber-600">
+                              <Star className="size-3 fill-amber-400 text-amber-400" />
+                              {teacher.rating_avg.toFixed(1)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                  </AnimateOnScroll>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ─── SECTION 4: SERVICES ─── */}
       <section className="bg-slate-50">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
           <AnimateOnScroll>
