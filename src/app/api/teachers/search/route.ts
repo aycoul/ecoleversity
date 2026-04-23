@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
 
     // Post-filter: text search on display_name and city filter
     // (Supabase doesn't support ilike on joined tables in .filter())
-    let results = (teachers ?? []).filter((t) => {
+    const results = (teachers ?? []).filter((t) => {
       const profile = t.profiles as unknown as {
         id: string;
         display_name: string;

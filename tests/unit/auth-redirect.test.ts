@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { getAuthRedirect } from "@/lib/auth-redirect";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 // Minimal Supabase client mock — only what getAuthRedirect actually calls
 function mockSupabase({
@@ -34,7 +35,7 @@ function mockSupabase({
       }
       return {};
     }),
-  } as any;
+  } as unknown as SupabaseClient;
 }
 
 describe("getAuthRedirect", () => {

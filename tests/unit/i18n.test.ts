@@ -35,7 +35,7 @@ describe("i18n message parity", () => {
 
   it("no empty string values in French (source of truth)", () => {
     const emptyKeys = frKeys.filter((key) => {
-      const value = key.split(".").reduce((obj: any, k) => obj?.[k], fr);
+      const value = key.split(".").reduce((obj: Record<string, unknown>, k: string) => (obj as Record<string, unknown>)?.[k], fr as Record<string, unknown>);
       return value === "";
     });
     expect(emptyKeys).toEqual([]);
@@ -43,7 +43,7 @@ describe("i18n message parity", () => {
 
   it("no empty string values in English", () => {
     const emptyKeys = enKeys.filter((key) => {
-      const value = key.split(".").reduce((obj: any, k) => obj?.[k], en);
+      const value = key.split(".").reduce((obj: Record<string, unknown>, k: string) => (obj as Record<string, unknown>)?.[k], en as Record<string, unknown>);
       return value === "";
     });
     expect(emptyKeys).toEqual([]);

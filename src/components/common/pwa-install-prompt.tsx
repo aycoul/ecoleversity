@@ -10,33 +10,35 @@ type BeforeInstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 
+function getIsInstalled() {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(display-mode: standalone)").matches;
+}
+
+function getDismissed() {
+  if (typeof window === "undefined") return false;
+  const dismissedAt = localStorage.getItem("pwa-prompt-dismissed");
+  if (!dismissedAt) return false;
+  const daysSince = (Date.now() - parseInt(dismissedAt)) / (1000 * 60 * 60 * 24);
+  return daysSince < 7;
+}
+
 export function PwaInstallPrompt() {
   const t = useTranslations("common");
-  const [deferredPrompt, setDeferredPrompt] =
-    useState<BeforeInstallPromptEvent | null>(null);
-  const [dismissed, setDismissed] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [dismissed, setDismissed] = useState(getDismissed);
+  const [isInstalled, setIsInstalled] = useState(getIsInstalled);
 
   useEffect(() => {
-    // Check if already installed
-    if (window.matchMedia("(display-mode: standalone)").matches) {
-      setIsInstalled(true);
-      return;
-    }
-
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
     };
-
     window.addEventListener("beforeinstallprompt", handler);
-
-    // Also listen for appinstalled
     window.addEventListener("appinstalled", () => {
       setIsInstalled(true);
       setDeferredPrompt(null);
     });
-
     return () => {
       window.removeEventListener("beforeinstallprompt", handler);
     };
@@ -53,20 +55,8 @@ export function PwaInstallPrompt() {
 
   const handleDismiss = () => {
     setDismissed(true);
-    // Remember dismissal for 7 days
     localStorage.setItem("pwa-prompt-dismissed", Date.now().toString());
   };
-
-  // Check if user dismissed recently
-  useEffect(() => {
-    const dismissedAt = localStorage.getItem("pwa-prompt-dismissed");
-    if (dismissedAt) {
-      const daysSince = (Date.now() - parseInt(dismissedAt)) / (1000 * 60 * 60 * 24);
-      if (daysSince < 7) {
-        setDismissed(true);
-      }
-    }
-  }, []);
 
   if (isInstalled || dismissed || !deferredPrompt) return null;
 

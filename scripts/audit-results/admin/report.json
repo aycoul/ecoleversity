@@ -1,0 +1,96 @@
+{
+  "role": "admin",
+  "pages": [
+    {
+      "name": "Admin Overview",
+      "url": "/dashboard/admin",
+      "duration": 5649,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "name": "Verification",
+      "url": "/dashboard/admin/verification",
+      "duration": 6193,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "name": "Payments",
+      "url": "/dashboard/admin/payments",
+      "duration": 5353,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "name": "Payouts",
+      "url": "/dashboard/admin/payouts",
+      "duration": 5596,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "name": "Reports",
+      "url": "/dashboard/admin/reports",
+      "duration": 6769,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "name": "Strikes",
+      "url": "/dashboard/admin/strikes",
+      "duration": 5532,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "name": "Tickets",
+      "url": "/dashboard/admin/tickets",
+      "duration": 6400,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "name": "Agents",
+      "url": "/dashboard/admin/agents",
+      "duration": 6093,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "name": "Analytics",
+      "url": "/dashboard/admin/analytics",
+      "duration": 11564,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "name": "AI Twins",
+      "url": "/dashboard/admin/ai-twins",
+      "duration": 6694,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "name": "AI Settings",
+      "url": "/dashboard/admin/ai-settings",
+      "duration": 6299,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "name": "Settings",
+      "url": "/dashboard/settings/notifications",
+      "duration": 6105,
+      "consoleErrors": [],
+      "pageErrors": []
+    }
+  ],
+  "errors": [],
+  "links": [
+    {
+      "href": "/fr/dashboard/admin",
+      "status": 404
+    }
+  ]
+}

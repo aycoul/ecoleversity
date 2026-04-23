@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "@/i18n/routing";
+import { useRouter, Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { ChevronDown, LogOut, Plus, Settings } from "lucide-react";
@@ -177,24 +177,24 @@ export function AvatarSwitcher({
           {isParent && (
             <>
               <div className="border-t border-slate-100" />
-              <a
+              <Link
                 href="/dashboard/parent/children"
                 className="flex items-center gap-3 px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
               >
                 <Plus className="size-4" />
                 {t("addChild")}
-              </a>
+              </Link>
             </>
           )}
 
           <div className="border-t border-slate-100" />
-          <a
+          <Link
             href="/dashboard/settings/notifications"
             className="flex items-center gap-3 px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
           >
             <Settings className="size-4" />
             {t("settings")}
-          </a>
+          </Link>
           <button
             onClick={logout}
             className="flex w-full items-center gap-3 px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-b-lg text-left"

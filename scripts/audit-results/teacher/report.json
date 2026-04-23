@@ -1,0 +1,102 @@
+{
+  "role": "teacher",
+  "pages": [
+    {
+      "name": "Dashboard Overview",
+      "url": "/dashboard/teacher",
+      "duration": 4757,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "name": "Availability",
+      "url": "/dashboard/teacher/availability",
+      "duration": 4624,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "name": "Sessions",
+      "url": "/dashboard/teacher/sessions",
+      "duration": 4939,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "name": "Classes",
+      "url": "/dashboard/teacher/classes",
+      "duration": 4766,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "name": "Recorded Courses",
+      "url": "/dashboard/teacher/courses",
+      "duration": 4763,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "name": "Earnings",
+      "url": "/dashboard/teacher/earnings",
+      "duration": 6081,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "name": "Transactions",
+      "url": "/dashboard/teacher/transactions",
+      "duration": 4796,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "name": "Messages",
+      "url": "/dashboard/teacher/messages",
+      "duration": 4895,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "name": "Settings",
+      "url": "/dashboard/settings/notifications",
+      "duration": 4833,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "name": "Public Teachers",
+      "url": "/teachers",
+      "duration": 6337,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "name": "Public Courses",
+      "url": "/courses",
+      "duration": 5145,
+      "consoleErrors": [
+        "p: MISSING_MESSAGE: courseCatalog.priceLabel (fr)\n    at c (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:6829)\n    at m (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:7016)\n    at f (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:7475)\n    at h (https://ecoleversity.com/_next/static/chunks/0s5fmj2o3v_g2.js:1:10327)\n    at ay (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:63875)\n    at oJ (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:84132)\n    at iu (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:95734)\n    at sd (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:138974)\n    at https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:133860\n    at se (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:133961)",
+        "p: MISSING_MESSAGE: courseCatalog.priceLabel (fr)\n    at c (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:6829)\n    at m (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:7016)\n    at f (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:7475)\n    at h (https://ecoleversity.com/_next/static/chunks/0s5fmj2o3v_g2.js:1:10327)\n    at ay (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:63875)\n    at oJ (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:84132)\n    at iu (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:95734)\n    at sd (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:138974)\n    at https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:133860\n    at se (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:133961)",
+        "p: MISSING_MESSAGE: courseCatalog.priceLabel (fr)\n    at c (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:6829)\n    at m (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:7016)\n    at f (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:7475)\n    at h (https://ecoleversity.com/_next/static/chunks/0s5fmj2o3v_g2.js:1:10327)\n    at ay (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:63875)\n    at oJ (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:84132)\n    at iu (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:95734)\n    at sd (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:138974)\n    at https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:133860\n    at se (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:133961)",
+        "p: MISSING_MESSAGE: courseCatalog.priceLabel (fr)\n    at c (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:6829)\n    at m (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:7016)\n    at f (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:7475)\n    at h (https://ecoleversity.com/_next/static/chunks/0s5fmj2o3v_g2.js:1:10327)\n    at ay (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:63875)\n    at oJ (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:84132)\n    at iu (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:95734)\n    at sd (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:138974)\n    at https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:133860\n    at se (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:133961)",
+        "p: MISSING_MESSAGE: courseCatalog.priceLabel (fr)\n    at c (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:6829)\n    at m (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:7016)\n    at f (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:7475)\n    at h (https://ecoleversity.com/_next/static/chunks/0s5fmj2o3v_g2.js:1:10327)\n    at ay (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:63875)\n    at oJ (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:84132)\n    at iu (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:95734)\n    at sd (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:138974)\n    at https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:133860\n    at se (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:133961)",
+        "p: MISSING_MESSAGE: courseCatalog.priceLabel (fr)\n    at c (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:6829)\n    at m (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:7016)\n    at f (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:7475)\n    at h (https://ecoleversity.com/_next/static/chunks/0s5fmj2o3v_g2.js:1:10327)\n    at ay (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:63875)\n    at oJ (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:84132)\n    at iu (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:95734)\n    at sd (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:138974)\n    at https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:133860\n    at se (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:133961)",
+        "p: MISSING_MESSAGE: courseCatalog.priceLabel (fr)\n    at c (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:6829)\n    at m (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:7016)\n    at f (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:7475)\n    at h (https://ecoleversity.com/_next/static/chunks/0s5fmj2o3v_g2.js:1:10327)\n    at ay (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:63875)\n    at oJ (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:84132)\n    at iu (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:95734)\n    at sd (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:138974)\n    at https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:133860\n    at se (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:133961)",
+        "p: MISSING_MESSAGE: courseCatalog.priceLabel (fr)\n    at c (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:6829)\n    at m (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:7016)\n    at f (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:7475)\n    at h (https://ecoleversity.com/_next/static/chunks/0s5fmj2o3v_g2.js:1:10327)\n    at ay (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:63875)\n    at oJ (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:84132)\n    at iu (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:95734)\n    at sd (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:138974)\n    at https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:133860\n    at se (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:133961)",
+        "p: MISSING_MESSAGE: courseCatalog.priceLabel (fr)\n    at c (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:6829)\n    at m (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:7016)\n    at f (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:7475)\n    at h (https://ecoleversity.com/_next/static/chunks/0s5fmj2o3v_g2.js:1:10327)\n    at ay (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:63875)\n    at oJ (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:84132)\n    at iu (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:95734)\n    at sd (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:138974)\n    at https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:133860\n    at se (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:133961)",
+        "p: MISSING_MESSAGE: courseCatalog.priceLabel (fr)\n    at c (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:6829)\n    at m (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:7016)\n    at f (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:7475)\n    at h (https://ecoleversity.com/_next/static/chunks/0s5fmj2o3v_g2.js:1:10327)\n    at ay (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:63875)\n    at oJ (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:84132)\n    at iu (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:95734)\n    at sd (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:138974)\n    at https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:133860\n    at se (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:133961)",
+        "p: MISSING_MESSAGE: courseCatalog.priceLabel (fr)\n    at c (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:6829)\n    at m (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:7016)\n    at f (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:7475)\n    at h (https://ecoleversity.com/_next/static/chunks/0s5fmj2o3v_g2.js:1:10327)\n    at ay (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:63875)\n    at oJ (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:84132)\n    at iu (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:95734)\n    at sd (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:138974)\n    at https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:133860\n    at se (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:133961)",
+        "p: MISSING_MESSAGE: courseCatalog.priceLabel (fr)\n    at c (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:6829)\n    at m (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:7016)\n    at f (https://ecoleversity.com/_next/static/chunks/00_07ek96lm8a.js:3:7475)\n    at h (https://ecoleversity.com/_next/static/chunks/0s5fmj2o3v_g2.js:1:10327)\n    at ay (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:63875)\n    at oJ (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:84132)\n    at iu (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:95734)\n    at sd (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:138974)\n    at https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:133860\n    at se (https://ecoleversity.com/_next/static/chunks/0cpi2mmm91c3b.js:1:133961)"
+      ],
+      "pageErrors": []
+    }
+  ],
+  "errors": [],
+  "links": [
+    {
+      "href": "/fr/dashboard/teacher",
+      "status": 404
+    }
+  ]
+}
