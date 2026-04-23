@@ -55,6 +55,7 @@ CREATE OR REPLACE FUNCTION enroll_learner_atomic(
 RETURNS JSON
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, pg_temp
 AS $$
 DECLARE
   v_max_students INT;
