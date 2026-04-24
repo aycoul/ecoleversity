@@ -234,8 +234,11 @@ export default async function ParentOverviewPage() {
         </Link>
       )}
 
-      {/* Kids */}
-      {children.length === 0 ? (
+      {/* Kids empty state — CTA to add the first child. When the parent
+          already has children, the kid strip above (rendered by
+          DashboardShell) is the canonical list; rendering LearnerCards
+          here too duplicates the same information. */}
+      {children.length === 0 && (
         <div className="flex flex-col items-center rounded-2xl border border-dashed border-slate-200 bg-[var(--ev-blue-50)] py-14 text-center">
           <EmptyChildrenIllustration className="size-20" />
           <p className="mt-4 text-base font-semibold text-[var(--ev-blue)]">{t("noChildren")}</p>
@@ -248,34 +251,6 @@ export default async function ParentOverviewPage() {
             {t("addChild")}
           </Link>
         </div>
-      ) : (
-        <section>
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-900">{t("myChildren")}</h2>
-            <Link
-              href="/dashboard/parent/children"
-              className="text-sm font-medium text-[var(--ev-blue)] hover:underline"
-            >
-              {t("manage")}
-            </Link>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {children.map((child) => {
-              const childEnrollmentsCount = (enrollments ?? []).filter(
-                (e) => e.learner_id === child.id && !e.completed_at
-              ).length;
-              return (
-                <LearnerCard
-                  key={child.id}
-                  learner={child}
-                  enrolledCount={childEnrollmentsCount}
-                  nextSessionAt={nextSessionByLearner.get(child.id) ?? null}
-                  locale={locale}
-                />
-              );
-            })}
-          </div>
-        </section>
       )}
 
       {/* Upcoming sessions */}
