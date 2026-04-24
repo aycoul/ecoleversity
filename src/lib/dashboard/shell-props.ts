@@ -99,18 +99,27 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
   // Section labels for sidebar grouping. Order here defines display order.
   // Keys map 1:1 to AdminPage. 'overview' has no section (sits above the
   // first group as a bare entry).
+  const S_FINANCES = t("sectionFinances");
+  const S_OPERATIONS = t("sectionOperations");
+  const S_LEARNING = t("sectionLearning");
+  const S_TEACHING = t("sectionTeaching");
+  const S_MODERATION = t("sectionModeration");
+  const S_IA = t("sectionAI");
+  const S_COMMS = t("sectionCommunication");
+  const S_ACCOUNT = t("sectionAccount");
+
   const ADMIN_PAGE_SECTION: Record<AdminPage, string | undefined> = {
     overview: undefined,
-    payments: "Finances",
-    payouts: "Finances",
-    reports: "Modération",
-    strikes: "Modération",
-    tickets: "Modération",
-    verification: "Opérations",
-    analytics: "Opérations",
-    ai_twins: "IA",
-    ai_settings: "IA",
-    agents: "IA",
+    payments: S_FINANCES,
+    payouts: S_FINANCES,
+    reports: S_MODERATION,
+    strikes: S_MODERATION,
+    tickets: S_MODERATION,
+    verification: S_OPERATIONS,
+    analytics: S_OPERATIONS,
+    ai_twins: S_IA,
+    ai_settings: S_IA,
+    agents: S_IA,
   };
 
   // Preserve the SCOPE_PAGES order for access control, but re-order within
@@ -118,10 +127,10 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
   const adminPages = adminScope ? SCOPE_PAGES[adminScope] : [];
   const sectionOrder = [
     undefined,
-    "Finances",
-    "Modération",
-    "Opérations",
-    "IA",
+    S_FINANCES,
+    S_MODERATION,
+    S_OPERATIONS,
+    S_IA,
   ];
   const adminPagesOrdered = [...adminPages].sort((a, b) => {
     const aIdx = sectionOrder.indexOf(ADMIN_PAGE_SECTION[a]);
@@ -138,9 +147,9 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
   if (canAccess(adminScope, "payments")) {
     adminNav.push({
       href: "/dashboard/admin/refunds",
-      label: "Remboursements",
+      label: t("refunds"),
       icon: "rotate-ccw",
-      section: "Finances",
+      section: S_FINANCES,
     });
   }
 
@@ -148,9 +157,9 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
   if (canAccess(adminScope, "analytics")) {
     adminNav.push({
       href: "/dashboard/admin/featured-teachers",
-      label: "En vedette",
+      label: t("featured"),
       icon: "sparkles",
-      section: "Opérations",
+      section: S_OPERATIONS,
     });
   }
 
@@ -158,7 +167,7 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
     href: "/dashboard/settings/notifications",
     label: t("settings"),
     icon: "settings",
-    section: "Compte",
+    section: S_ACCOUNT,
   });
 
   const navConfig: Record<
@@ -168,32 +177,32 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
     admin: adminNav,
     teacher: [
       { href: "/dashboard/teacher", label: t("myProfile"), icon: "user" },
-      { href: "/dashboard/teacher/availability", label: t("schedule"), icon: "calendar", section: "Enseignement" },
-      { href: "/dashboard/teacher/sessions", label: t("upcomingSessions"), icon: "video", section: "Enseignement" },
-      { href: "/dashboard/teacher/classes", label: "Cours en direct", icon: "video", section: "Enseignement" },
-      { href: "/dashboard/teacher/courses", label: t("recordedCourses"), icon: "play-circle", section: "Enseignement" },
-      { href: "/dashboard/teacher/earnings", label: t("earnings"), icon: "wallet", section: "Finances" },
-      { href: "/dashboard/teacher/transactions", label: t("payments"), icon: "receipt", section: "Finances" },
-      { href: "/dashboard/teacher/messages", label: t("messages"), icon: "message-circle", section: "Communication" },
-      { href: "/dashboard/settings/notifications", label: t("settings"), icon: "settings", section: "Compte" },
+      { href: "/dashboard/teacher/availability", label: t("schedule"), icon: "calendar", section: S_TEACHING },
+      { href: "/dashboard/teacher/sessions", label: t("upcomingSessions"), icon: "video", section: S_TEACHING },
+      { href: "/dashboard/teacher/classes", label: t("liveClasses"), icon: "video", section: S_TEACHING },
+      { href: "/dashboard/teacher/courses", label: t("recordedCourses"), icon: "play-circle", section: S_TEACHING },
+      { href: "/dashboard/teacher/earnings", label: t("earnings"), icon: "wallet", section: S_FINANCES },
+      { href: "/dashboard/teacher/transactions", label: t("payments"), icon: "receipt", section: S_FINANCES },
+      { href: "/dashboard/teacher/messages", label: t("messages"), icon: "message-circle", section: S_COMMS },
+      { href: "/dashboard/settings/notifications", label: t("settings"), icon: "settings", section: S_ACCOUNT },
     ],
     parent: [
       { href: "/dashboard/parent", label: t("myChildren"), icon: "users" },
-      { href: "/teachers", label: t("findTeacher"), icon: "search", section: "Apprentissage" },
-      { href: "/dashboard/parent/sessions", label: t("upcomingSessions"), icon: "calendar", section: "Apprentissage" },
-      { href: "/dashboard/parent/recordings", label: "Enregistrements", icon: "video", section: "Apprentissage" },
-      { href: "/dashboard/parent/courses", label: t("recordedCourses"), icon: "play-circle", section: "Apprentissage" },
-      { href: "/dashboard/parent/saved-classes", label: t("savedClasses"), icon: "bookmark", section: "Apprentissage" },
-      { href: "/dashboard/parent/payments", label: t("payments"), icon: "receipt", badge: pendingPaymentsCount, section: "Finances" },
-      { href: "/dashboard/parent/spending", label: t("spending"), icon: "trending-up", section: "Finances" },
-      { href: "/dashboard/parent/wallet", label: t("wallet"), icon: "wallet", section: "Finances" },
-      { href: "/dashboard/parent/messages", label: t("messages"), icon: "message-circle", section: "Communication" },
-      { href: "/dashboard/settings/notifications", label: t("settings"), icon: "settings", section: "Compte" },
+      { href: "/teachers", label: t("findTeacher"), icon: "search", section: S_LEARNING },
+      { href: "/dashboard/parent/sessions", label: t("upcomingSessions"), icon: "calendar", section: S_LEARNING },
+      { href: "/dashboard/parent/recordings", label: t("recordings"), icon: "video", section: S_LEARNING },
+      { href: "/dashboard/parent/courses", label: t("recordedCourses"), icon: "play-circle", section: S_LEARNING },
+      { href: "/dashboard/parent/saved-classes", label: t("savedClasses"), icon: "bookmark", section: S_LEARNING },
+      { href: "/dashboard/parent/payments", label: t("payments"), icon: "receipt", badge: pendingPaymentsCount, section: S_FINANCES },
+      { href: "/dashboard/parent/spending", label: t("spending"), icon: "trending-up", section: S_FINANCES },
+      { href: "/dashboard/parent/wallet", label: t("wallet"), icon: "wallet", section: S_FINANCES },
+      { href: "/dashboard/parent/messages", label: t("messages"), icon: "message-circle", section: S_COMMS },
+      { href: "/dashboard/settings/notifications", label: t("settings"), icon: "settings", section: S_ACCOUNT },
     ],
     school_admin: [
       { href: "/dashboard/admin/verification", label: t("verification"), icon: "shield-check" },
       { href: "/dashboard/admin/reports", label: t("reports"), icon: "bar-chart" },
-      { href: "/dashboard/settings/notifications", label: t("settings"), icon: "settings", section: "Compte" },
+      { href: "/dashboard/settings/notifications", label: t("settings"), icon: "settings", section: S_ACCOUNT },
     ],
   };
 

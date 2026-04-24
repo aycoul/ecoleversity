@@ -268,7 +268,41 @@
       "recordedCourses": "Cours vidéo",
       "savedClasses": "Favoris",
       "wallet": "Portefeuille",
-      "settings": "Paramètres"
+      "settings": "Paramètres",
+      "refunds": "Remboursements",
+      "featured": "En vedette",
+      "recordings": "Enregistrements",
+      "liveClasses": "Cours en direct",
+      "sectionLearning": "Apprentissage",
+      "sectionTeaching": "Enseignement",
+      "sectionFinances": "Finances",
+      "sectionOperations": "Opérations",
+      "sectionModeration": "Modération",
+      "sectionAI": "IA",
+      "sectionCommunication": "Communication",
+      "sectionAccount": "Compte"
+    },
+    "greeting": {
+      "hello": "Bonjour",
+      "teacherSubtitle": "Votre espace enseignant — gérez vos cours, disponibilités et revenus.",
+      "parentSubtitle": "Votre espace parent — suivez les progrès de vos enfants.",
+      "adminSubtitle": "Votre espace administrateur — supervisez la plateforme.",
+      "schoolAdminSubtitle": "Votre espace école — gérez votre établissement.",
+      "kidSubtitle": "Bonne séance d'apprentissage !"
+    },
+    "parentRecordings": {
+      "title": "Enregistrements",
+      "empty": "Aucun enregistrement disponible",
+      "summaryLabel": "Résumé du cours",
+      "summaryGenerating": "Résumé en cours de génération…",
+      "speakingTime": "Temps de parole · {minutes} min",
+      "rewatch": "Revoir"
+    },
+    "adminRefunds": {
+      "title": "Demandes de remboursement"
+    },
+    "adminFeatured": {
+      "title": "Enseignants en vedette"
     }
   },
   "navigation": {

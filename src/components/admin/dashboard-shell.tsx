@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Link, usePathname, useRouter } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import type { UserRole } from "@/types/domain";
@@ -105,12 +106,21 @@ const ROOT_DASHBOARD_PATHS = new Set([
   "/dashboard/admin/verification",
 ]);
 
-const ROLE_GREETING: Record<UserRole | "kid", { emoji: string; subtitle: string }> = {
-  teacher: { emoji: "👨‍🏫", subtitle: "Votre espace enseignant — gérez vos cours, disponibilités et revenus." },
-  parent: { emoji: "👋", subtitle: "Votre espace parent — suivez les progrès de vos enfants." },
-  admin: { emoji: "👋", subtitle: "Votre espace administrateur — supervisez la plateforme." },
-  school_admin: { emoji: "🏫", subtitle: "Votre espace école — gérez votre établissement." },
-  kid: { emoji: "🎒", subtitle: "Bonne séance d'apprentissage !" },
+// Emoji per role — the subtitle text comes from i18n at render time so it
+// switches with the user's selected locale.
+const ROLE_EMOJI: Record<UserRole | "kid", string> = {
+  teacher: "👨‍🏫",
+  parent: "👋",
+  admin: "👋",
+  school_admin: "🏫",
+  kid: "🎒",
+};
+const ROLE_SUBTITLE_KEY: Record<UserRole | "kid", string> = {
+  teacher: "teacherSubtitle",
+  parent: "parentSubtitle",
+  admin: "adminSubtitle",
+  school_admin: "schoolAdminSubtitle",
+  kid: "kidSubtitle",
 };
 
 function GreetingBanner({
@@ -124,6 +134,7 @@ function GreetingBanner({
   activeLearnerId: string | null;
   learners: AvatarSwitcherLearner[];
 }) {
+  const t = useTranslations("dashboard.greeting");
   const firstName = userName.split(" ")[0];
   const isKidMode = role === "parent" && !!activeLearnerId;
   const activeLearner = isKidMode
@@ -131,16 +142,17 @@ function GreetingBanner({
     : null;
   const displayName = activeLearner?.first_name ?? firstName;
   const greetingRole = isKidMode ? "kid" : role;
-  const meta = ROLE_GREETING[greetingRole] ?? ROLE_GREETING.parent;
+  const emoji = ROLE_EMOJI[greetingRole] ?? ROLE_EMOJI.parent;
+  const subtitleKey = ROLE_SUBTITLE_KEY[greetingRole] ?? ROLE_SUBTITLE_KEY.parent;
 
   return (
     <section className="rounded-2xl bg-gradient-to-br from-[var(--ev-blue)] via-[var(--ev-blue)] to-[var(--ev-blue-light)] p-5 text-white md:p-6">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h1 className="text-xl font-bold md:text-2xl">
-            Bonjour {displayName} {meta.emoji}
+            {t("hello")} {displayName} {emoji}
           </h1>
-          <p className="mt-1 text-sm text-white/80">{meta.subtitle}</p>
+          <p className="mt-1 text-sm text-white/80">{t(subtitleKey)}</p>
         </div>
         {role === "admin" && (
           <Sparkles className="size-5 shrink-0 text-white/60" />

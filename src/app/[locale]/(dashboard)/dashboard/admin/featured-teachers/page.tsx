@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { FeaturedTeacherManager } from "@/components/admin/featured-teacher-manager";
@@ -8,6 +9,7 @@ import { canAccess, type AdminScope } from "@/lib/admin/scopes";
 export const dynamic = "force-dynamic";
 
 export default async function AdminFeaturedTeachersPage() {
+  const t = await getTranslations("dashboard.adminFeatured");
   const supabase = await createServerSupabaseClient();
 
   const { data: { user } } = await supabase.auth.getUser();
@@ -61,7 +63,7 @@ export default async function AdminFeaturedTeachersPage() {
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <Sparkles className="size-7 text-[var(--ev-amber)]" />
-        <h1 className="text-2xl font-bold text-slate-900">Enseignants en vedette</h1>
+        <h1 className="text-2xl font-bold text-slate-900">{t("title")}</h1>
       </div>
 
       <FeaturedTeacherManager initialItems={items} />

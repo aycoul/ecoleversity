@@ -268,7 +268,41 @@
       "recordedCourses": "Video courses",
       "savedClasses": "Saved",
       "wallet": "Wallet",
-      "settings": "Settings"
+      "settings": "Settings",
+      "refunds": "Refunds",
+      "featured": "Featured",
+      "recordings": "Recordings",
+      "liveClasses": "Live classes",
+      "sectionLearning": "Learning",
+      "sectionTeaching": "Teaching",
+      "sectionFinances": "Finances",
+      "sectionOperations": "Operations",
+      "sectionModeration": "Moderation",
+      "sectionAI": "AI",
+      "sectionCommunication": "Communication",
+      "sectionAccount": "Account"
+    },
+    "greeting": {
+      "hello": "Hello",
+      "teacherSubtitle": "Your teaching space — manage classes, availability and earnings.",
+      "parentSubtitle": "Your parent space — follow your children's progress.",
+      "adminSubtitle": "Your admin space — oversee the platform.",
+      "schoolAdminSubtitle": "Your school space — manage your institution.",
+      "kidSubtitle": "Have a great learning session!"
+    },
+    "parentRecordings": {
+      "title": "Recordings",
+      "empty": "No recordings available",
+      "summaryLabel": "Session summary",
+      "summaryGenerating": "Summary being generated…",
+      "speakingTime": "Speaking time · {minutes} min",
+      "rewatch": "Rewatch"
+    },
+    "adminRefunds": {
+      "title": "Refund requests"
+    },
+    "adminFeatured": {
+      "title": "Featured teachers"
     }
   },
   "navigation": {

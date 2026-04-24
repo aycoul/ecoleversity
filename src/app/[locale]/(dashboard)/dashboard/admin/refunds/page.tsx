@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { RefundProcessor } from "@/components/admin/refund-processor";
@@ -8,6 +9,7 @@ import { canAccess, type AdminScope } from "@/lib/admin/scopes";
 export const dynamic = "force-dynamic";
 
 export default async function AdminRefundsPage() {
+  const t = await getTranslations("dashboard.adminRefunds");
   const supabase = await createServerSupabaseClient();
 
   const { data: { user } } = await supabase.auth.getUser();
@@ -48,7 +50,7 @@ export default async function AdminRefundsPage() {
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <RotateCcw className="size-7 text-[var(--ev-blue)]" />
-        <h1 className="text-2xl font-bold text-slate-900">Demandes de remboursement</h1>
+        <h1 className="text-2xl font-bold text-slate-900">{t("title")}</h1>
       </div>
 
       <RefundProcessor initialRefunds={refunds ?? []} />

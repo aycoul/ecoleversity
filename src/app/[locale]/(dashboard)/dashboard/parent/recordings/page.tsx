@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Link } from "@/i18n/routing";
@@ -8,6 +9,7 @@ import { PlayCircle, Calendar, Clock, Video } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 export default async function ParentRecordingsPage() {
+  const t = await getTranslations("dashboard.parentRecordings");
   const supabase = await createServerSupabaseClient();
 
   const { data: { user } } = await supabase.auth.getUser();
@@ -94,12 +96,12 @@ export default async function ParentRecordingsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-slate-900">Enregistrements</h1>
+      <h1 className="text-2xl font-bold text-slate-900">{t("title")}</h1>
 
       {(!recordings || recordings.length === 0) ? (
         <div className="rounded-xl border border-dashed border-slate-200 py-16 text-center">
           <Video className="mx-auto mb-3 size-10 text-slate-300" />
-          <p className="text-sm text-slate-500">Aucun enregistrement disponible</p>
+          <p className="text-sm text-slate-500">{t("empty")}</p>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
@@ -132,7 +134,7 @@ export default async function ParentRecordingsPage() {
                     className="flex shrink-0 items-center gap-1 rounded-lg bg-[var(--ev-blue)] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[var(--ev-blue-light)]"
                   >
                     <PlayCircle className="size-3.5" />
-                    Revoir
+                    {t("rewatch")}
                   </Link>
                 </div>
 
@@ -156,7 +158,7 @@ export default async function ParentRecordingsPage() {
                 {summary ? (
                   <details className="mt-3 rounded-lg bg-slate-50 p-3 text-xs text-slate-700">
                     <summary className="cursor-pointer font-semibold text-slate-900">
-                      Résumé du cours
+                      {t("summaryLabel")}
                     </summary>
                     <div className="mt-2 whitespace-pre-wrap leading-relaxed">
                       {summary}
@@ -164,11 +166,14 @@ export default async function ParentRecordingsPage() {
                   </details>
                 ) : rec.ai_status === "processing" ? (
                   <div className="mt-3 text-xs italic text-slate-400">
-                    Résumé en cours de génération…
+                    {t("summaryGenerating")}
                   </div>
                 ) : null}
 
-                <EngagementBreakdown engagement={rec.engagement_json as Record<string, { name: string; speakingMs: number }> | null} />
+                <EngagementBreakdown
+                  engagement={rec.engagement_json as Record<string, { name: string; speakingMs: number }> | null}
+                  label={t("speakingTime", { minutes: 0 }).split(" · ")[0]}
+                />
               </div>
             );
           })}
@@ -184,8 +189,10 @@ export default async function ParentRecordingsPage() {
 // speaker and show percentage bars.
 function EngagementBreakdown({
   engagement,
+  label,
 }: {
   engagement: Record<string, { name: string; speakingMs: number }> | null;
+  label: string;
 }) {
   if (!engagement) return null;
   const rows = Object.values(engagement)
@@ -195,11 +202,12 @@ function EngagementBreakdown({
 
   const max = rows[0].speakingMs;
   const total = rows.reduce((s, r) => s + r.speakingMs, 0);
+  const totalMins = Math.round(total / 1000 / 60);
 
   return (
     <details className="mt-3 rounded-lg bg-[var(--ev-blue-50)] p-3 text-xs text-slate-700">
       <summary className="cursor-pointer font-semibold text-slate-900">
-        Temps de parole · {Math.round(total / 1000 / 60)} min
+        {label} · {totalMins} min
       </summary>
       <div className="mt-2 space-y-1.5">
         {rows.map((r, i) => {
