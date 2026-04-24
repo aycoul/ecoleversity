@@ -497,6 +497,7 @@
     "whiteboardUndo": "Annuler",
     "whiteboardExport": "Télécharger en image",
     "whiteboardTextPrompt": "Texte à ajouter au tableau :",
+    "whiteboardClearConfirm": "Effacer tout le tableau pour tous les participants ?",
     "whiteboardClearAll": "Effacer tout",
     "whiteboardClose": "Fermer",
     "chatPanelTitle": "Discussion",

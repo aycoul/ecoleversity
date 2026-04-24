@@ -497,6 +497,7 @@
     "whiteboardUndo": "Undo",
     "whiteboardExport": "Download as image",
     "whiteboardTextPrompt": "Text to add to the board:",
+    "whiteboardClearConfirm": "Clear the whole board for every participant?",
     "whiteboardClearAll": "Clear all",
     "whiteboardClose": "Close",
     "chatPanelTitle": "Chat",

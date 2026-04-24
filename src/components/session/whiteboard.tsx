@@ -534,6 +534,12 @@ export function Whiteboard({ onClose }: WhiteboardProps) {
   }, [redraw]);
 
   const clearBoard = () => {
+    // Confirm — clear broadcasts to every participant and can't be
+    // undone, so an accidental tap on a tablet would wipe a whole
+    // lesson's work.
+    if (itemsRef.current.length > 0) {
+      if (!window.confirm(t("whiteboardClearConfirm"))) return;
+    }
     itemsRef.current = [];
     publish({ type: "wb_clear" });
     redraw();
@@ -573,6 +579,9 @@ export function Whiteboard({ onClose }: WhiteboardProps) {
     return () => window.removeEventListener("keydown", onKey);
   }, [undo]);
 
+  // Size 11 (44px) = iOS/Android recommended minimum touch target.
+  // Essential for the whiteboard, which is almost always used on a
+  // tablet with fingers or a stylus.
   const ToolBtn = ({
     id,
     Icon,
@@ -584,7 +593,7 @@ export function Whiteboard({ onClose }: WhiteboardProps) {
   }) => (
     <button
       onClick={() => setTool(id)}
-      className={`flex size-9 shrink-0 items-center justify-center rounded-md border transition-colors ${
+      className={`flex size-11 shrink-0 items-center justify-center rounded-md border transition-colors ${
         tool === id
           ? "border-[var(--ev-blue)] bg-[var(--ev-blue)] text-white"
           : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
@@ -593,7 +602,7 @@ export function Whiteboard({ onClose }: WhiteboardProps) {
       aria-label={label}
       aria-pressed={tool === id}
     >
-      <Icon className="size-4" />
+      <Icon className="size-5" />
     </button>
   );
 
@@ -681,7 +690,7 @@ export function Whiteboard({ onClose }: WhiteboardProps) {
         {/* Actions */}
         <button
           onClick={undo}
-          className="flex size-9 shrink-0 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-700 transition-colors hover:bg-slate-50"
+          className="flex size-11 shrink-0 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-700 transition-colors hover:bg-slate-50"
           title={t("whiteboardUndo")}
           aria-label={t("whiteboardUndo")}
         >
@@ -689,7 +698,7 @@ export function Whiteboard({ onClose }: WhiteboardProps) {
         </button>
         <button
           onClick={exportPng}
-          className="flex size-9 shrink-0 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-700 transition-colors hover:bg-slate-50"
+          className="flex size-11 shrink-0 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-700 transition-colors hover:bg-slate-50"
           title={t("whiteboardExport")}
           aria-label={t("whiteboardExport")}
         >
@@ -697,11 +706,11 @@ export function Whiteboard({ onClose }: WhiteboardProps) {
         </button>
         <button
           onClick={clearBoard}
-          className="flex size-9 shrink-0 items-center justify-center rounded-md border border-red-300 bg-white text-red-600 transition-colors hover:bg-red-50"
+          className="flex size-11 shrink-0 items-center justify-center rounded-md border border-red-300 bg-white text-red-600 transition-colors hover:bg-red-50"
           title={t("whiteboardClearAll")}
           aria-label={t("whiteboardClearAll")}
         >
-          <Trash2 className="size-4" />
+          <Trash2 className="size-5" />
         </button>
 
         <div className="flex-1" />
