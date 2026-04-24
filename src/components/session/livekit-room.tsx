@@ -9,6 +9,7 @@ import {
   ControlBar,
   useTracks,
   useRoomContext,
+  useLocalParticipant,
   useMediaDeviceSelect,
   useSpeakingParticipants,
   type TrackReferenceOrPlaceholder,
@@ -29,7 +30,7 @@ import { SessionPoll } from "./session-poll";
 import { SessionSlides } from "./session-slides";
 import { CaptionsToggle, CaptionsOverlay } from "./session-captions";
 import { useLocale } from "next-intl";
-import { Hand, Users, Loader2, Presentation, LayoutGrid, Maximize2, Minimize2, Pin, PinOff, ChevronRight, ChevronLeft, MicOff, Settings2, Sparkles as BlurIcon, BarChart3, FileText, DoorOpen, Captions, MessageCircle } from "lucide-react";
+import { Hand, Users, Loader2, Presentation, LayoutGrid, Maximize2, Minimize2, Pin, PinOff, ChevronRight, ChevronLeft, MicOff, Settings2, Sparkles as BlurIcon, BarChart3, FileText, DoorOpen, Captions, MessageCircle, Monitor, MonitorOff } from "lucide-react";
 import { Whiteboard } from "./whiteboard";
 
 // LiveKit room options. Simulcast is on by default in the JS client but we
@@ -802,6 +803,95 @@ function PlusMenu({ children }: { children: React.ReactNode }) {
   );
 }
 
+// ─── Explicit Screen-Share Button ──────────────────────────────────────
+// Replaces LiveKit's built-in screen-share toggle in our primary row.
+// LiveKit's ControlBar sometimes hides the button on narrow viewports
+// (mobile layout heuristics) — which is exactly when tablet users most
+// want it. This version is always visible and always reachable.
+// Calls setScreenShareEnabled on the local participant; errors (user
+// cancels the picker, permission denied) are non-fatal.
+function ScreenShareButton() {
+  const t = useTranslations("session");
+  const { localParticipant } = useLocalParticipant();
+  const [sharing, setSharing] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [supported, setSupported] = useState(true);
+
+  // Detect support on mount. navigator.mediaDevices.getDisplayMedia is
+  // absent on iOS Safari. On Android Chrome it's present and works.
+  useEffect(() => {
+    if (typeof navigator === "undefined") return;
+    if (
+      !navigator.mediaDevices ||
+      typeof navigator.mediaDevices.getDisplayMedia !== "function"
+    ) {
+      setSupported(false);
+    }
+  }, []);
+
+  // Mirror LiveKit's current screen-share state so the button reflects
+  // reality if something else toggled it (e.g. the share dialog itself,
+  // a remote "stop sharing" command).
+  useEffect(() => {
+    const update = () => {
+      setSharing(
+        localParticipant
+          .getTrackPublications()
+          .some((pub) => pub.source === Track.Source.ScreenShare && !pub.isMuted)
+      );
+    };
+    update();
+    localParticipant.on("trackPublished", update);
+    localParticipant.on("trackUnpublished", update);
+    return () => {
+      localParticipant.off("trackPublished", update);
+      localParticipant.off("trackUnpublished", update);
+    };
+  }, [localParticipant]);
+
+  const toggle = async () => {
+    setBusy(true);
+    try {
+      await localParticipant.setScreenShareEnabled(!sharing, {
+        audio: true, // capture tab audio if the user grants it
+      });
+    } catch (err) {
+      console.warn("[screen-share]", err);
+      // User probably cancelled the picker — no toast.
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (!supported) return null;
+
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      disabled={busy}
+      className={`lk-button flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors disabled:opacity-50 ${
+        sharing
+          ? "bg-red-500 text-white hover:bg-red-600"
+          : "bg-white/10 text-white hover:bg-white/20"
+      }`}
+      title={sharing ? t("screenShareStopTooltip") : t("screenShareTooltip")}
+      aria-pressed={sharing}
+    >
+      {busy ? (
+        <Loader2 className="size-4 animate-spin" />
+      ) : sharing ? (
+        <MonitorOff className="size-4" />
+      ) : (
+        <Monitor className="size-4" />
+      )}
+      <span className="hidden md:inline">
+        {sharing ? t("screenShareStop") : t("screenShare")}
+      </span>
+    </button>
+  );
+}
+
 function RaiseHandButton() {
   const t = useTranslations("session");
   const room = useRoomContext();
@@ -1403,18 +1493,22 @@ function RoomLayout({
       {/* Primary control bar — compact, identical on tablet + laptop.
           Only the essentials are always-visible. Secondary actions live
           under the "Plus" overflow menu so the bar never wraps onto two
-          rows or pushes buttons off-screen. */}
-      <div className="flex items-center justify-center gap-2 border-t border-white/10 bg-[var(--lk-bg,#111)] px-2 py-2">
+          rows or pushes buttons off-screen.
+          screenShare is disabled on LiveKit's ControlBar because it has
+          responsive quirks on narrow viewports — we ship our own explicit
+          <ScreenShareButton /> so tablet users always see the control. */}
+      <div className="flex items-center justify-center gap-2 overflow-x-auto border-t border-white/10 bg-[var(--lk-bg,#111)] px-2 py-2">
         <ControlBar
           variation="minimal"
           controls={{
             microphone: true,
             camera: true,
-            screenShare: true,
+            screenShare: false,
             chat: false,
             leave: true,
           }}
         />
+        <ScreenShareButton />
         <RaiseHandButton />
         <button
           type="button"

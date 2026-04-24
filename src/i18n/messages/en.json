@@ -17,6 +17,7 @@
     "search": "Search",
     "loading": "Loading...",
     "error": "An error occurred",
+    "notAuthenticated": "Not authenticated",
     "success": "Operation successful",
     "fcfa": "{amount} FCFA",
     "back": "Back",
@@ -305,6 +306,22 @@
       "title": "Featured teachers"
     }
   },
+  "childrenManager": {
+    "addHeading": "Add a child",
+    "editHeading": "Edit child",
+    "addButton": "Add a child",
+    "firstNameLabel": "First name",
+    "firstNamePlaceholder": "Aya, Kouamé, Fatou...",
+    "gradeLevelLabel": "Grade",
+    "gradeLevelPlaceholder": "Choose a grade",
+    "targetExamLabel": "Target exam (optional)",
+    "targetExamPlaceholder": "None",
+    "save": "Save",
+    "added": "Child added",
+    "saved": "Changes saved",
+    "deleted": "{name} removed",
+    "deleteConfirm": "Remove {name}?"
+  },
   "kidStrip": {
     "all": "All",
     "allInitial": "All",
@@ -560,7 +577,11 @@
     "fullscreen": "Full screen",
     "fullscreenExit": "Exit full screen",
     "fullscreenTooltip": "Enter full screen",
-    "fullscreenExitTooltip": "Exit full screen"
+    "fullscreenExitTooltip": "Exit full screen",
+    "screenShare": "Share",
+    "screenShareStop": "Stop sharing",
+    "screenShareTooltip": "Share your screen",
+    "screenShareStopTooltip": "Stop sharing your screen"
   },
   "rating": {
     "title": "Rate your session",

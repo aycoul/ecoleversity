@@ -17,6 +17,7 @@
     "search": "Rechercher",
     "loading": "Chargement...",
     "error": "Une erreur est survenue",
+    "notAuthenticated": "Non authentifié",
     "success": "Opération réussie",
     "fcfa": "{amount} FCFA",
     "back": "Retour",
@@ -305,6 +306,22 @@
       "title": "Enseignants en vedette"
     }
   },
+  "childrenManager": {
+    "addHeading": "Ajouter un enfant",
+    "editHeading": "Modifier l'enfant",
+    "addButton": "Ajouter un enfant",
+    "firstNameLabel": "Prénom",
+    "firstNamePlaceholder": "Aya, Kouamé, Fatou...",
+    "gradeLevelLabel": "Classe",
+    "gradeLevelPlaceholder": "Choisir une classe",
+    "targetExamLabel": "Examen visé (optionnel)",
+    "targetExamPlaceholder": "Aucun",
+    "save": "Enregistrer",
+    "added": "Enfant ajouté",
+    "saved": "Modifications enregistrées",
+    "deleted": "{name} supprimé",
+    "deleteConfirm": "Supprimer {name} ?"
+  },
   "kidStrip": {
     "all": "Tous",
     "allInitial": "Tous",
@@ -560,7 +577,11 @@
     "fullscreen": "Plein écran",
     "fullscreenExit": "Quitter le plein écran",
     "fullscreenTooltip": "Passer en plein écran",
-    "fullscreenExitTooltip": "Quitter le plein écran"
+    "fullscreenExitTooltip": "Quitter le plein écran",
+    "screenShare": "Partager",
+    "screenShareStop": "Arrêter le partage",
+    "screenShareTooltip": "Partager votre écran",
+    "screenShareStopTooltip": "Arrêter de partager votre écran"
   },
   "rating": {
     "title": "Évaluer votre cours",

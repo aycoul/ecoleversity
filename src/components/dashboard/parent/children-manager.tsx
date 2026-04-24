@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import {
   GRADE_LEVELS,
@@ -46,6 +47,8 @@ type Draft = {
 const EMPTY_DRAFT: Draft = { first_name: "", grade_level: "", target_exam: "" };
 
 export function ChildrenManager({ initialChildren }: { initialChildren: Child[] }) {
+  const t = useTranslations("childrenManager");
+  const tc = useTranslations("common");
   const [children, setChildren] = useState<Child[]>(initialChildren);
   const [mode, setMode] = useState<Mode>({ kind: "view" });
   const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
@@ -82,7 +85,7 @@ export function ChildrenManager({ initialChildren }: { initialChildren: Child[] 
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifié");
+      if (!user) throw new Error(tc("notAuthenticated"));
 
       if (mode.kind === "add") {
         const { data, error } = await supabase
@@ -107,7 +110,7 @@ export function ChildrenManager({ initialChildren }: { initialChildren: Child[] 
             birth_year: (data.birth_year as number | null) ?? null,
           },
         ]);
-        toast.success("Enfant ajouté");
+        toast.success(t("added"));
       } else if (mode.kind === "edit") {
         const { error } = await supabase
           .from("learner_profiles")
@@ -130,19 +133,19 @@ export function ChildrenManager({ initialChildren }: { initialChildren: Child[] 
               : c
           )
         );
-        toast.success("Modifications enregistrées");
+        toast.success(t("saved"));
       }
 
       cancel();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erreur");
+      toast.error(err instanceof Error ? err.message : tc("error"));
     } finally {
       setSubmitting(false);
     }
   };
 
   const remove = async (child: Child) => {
-    if (!window.confirm(`Supprimer ${child.first_name} ?`)) return;
+    if (!window.confirm(t("deleteConfirm", { name: child.first_name }))) return;
     setDeleting(child.id);
     try {
       const supabase = createClient();
@@ -152,9 +155,9 @@ export function ChildrenManager({ initialChildren }: { initialChildren: Child[] 
         .eq("id", child.id);
       if (error) throw error;
       setChildren((prev) => prev.filter((c) => c.id !== child.id));
-      toast.success(`${child.first_name} supprimé`);
+      toast.success(t("deleted", { name: child.first_name }));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erreur");
+      toast.error(err instanceof Error ? err.message : tc("error"));
     } finally {
       setDeleting(null);
     }
@@ -176,7 +179,7 @@ export function ChildrenManager({ initialChildren }: { initialChildren: Child[] 
                 submitting={submitting}
                 onSubmit={submit}
                 onCancel={cancel}
-                heading="Modifier l'enfant"
+                heading={t("editHeading")}
               />
             );
           }
@@ -233,7 +236,7 @@ export function ChildrenManager({ initialChildren }: { initialChildren: Child[] 
           submitting={submitting}
           onSubmit={submit}
           onCancel={cancel}
-          heading="Ajouter un enfant"
+          heading={t("addHeading")}
         />
       ) : (
         <Button
@@ -243,7 +246,7 @@ export function ChildrenManager({ initialChildren }: { initialChildren: Child[] 
           className="w-full border-dashed"
         >
           <Plus className="mr-2 size-4" />
-          Ajouter un enfant
+          {t("addButton")}
         </Button>
       )}
     </div>
@@ -269,6 +272,7 @@ function ChildFormCard({
   onCancel,
   heading,
 }: ChildFormCardProps) {
+  const t = useTranslations("childrenManager");
   return (
     <div className="space-y-3 rounded-xl border border-[var(--ev-blue)]/20 bg-[var(--ev-blue-50)]/30 p-4">
       <div className="flex items-center justify-between">
@@ -283,17 +287,17 @@ function ChildFormCard({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="child-name">Prénom</Label>
+        <Label htmlFor="child-name">{t("firstNameLabel")}</Label>
         <Input
           id="child-name"
           value={draft.first_name}
           onChange={(e) => setDraft({ ...draft, first_name: e.target.value })}
-          placeholder="Aya, Kouamé, Fatou..."
+          placeholder={t("firstNamePlaceholder")}
         />
       </div>
 
       <div className="space-y-2">
-        <Label>Classe</Label>
+        <Label>{t("gradeLevelLabel")}</Label>
         <Select
           value={draft.grade_level}
           onValueChange={(val) =>
@@ -301,7 +305,7 @@ function ChildFormCard({
           }
         >
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Choisir une classe" />
+            <SelectValue placeholder={t("gradeLevelPlaceholder")} />
           </SelectTrigger>
           <SelectContent>
             {GRADE_LEVELS.map((grade) => (
@@ -314,7 +318,7 @@ function ChildFormCard({
       </div>
 
       <div className="space-y-2">
-        <Label>Examen visé (optionnel)</Label>
+        <Label>{t("targetExamLabel")}</Label>
         <Select
           value={draft.target_exam}
           onValueChange={(val) =>
@@ -322,7 +326,7 @@ function ChildFormCard({
           }
         >
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Aucun" />
+            <SelectValue placeholder={t("targetExamPlaceholder")} />
           </SelectTrigger>
           <SelectContent>
             {TARGET_EXAMS.map((exam) => (
@@ -344,7 +348,7 @@ function ChildFormCard({
         ) : (
           <Save className="mr-2 size-4" />
         )}
-        Enregistrer
+        {t("save")}
       </Button>
     </div>
   );
