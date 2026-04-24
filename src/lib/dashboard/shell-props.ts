@@ -55,26 +55,30 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
   let learnerStats: Record<string, LearnerStats> = {};
   let pendingPaymentsCount = 0;
   if (role === "parent") {
-    const { data: learnerRows } = await supabase
-      .from("learner_profiles")
-      .select("id, first_name, grade_level, avatar_url")
-      .eq("parent_id", user.id)
-      .order("created_at", { ascending: true });
-    learners = (learnerRows ?? []).map((l) => ({
+    // Parallel: fetch learners + pending-payments count. Upcoming-session
+    // stats depend on learner IDs, so it runs in a second phase. Previous
+    // version did all three sequentially — three RTTs when two is enough.
+    const expiryCutoff = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+    const [learnersResult, paymentsResult] = await Promise.all([
+      supabase
+        .from("learner_profiles")
+        .select("id, first_name, grade_level, avatar_url")
+        .eq("parent_id", user.id)
+        .order("created_at", { ascending: true }),
+      supabase
+        .from("transactions")
+        .select("id", { count: "exact", head: true })
+        .eq("parent_id", user.id)
+        .eq("status", "pending")
+        .gte("created_at", expiryCutoff),
+    ]);
+    learners = (learnersResult.data ?? []).map((l) => ({
       id: l.id as string,
       first_name: l.first_name as string,
       grade_level: l.grade_level as GradeLevel,
       avatar_url: (l.avatar_url as string | null) ?? null,
     }));
-
-    const expiryCutoff = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
-    const { count } = await supabase
-      .from("transactions")
-      .select("id", { count: "exact", head: true })
-      .eq("parent_id", user.id)
-      .eq("status", "pending")
-      .gte("created_at", expiryCutoff);
-    pendingPaymentsCount = count ?? 0;
+    pendingPaymentsCount = paymentsResult.count ?? 0;
 
     // Per-kid stats for the top "kid strip". Upcoming sessions count +
     // "hasAlert" flag (red dot) when a session starts in < 30 min.

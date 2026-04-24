@@ -93,21 +93,33 @@ export function CaptionsToggle({ locale }: { locale: "fr" | "en" }) {
       const transcript = res[0]?.transcript ?? "";
       const isFinal = res.isFinal;
 
+      // Throttle interim results to ~3/sec; always let finals through.
       const now = Date.now();
       if (!isFinal && now - lastSentRef.current < 300) return;
       lastSentRef.current = now;
 
+      const text = transcript.trim();
+      if (!text) return;
+      const speakerName =
+        room.localParticipant.name || room.localParticipant.identity;
       const msg: CaptionMsg = {
         type: "caption",
-        text: transcript.trim(),
+        text,
         final: isFinal,
-        speakerName: room.localParticipant.name || room.localParticipant.identity,
+        speakerName,
         timestamp: now,
       };
-      if (!msg.text) return;
+      // Broadcast to remote peers…
       room.localParticipant.publishData(encode(msg), {
         reliable: false,
       } as DataPublishOptions);
+      // …and fire a local-only event so the CaptionsOverlay on THIS
+      // client can render the speaker's own captions. Previously the
+      // overlay ignored the local participant and the speaker saw
+      // nothing while speaking — indistinguishable from "broken."
+      window.dispatchEvent(
+        new CustomEvent("ecoleversity:local-caption", { detail: msg })
+      );
     };
 
     recog.onerror = (e: unknown) => {
@@ -164,23 +176,27 @@ export function CaptionsToggle({ locale }: { locale: "fr" | "en" }) {
   );
 }
 
-// Belongs inside the video area. Listens for caption messages from
-// remote participants and displays them at the bottom.
+// Belongs inside the video area. Displays captions from both remote
+// participants (via LiveKit data channel) and the local speaker (via
+// a synthetic CustomEvent fired by CaptionsToggle). Without the local
+// echo, a teacher testing alone wouldn't see their own captions and
+// would think the feature was broken.
 export function CaptionsOverlay() {
   const room = useRoomContext();
-  const [remote, setRemote] = useState<{
+  const [current, setCurrent] = useState<{
     speakerName: string;
     text: string;
     at: number;
   } | null>(null);
 
+  // Remote captions from LiveKit data channel
   useEffect(() => {
     const handler = (payload: Uint8Array, participant?: RemoteParticipant) => {
       if (!participant) return;
       try {
         const msg = JSON.parse(new TextDecoder().decode(payload)) as CaptionMsg;
         if (msg.type !== "caption" || !msg.text) return;
-        setRemote({ speakerName: msg.speakerName, text: msg.text, at: Date.now() });
+        setCurrent({ speakerName: msg.speakerName, text: msg.text, at: Date.now() });
       } catch {
         // ignore
       }
@@ -191,27 +207,36 @@ export function CaptionsOverlay() {
     };
   }, [room]);
 
+  // Local captions via CaptionsToggle's CustomEvent
   useEffect(() => {
-    if (!remote) return;
+    const onLocal = (e: Event) => {
+      const detail = (e as CustomEvent<CaptionMsg>).detail;
+      if (!detail || !detail.text) return;
+      setCurrent({ speakerName: detail.speakerName, text: detail.text, at: Date.now() });
+    };
+    window.addEventListener("ecoleversity:local-caption", onLocal);
+    return () => window.removeEventListener("ecoleversity:local-caption", onLocal);
+  }, []);
+
+  useEffect(() => {
+    if (!current) return;
     const id = setTimeout(() => {
-      setRemote((current) =>
-        current && Date.now() - current.at >= CAPTION_DISPLAY_MS - 100
-          ? null
-          : current
+      setCurrent((c) =>
+        c && Date.now() - c.at >= CAPTION_DISPLAY_MS - 100 ? null : c
       );
     }, CAPTION_DISPLAY_MS);
     return () => clearTimeout(id);
-  }, [remote]);
+  }, [current]);
 
-  if (!remote) return null;
+  if (!current) return null;
 
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-4 z-20 flex justify-center px-4">
       <div className="pointer-events-auto max-w-3xl rounded-lg bg-black/75 px-4 py-2 text-center text-sm text-white shadow-lg backdrop-blur">
         <div className="text-[0.65rem] font-semibold uppercase tracking-wider text-white/60">
-          {remote.speakerName}
+          {current.speakerName}
         </div>
-        <div className="mt-0.5 leading-snug">{remote.text}</div>
+        <div className="mt-0.5 leading-snug">{current.text}</div>
       </div>
     </div>
   );
