@@ -741,6 +741,13 @@ function FullscreenButton({ targetRef }: { targetRef: React.RefObject<HTMLDivEle
 }
 
 // ─── Overflow menu: "Plus" — secondary actions that don't fit in the primary bar ───
+// Critical: children are rendered ALWAYS. When open=false we hide the
+// dropdown container via CSS (transform translates it offscreen with
+// pointer-events-none + opacity-0), so feature components inside retain
+// their React state, event subscriptions, and in-flight modals across
+// menu toggles. Unmounting-on-close was the root cause of "mute-all
+// doesn't work / captions don't work / breakouts don't open" — every
+// click reset the menu AND the state of everything inside.
 function PlusMenu({ children }: { children: React.ReactNode }) {
   const t = useTranslations("session");
   const [open, setOpen] = useState(false);
@@ -767,14 +774,14 @@ function PlusMenu({ children }: { children: React.ReactNode }) {
         <Settings2 className="size-4" />
         {t("more")}
       </button>
-      {open && (
-        <div
-          className="absolute bottom-full right-0 z-40 mb-2 flex w-60 flex-col gap-1 rounded-lg border border-slate-700 bg-slate-900 p-2 shadow-xl"
-          onClick={() => setOpen(false)}
-        >
-          {children}
-        </div>
-      )}
+      <div
+        className={`absolute bottom-full right-0 z-40 mb-2 flex w-60 flex-col gap-1 rounded-lg border border-slate-700 bg-slate-900 p-2 shadow-xl transition-opacity ${
+          open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none -translate-y-2"
+        }`}
+        aria-hidden={!open}
+      >
+        {children}
+      </div>
     </div>
   );
 }

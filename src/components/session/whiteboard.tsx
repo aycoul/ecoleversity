@@ -159,6 +159,9 @@ export function Whiteboard({ onClose }: WhiteboardProps) {
   // Remote laser-pointer positions (per sender, fades after 1.5s).
   const lasersRef = useRef<Map<string, { x: number; y: number; at: number }>>(new Map());
   const localIdRef = useRef<string>("");
+  // Throttle flag for shape-preview redraws (full-canvas refreshes
+  // are expensive; rAF keeps them under 60fps).
+  const shapeRedrawScheduledRef = useRef(false);
 
   // Establish a local sender id once.
   useEffect(() => {
@@ -437,12 +440,54 @@ export function Whiteboard({ onClose }: WhiteboardProps) {
       eraseAt(p);
       return;
     }
+
+    // ── Performance: freehand draws the NEW segment only ───────────
+    // Redrawing the whole canvas on every pointer-move is the main
+    // source of tablet lag — with a few dozen strokes each move
+    // repaints every pixel. Instead we draw prev→current directly on
+    // top and only full-redraw for shape previews (which need the
+    // canvas cleared between frames to erase the old preview).
     if (inFlightRef.current.kind === "freehand") {
-      inFlightRef.current.points.push(p);
-    } else if (inFlightRef.current.kind === "shape") {
-      inFlightRef.current.end = p;
+      const pts = inFlightRef.current.points;
+      const prev = pts[pts.length - 1];
+      pts.push(p);
+      const canvas = canvasRef.current;
+      const container = containerRef.current;
+      if (canvas && container) {
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          const rect = container.getBoundingClientRect();
+          ctx.save();
+          const tool = inFlightRef.current.tool;
+          if (tool === "highlighter") {
+            ctx.globalAlpha = 0.35;
+            ctx.lineWidth = Math.max(inFlightRef.current.width * 3, 8);
+          } else {
+            ctx.lineWidth = inFlightRef.current.width;
+          }
+          ctx.strokeStyle = inFlightRef.current.color;
+          ctx.beginPath();
+          ctx.moveTo(prev.x * rect.width, prev.y * rect.height);
+          ctx.lineTo(p.x * rect.width, p.y * rect.height);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+      return;
     }
-    redraw();
+
+    // Shapes: full redraw is required because the previous preview
+    // outline has to be erased between frames. Batched via rAF below.
+    if (inFlightRef.current.kind === "shape") {
+      inFlightRef.current.end = p;
+      if (!shapeRedrawScheduledRef.current) {
+        shapeRedrawScheduledRef.current = true;
+        requestAnimationFrame(() => {
+          shapeRedrawScheduledRef.current = false;
+          redraw();
+        });
+      }
+    }
   };
 
   const onPointerUp = () => {
