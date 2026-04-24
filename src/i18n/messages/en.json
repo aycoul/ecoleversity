@@ -499,7 +499,13 @@
     "captions": "Captions",
     "captionsOnTooltip": "Turn off captions",
     "captionsOffTooltip": "Turn on live captions",
-    "captionsUnsupported": "Live captions are not supported on this browser. Use Chrome, Edge or Safari."
+    "captionsUnsupported": "Live captions are not supported on this browser. Use Chrome, Edge or Safari.",
+    "more": "More",
+    "moreTooltip": "More options",
+    "fullscreen": "Full screen",
+    "fullscreenExit": "Exit full screen",
+    "fullscreenTooltip": "Enter full screen",
+    "fullscreenExitTooltip": "Exit full screen"
   },
   "rating": {
     "title": "Rate your session",

@@ -50,12 +50,24 @@ const CAPTION_DISPLAY_MS = 6000;
 
 // Belongs in the control bar. Toggles local speech recognition and
 // broadcasts resulting transcripts. No UI beyond the button.
+//
+// If the browser doesn't support the Web Speech API (iOS Safari sometimes,
+// Firefox always, some Android Chrome builds) we render NOTHING — no
+// button, no error alert, no broken promise. The feature silently
+// disappears for users whose device can't support it.
 export function CaptionsToggle({ locale }: { locale: "fr" | "en" }) {
   const t = useTranslations("session");
   const room = useRoomContext();
   const [enabled, setEnabled] = useState(false);
+  const [supported, setSupported] = useState(false);
   const recogRef = useRef<SpeechRecognitionLike | null>(null);
   const lastSentRef = useRef<number>(0);
+
+  // Detect support on mount (useEffect, not during render, to avoid SSR
+  // checking a client-only API).
+  useEffect(() => {
+    setSupported(getRecognitionCtor() !== null);
+  }, []);
 
   useEffect(() => {
     if (!enabled) {
@@ -132,18 +144,13 @@ export function CaptionsToggle({ locale }: { locale: "fr" | "en" }) {
     };
   }, [enabled, locale, room]);
 
-  const toggle = () => {
-    if (!enabled && !getRecognitionCtor()) {
-      alert(t("captionsUnsupported"));
-      return;
-    }
-    setEnabled((v) => !v);
-  };
+  // Hidden entirely on unsupported browsers — don't tease a feature we can't deliver.
+  if (!supported) return null;
 
   return (
     <button
       type="button"
-      onClick={toggle}
+      onClick={() => setEnabled((v) => !v)}
       className={`lk-button flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
         enabled
           ? "bg-[var(--ev-green)] text-white"

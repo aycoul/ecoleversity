@@ -499,7 +499,13 @@
     "captions": "Sous-titres",
     "captionsOnTooltip": "Désactiver les sous-titres",
     "captionsOffTooltip": "Activer les sous-titres en direct",
-    "captionsUnsupported": "Les sous-titres en direct ne sont pas pris en charge sur ce navigateur. Utilisez Chrome, Edge ou Safari."
+    "captionsUnsupported": "Les sous-titres en direct ne sont pas pris en charge sur ce navigateur. Utilisez Chrome, Edge ou Safari.",
+    "more": "Plus",
+    "moreTooltip": "Plus d'options",
+    "fullscreen": "Plein écran",
+    "fullscreenExit": "Quitter le plein écran",
+    "fullscreenTooltip": "Passer en plein écran",
+    "fullscreenExitTooltip": "Quitter le plein écran"
   },
   "rating": {
     "title": "Évaluer votre cours",

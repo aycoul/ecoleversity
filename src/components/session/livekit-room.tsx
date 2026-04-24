@@ -29,7 +29,7 @@ import { SessionPoll } from "./session-poll";
 import { SessionSlides } from "./session-slides";
 import { CaptionsToggle, CaptionsOverlay } from "./session-captions";
 import { useLocale } from "next-intl";
-import { Hand, Users, Loader2, Presentation, LayoutGrid, Maximize2, Pin, PinOff, ChevronRight, ChevronLeft, MicOff, Settings2, Sparkles as BlurIcon, BarChart3, FileText, DoorOpen, Captions } from "lucide-react";
+import { Hand, Users, Loader2, Presentation, LayoutGrid, Maximize2, Minimize2, Pin, PinOff, ChevronRight, ChevronLeft, MicOff, Settings2, Sparkles as BlurIcon, BarChart3, FileText, DoorOpen, Captions, MessageCircle } from "lucide-react";
 import { Whiteboard } from "./whiteboard";
 
 // LiveKit room options. Simulcast is on by default in the JS client but we
@@ -368,21 +368,30 @@ function DeviceSection({
 
 // ─── Background blur toggle ────────────────────────────────────────────
 // Uses @livekit/track-processors BackgroundBlur. Client-side only; loads
-// the processor lazily so first-paint of the room isn't delayed.
+// the processor lazily so first-paint of the room isn't delayed. If the
+// runtime (tablet GPU, old browser) can't support the processor, the
+// button hides itself — no broken feature, no scary error toast.
 function BlurButton() {
   const t = useTranslations("session");
   const room = useRoomContext();
   const [enabled, setEnabled] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [supported, setSupported] = useState(true);
+
+  // Probe for MediaStreamTrackGenerator + BackgroundBlur feasibility.
+  // The track-processor internals use OffscreenCanvas + MediaStreamTrackGenerator
+  // — both absent on iOS Safari and some older Android Chromes.
+  useEffect(() => {
+    const hasGenerator = typeof window !== "undefined" &&
+      "MediaStreamTrackGenerator" in window;
+    if (!hasGenerator) setSupported(false);
+  }, []);
 
   const toggle = async () => {
     setBusy(true);
     try {
       const track = room.localParticipant.getTrackPublication(Track.Source.Camera)?.track;
-      if (!track) {
-        toast.error(t("blurNoCamera"));
-        return;
-      }
+      if (!track) return; // no camera — silently ignore
       if (enabled) {
         await track.stopProcessor();
         setEnabled(false);
@@ -392,12 +401,16 @@ function BlurButton() {
         setEnabled(true);
       }
     } catch (err) {
-      console.error("[blur] error:", err);
-      toast.error(err instanceof Error ? err.message : t("blurUnsupported"));
+      // Device can't run the processor — hide the button instead of popping
+      // an error toast. User experience is "this wasn't meant for my device."
+      console.warn("[blur] failed; hiding button:", err);
+      setSupported(false);
     } finally {
       setBusy(false);
     }
   };
+
+  if (!supported) return null;
 
   return (
     <button
@@ -685,6 +698,87 @@ function BreakoutBanner({
   );
 }
 
+// ─── Fullscreen toggle ─────────────────────────────────────────────────
+// Requests fullscreen for the whole session container (video + control
+// bar). Works across all modern browsers via the Fullscreen API.
+function FullscreenButton({ targetRef }: { targetRef: React.RefObject<HTMLDivElement | null> }) {
+  const t = useTranslations("session");
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(document.fullscreenElement !== null);
+    document.addEventListener("fullscreenchange", onChange);
+    return () => document.removeEventListener("fullscreenchange", onChange);
+  }, []);
+
+  const toggle = async () => {
+    const el = targetRef.current;
+    if (!el) return;
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      } else {
+        await el.requestFullscreen();
+      }
+    } catch {
+      // user cancelled or not supported — no-op
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      className="lk-button flex items-center gap-1.5 rounded-md bg-white/10 px-3 py-2 text-sm font-medium text-white hover:bg-white/20"
+      title={isFullscreen ? t("fullscreenExitTooltip") : t("fullscreenTooltip")}
+    >
+      {isFullscreen ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
+      <span className="hidden md:inline">
+        {isFullscreen ? t("fullscreenExit") : t("fullscreen")}
+      </span>
+    </button>
+  );
+}
+
+// ─── Overflow menu: "Plus" — secondary actions that don't fit in the primary bar ───
+function PlusMenu({ children }: { children: React.ReactNode }) {
+  const t = useTranslations("session");
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="lk-button flex items-center gap-1.5 rounded-md bg-white/10 px-3 py-2 text-sm font-medium text-white hover:bg-white/20"
+        title={t("moreTooltip")}
+        aria-expanded={open}
+      >
+        <Settings2 className="size-4" />
+        {t("more")}
+      </button>
+      {open && (
+        <div
+          className="absolute bottom-full right-0 z-40 mb-2 flex w-60 flex-col gap-1 rounded-lg border border-slate-700 bg-slate-900 p-2 shadow-xl"
+          onClick={() => setOpen(false)}
+        >
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function RaiseHandButton() {
   const t = useTranslations("session");
   const room = useRoomContext();
@@ -827,6 +921,10 @@ function PresentationLayout({
   onToggleThumbnails: () => void;
 }) {
   const t = useTranslations("session");
+  // Layout: focus tile takes the full width on top, thumbnail strip runs
+  // horizontally along the bottom (matches the Zoom speaker-view reference).
+  // Previous version put thumbnails on the right — felt cramped on tablet
+  // landscape where horizontal space is the limiting factor.
 
   const focused = useMemo(() => {
     if (pinnedKey) {
@@ -849,9 +947,10 @@ function PresentationLayout({
   if (!focused) return null;
 
   return (
-    <div className="flex h-full w-full gap-2 p-1">
-      {/* Big focus tile */}
-      <div className="relative flex-1 min-w-0 overflow-hidden rounded-lg bg-slate-900">
+    <div className="flex h-full w-full flex-col gap-2 p-1">
+      {/* Big focus tile — full-width, takes all vertical space the
+          thumbnail strip doesn't use. */}
+      <div className="relative min-h-0 flex-1 overflow-hidden rounded-lg bg-slate-900">
         <ParticipantTile trackRef={focused} className="!h-full !w-full" />
         {pinnedKey && (
           <button
@@ -866,32 +965,31 @@ function PresentationLayout({
         )}
       </div>
 
-      {/* Show-thumbnails toggle when strip is hidden */}
+      {/* Collapsed-strip pill when thumbnails hidden */}
       {others.length > 0 && thumbnailsHidden && (
         <button
           type="button"
           onClick={onToggleThumbnails}
-          className="absolute right-3 top-1/2 z-10 inline-flex -translate-y-1/2 items-center gap-1 rounded-full bg-black/60 px-2 py-2 text-xs font-medium text-white backdrop-blur hover:bg-black/80"
+          className="self-center inline-flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1 text-xs font-medium text-white backdrop-blur hover:bg-black/80"
           title={t("showThumbnails")}
           aria-label={t("showThumbnails")}
         >
-          <ChevronLeft className="size-4" />
-          <span className="pr-1">{others.length}</span>
+          <ChevronLeft className="size-3 rotate-90" />
+          <span>{t("showThumbnails")} ({others.length})</span>
         </button>
       )}
 
-      {/* Thumbnail strip */}
+      {/* Horizontal thumbnail strip along the bottom (Zoom style) */}
       {others.length > 0 && !thumbnailsHidden && (
-        <div className="relative flex w-36 shrink-0 flex-col gap-2 overflow-y-auto pr-0.5 md:w-44">
+        <div className="relative flex h-20 shrink-0 items-center gap-2 overflow-x-auto overflow-y-hidden pb-0.5 pt-1 sm:h-24">
           <button
             type="button"
             onClick={onToggleThumbnails}
-            className="sticky top-0 z-10 -mx-0.5 flex items-center justify-center gap-1 rounded-md bg-white/10 py-1 text-[10px] font-medium uppercase tracking-wide text-white/70 backdrop-blur hover:bg-white/20 hover:text-white"
+            className="shrink-0 rounded-md bg-white/10 px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-white/70 hover:bg-white/20 hover:text-white"
             title={t("hideThumbnails")}
             aria-label={t("hideThumbnails")}
           >
-            <ChevronRight className="size-3" />
-            {t("hideThumbnails")}
+            <ChevronRight className="size-3 rotate-90" />
           </button>
           {others.map((trackRef) => {
             const key = getTrackKey(trackRef);
@@ -908,7 +1006,7 @@ function PresentationLayout({
                     onPin(isPinned ? null : key);
                   }
                 }}
-                className={`group relative aspect-video shrink-0 cursor-pointer overflow-hidden rounded-md bg-slate-900 ring-2 transition-all ${
+                className={`group relative aspect-video h-full shrink-0 cursor-pointer overflow-hidden rounded-md bg-slate-900 ring-2 transition-all ${
                   isPinned
                     ? "ring-[var(--ev-amber)]"
                     : "ring-transparent hover:ring-white/40"
@@ -936,6 +1034,9 @@ export function LiveKitRoomEmbed({
   actingAsLearnerId,
 }: LiveKitRoomEmbedProps) {
   const t = useTranslations("session");
+  // Fullscreen target — the outermost video container. Passed down to
+  // RoomLayout so the FullscreenButton inside the control bar can flip it.
+  const containerRef = useRef<HTMLDivElement>(null);
   const [connection, setConnection] = useState<TokenResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [inWaitingRoom, setInWaitingRoom] = useState(userRole === "parent");
@@ -1088,6 +1189,7 @@ export function LiveKitRoomEmbed({
 
   return (
     <div
+      ref={containerRef}
       className="relative overflow-hidden rounded-xl border border-slate-200 bg-black"
       style={{ height: "min(82vh, 760px)", minHeight: "520px" }}
       data-lk-theme="default"
@@ -1116,6 +1218,7 @@ export function LiveKitRoomEmbed({
           breakout={breakout}
           onSwapBreakout={swapToBreakout}
           onReturnToMain={returnToMain}
+          containerRef={containerRef}
         />
         <RoomAudioRenderer />
       </LiveKitRoom>
@@ -1131,6 +1234,7 @@ function RoomLayout({
   breakout,
   onSwapBreakout,
   onReturnToMain,
+  containerRef,
 }: {
   liveClassId: string;
   userRole: "parent" | "teacher";
@@ -1138,6 +1242,7 @@ function RoomLayout({
   breakout: { groupIdx: number; members: string[] } | null;
   onSwapBreakout: (room: string, token: string, groupIdx: number, members: string[]) => void;
   onReturnToMain: () => void;
+  containerRef: React.RefObject<HTMLDivElement | null>;
 }) {
   const t = useTranslations("session");
   const locale = useLocale() as "fr" | "en";
@@ -1266,9 +1371,13 @@ function RoomLayout({
         )}
       </div>
 
+      {/* Primary control bar — compact, identical on tablet + laptop.
+          Only the essentials are always-visible. Secondary actions live
+          under the "Plus" overflow menu so the bar never wraps onto two
+          rows or pushes buttons off-screen. */}
       <div className="flex items-center justify-center gap-2 border-t border-white/10 bg-[var(--lk-bg,#111)] px-2 py-2">
         <ControlBar
-          variation="verbose"
+          variation="minimal"
           controls={{
             microphone: true,
             camera: true,
@@ -1278,40 +1387,6 @@ function RoomLayout({
           }}
         />
         <RaiseHandButton />
-        <DevicePicker />
-        <BlurButton />
-        <CaptionsToggle locale={locale} />
-        <SessionPoll userRole={userRole} />
-        <SessionSlides liveClassId={liveClassId} userRole={userRole} />
-        {userRole === "teacher" && <MuteAllButton liveClassId={liveClassId} />}
-        <BreakoutButton
-          liveClassId={liveClassId}
-          userRole={userRole}
-          inBreakout={!!breakout}
-          onSwap={onSwapBreakout}
-          onReturn={onReturnToMain}
-        />
-        <button
-          type="button"
-          onClick={() =>
-            setLayoutMode((prev) => (prev === "speaker" ? "grid" : "speaker"))
-          }
-          disabled={tracks.length <= 1}
-          className="lk-button flex items-center gap-1.5 rounded-md bg-white/10 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20 disabled:opacity-40"
-          title={effectiveMode === "speaker" ? t("switchToGrid") : t("switchToSpeaker")}
-        >
-          {effectiveMode === "speaker" ? (
-            <>
-              <LayoutGrid className="size-4" />
-              {t("layoutGrid")}
-            </>
-          ) : (
-            <>
-              <Maximize2 className="size-4" />
-              {t("layoutSpeaker")}
-            </>
-          )}
-        </button>
         <button
           type="button"
           onClick={() => setWhiteboardOpen((v) => !v)}
@@ -1321,22 +1396,64 @@ function RoomLayout({
               : "bg-white/10 text-white hover:bg-white/20"
           }`}
           title={t("whiteboardTooltip")}
+          aria-pressed={whiteboardOpen}
         >
           <Presentation className="size-4" />
-          {t("whiteboardButton")}
+          <span className="hidden md:inline">{t("whiteboardButton")}</span>
         </button>
         <button
           type="button"
           onClick={() => setChatOpen((v) => !v)}
-          className={`lk-button rounded-md px-3 py-2 text-sm font-medium ${
+          className={`lk-button flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium ${
             chatOpen
               ? "bg-white text-slate-900"
               : "bg-white/10 text-white hover:bg-white/20"
           }`}
           aria-pressed={chatOpen}
+          title={chatOpen ? t("chatPanelClose") : t("chatPanelTitle")}
         >
-          {chatOpen ? "Fermer le chat" : "Ouvrir le chat"}
+          <MessageCircle className="size-4" />
+          <span className="hidden md:inline">{t("chatPanelTitle")}</span>
         </button>
+
+        {/* Overflow: layout, fullscreen, devices, blur, captions + teacher
+            tools (slides, polls, mute-all, breakouts). */}
+        <PlusMenu>
+          <button
+            type="button"
+            onClick={() =>
+              setLayoutMode((prev) => (prev === "speaker" ? "grid" : "speaker"))
+            }
+            disabled={tracks.length <= 1}
+            className="lk-button flex items-center gap-1.5 rounded-md bg-white/10 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20 disabled:opacity-40"
+          >
+            {effectiveMode === "speaker" ? (
+              <>
+                <LayoutGrid className="size-4" />
+                {t("layoutGrid")}
+              </>
+            ) : (
+              <>
+                <Maximize2 className="size-4" />
+                {t("layoutSpeaker")}
+              </>
+            )}
+          </button>
+          <FullscreenButton targetRef={containerRef} />
+          <DevicePicker />
+          <BlurButton />
+          <CaptionsToggle locale={locale} />
+          <SessionPoll userRole={userRole} />
+          <SessionSlides liveClassId={liveClassId} userRole={userRole} />
+          {userRole === "teacher" && <MuteAllButton liveClassId={liveClassId} />}
+          <BreakoutButton
+            liveClassId={liveClassId}
+            userRole={userRole}
+            inBreakout={!!breakout}
+            onSwap={onSwapBreakout}
+            onReturn={onReturnToMain}
+          />
+        </PlusMenu>
       </div>
     </div>
   );

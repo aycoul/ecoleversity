@@ -111,9 +111,18 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // LiveKit identity: when a parent acts-as-learner, use the learner's UUID
+    // so two children of the same parent (Awa + Alia) can join the SAME room
+    // from two devices without one kicking out the other (LiveKit treats
+    // same-identity reconnects as "replace previous connection").
+    //
+    // For the underlying parent auth/audit, the learner metadata still carries
+    // the parent user.id so server-side handlers can recover it.
+    const livekitIdentity = actingLearner ? actingLearner.id : user.id;
+
     const token = await generateAccessToken({
       roomName: getRoomName(liveClassId),
-      userId: user.id,
+      userId: livekitIdentity,
       displayName,
       userEmail: user.email ?? null,
       role,
