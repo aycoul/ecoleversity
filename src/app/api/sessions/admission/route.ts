@@ -5,7 +5,14 @@ import { z } from "zod";
 
 const admitSchema = z.object({
   liveClassId: z.string().uuid(),
-  userId: z.string().uuid().optional(), // if omitted, admit self
+  // If omitted the current caller admits THEMSELVES. Else the caller
+  // (teacher) admits someone by LiveKit identity. Parents acting-as-
+  // learner pass their learner UUID as livekitIdentity so the admission
+  // row's user_id matches the actual LiveKit participant identity
+  // (otherwise TeacherWaitingList and other code that joins admissions
+  // to LiveKit participants never finds a match for admitted kids).
+  userId: z.string().uuid().optional(),
+  livekitIdentity: z.string().uuid().nullable().optional(),
 });
 
 /** POST /api/sessions/admission — admit a learner (or self) */
@@ -43,10 +50,41 @@ export async function POST(request: NextRequest) {
     }
 
     const isTeacher = liveClass.teacher_id === user.id;
-    const targetUserId = parsed.data.userId ?? user.id;
+    // targetUserId is what we INSERT as the admission row's user_id.
+    // Priority: explicit livekitIdentity (when parent is acting-as-learner
+    // and wants the admission keyed on the learner) > explicit userId
+    // (teacher admitting someone else) > caller's own auth UUID (default).
+    //
+    // For parents admitting themselves, we verify the livekitIdentity
+    // belongs to one of their learners so a malicious client can't pass
+    // someone else's UUID.
+    let targetUserId = parsed.data.userId ?? user.id;
+    if (parsed.data.livekitIdentity && parsed.data.livekitIdentity !== user.id) {
+      // Parent self-admitting as one of their learners.
+      const { data: learner } = await admin
+        .from("learner_profiles")
+        .select("id")
+        .eq("id", parsed.data.livekitIdentity)
+        .eq("parent_id", user.id)
+        .maybeSingle();
+      if (learner) {
+        targetUserId = parsed.data.livekitIdentity;
+      } else if (!isTeacher) {
+        // Not their learner and not the teacher — reject.
+        return NextResponse.json({ error: "Non autorise" }, { status: 403 });
+      } else {
+        // Teacher admitting by learnerId — allowed.
+        targetUserId = parsed.data.livekitIdentity;
+      }
+    }
 
-    // Only teachers can admit others; anyone can admit themselves
-    if (targetUserId !== user.id && !isTeacher) {
+    // Only teachers can admit OTHER auth users (via userId). Self-admission
+    // with a learnerId is already verified above.
+    if (
+      parsed.data.userId &&
+      parsed.data.userId !== user.id &&
+      !isTeacher
+    ) {
       return NextResponse.json(
         { error: "Non autorise" },
         { status: 403 }

@@ -63,7 +63,19 @@ type TokenResponse = {
 };
 
 // ─── Waiting room overlay for learners ───
-function WaitingRoom({ liveClassId, onAdmitted }: { liveClassId: string; onAdmitted: () => void }) {
+// Takes actingAsLearnerId so the admission row's user_id matches the
+// LiveKit participant identity (post-multi-kid-fix, that's the learner
+// UUID, not the parent UUID). Without this, TeacherWaitingList sees
+// every admitted kid as "still waiting" because the IDs don't line up.
+function WaitingRoom({
+  liveClassId,
+  actingAsLearnerId,
+  onAdmitted,
+}: {
+  liveClassId: string;
+  actingAsLearnerId?: string;
+  onAdmitted: () => void;
+}) {
   const t = useTranslations("session");
   const [status, setStatus] = useState<"checking" | "waiting" | "admitted">("checking");
 
@@ -79,11 +91,15 @@ function WaitingRoom({ liveClassId, onAdmitted }: { liveClassId: string; onAdmit
         if (cancelled) return;
 
         if (data.teacherPresent) {
-          // Teacher is here — self-admit and proceed
+          // Teacher is here — self-admit using the LiveKit identity
+          // (learner UUID when acting-as-learner, else the parent's).
           await fetch("/api/sessions/admission", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ liveClassId }),
+            body: JSON.stringify({
+              liveClassId,
+              livekitIdentity: actingAsLearnerId ?? null,
+            }),
           });
           setStatus("admitted");
           onAdmitted();
@@ -107,7 +123,7 @@ function WaitingRoom({ liveClassId, onAdmitted }: { liveClassId: string; onAdmit
       cancelled = true;
       clearInterval(interval);
     };
-  }, [liveClassId, onAdmitted]);
+  }, [liveClassId, actingAsLearnerId, onAdmitted]);
 
   if (status === "checking") {
     return (
@@ -1084,7 +1100,9 @@ export function LiveKitRoomEmbed({
     }
   }, [liveClassId]);
 
-  // Teacher auto-admits themselves on mount
+  // Teacher auto-admits themselves on mount. Teacher's LiveKit identity
+  // matches their auth user.id (no learner mapping), so no livekitIdentity
+  // override needed.
   useEffect(() => {
     if (userRole === "teacher") {
       fetch("/api/sessions/admission", {
@@ -1181,6 +1199,7 @@ export function LiveKitRoomEmbed({
     return (
       <WaitingRoom
         liveClassId={liveClassId}
+        actingAsLearnerId={actingAsLearnerId}
         onAdmitted={() => setInWaitingRoom(false)}
       />
     );
@@ -1370,12 +1389,15 @@ function RoomLayout({
 
         {/* Whiteboard overlay (z-30) sits above the slides viewer (z-20)
             so a teacher can annotate over their slides if they open both.
-            The slides viewer is mounted by SessionSlides when active. */}
-        {whiteboardOpen && (
-          <div className="absolute inset-0 z-30">
-            <Whiteboard onClose={() => setWhiteboardOpen(false)} />
-          </div>
-        )}
+            Kept mounted always (CSS-hidden when closed) so strokes drawn
+            before closing the panel survive reopening. Full unmount would
+            reset itemsRef, making the board appear empty on reopen. */}
+        <div
+          className={`absolute inset-0 z-30 ${whiteboardOpen ? "" : "hidden"}`}
+          aria-hidden={!whiteboardOpen}
+        >
+          <Whiteboard onClose={() => setWhiteboardOpen(false)} />
+        </div>
       </div>
 
       {/* Primary control bar — compact, identical on tablet + laptop.

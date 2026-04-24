@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { RoomServiceClient } from "livekit-server-sdk";
+import { RoomServiceClient, TrackSource } from "livekit-server-sdk";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getRoomName } from "@/lib/video/livekit";
 
@@ -59,7 +59,11 @@ export async function POST(request: NextRequest) {
       // Skip the teacher themselves.
       if (p.identity === user.id) continue;
       for (const track of p.tracks) {
-        if (track.source === 1 /* MICROPHONE */ && !track.muted) {
+        // PREVIOUS BUG: we checked track.source === 1 thinking that was
+        // MICROPHONE. It's actually CAMERA (MICROPHONE is 2). So mute-all
+        // was muting everyone's cameras and leaving mics alive, which is
+        // why students kept talking after the teacher hit Mute All.
+        if (track.source === TrackSource.MICROPHONE && !track.muted) {
           await client.mutePublishedTrack(roomName, p.identity, track.sid, true);
           muted++;
         }

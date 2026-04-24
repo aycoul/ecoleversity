@@ -6,7 +6,11 @@
 create table if not exists session_admissions (
   id uuid primary key default uuid_generate_v4(),
   live_class_id uuid not null references live_classes (id) on delete cascade,
-  user_id uuid not null references profiles (id) on delete cascade,
+  -- LiveKit participant identity. Either a profiles.id (teacher / parent
+  -- in parent mode) or a learner_profiles.id (parent acting-as-learner).
+  -- Not FK-constrained because PG can't express "this column references
+  -- either table A or table B". Validated at the API layer instead.
+  user_id uuid not null,
   admitted_at timestamptz,
   created_at timestamptz not null default now(),
   constraint uq_session_admissions unique (live_class_id, user_id)
