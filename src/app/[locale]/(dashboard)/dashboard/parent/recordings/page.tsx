@@ -42,7 +42,7 @@ export default async function ParentRecordingsPage() {
   const { data: recordings } = classIds.length > 0
     ? await admin
         .from("session_recordings")
-        .select("id, live_class_id, duration_seconds, ended_at, summary, ai_status")
+        .select("id, live_class_id, duration_seconds, ended_at, summary, ai_status, engagement_json")
         .in("live_class_id", classIds)
         .eq("status", "completed")
         .order("ended_at", { ascending: false })
@@ -167,11 +167,62 @@ export default async function ParentRecordingsPage() {
                     Résumé en cours de génération…
                   </div>
                 ) : null}
+
+                <EngagementBreakdown engagement={rec.engagement_json as Record<string, { name: string; speakingMs: number }> | null} />
               </div>
             );
           })}
         </div>
       )}
     </div>
+  );
+}
+
+// Speaking-time breakdown per participant. Data lands on
+// session_recordings.engagement_json from the teacher's browser as
+// { [identity]: { name, speakingMs } }. We normalize to the biggest
+// speaker and show percentage bars.
+function EngagementBreakdown({
+  engagement,
+}: {
+  engagement: Record<string, { name: string; speakingMs: number }> | null;
+}) {
+  if (!engagement) return null;
+  const rows = Object.values(engagement)
+    .filter((r) => r.speakingMs > 1000) // ignore sub-second flickers
+    .sort((a, b) => b.speakingMs - a.speakingMs);
+  if (rows.length === 0) return null;
+
+  const max = rows[0].speakingMs;
+  const total = rows.reduce((s, r) => s + r.speakingMs, 0);
+
+  return (
+    <details className="mt-3 rounded-lg bg-[var(--ev-blue-50)] p-3 text-xs text-slate-700">
+      <summary className="cursor-pointer font-semibold text-slate-900">
+        Temps de parole · {Math.round(total / 1000 / 60)} min
+      </summary>
+      <div className="mt-2 space-y-1.5">
+        {rows.map((r, i) => {
+          const pct = max > 0 ? Math.round((r.speakingMs / max) * 100) : 0;
+          const mins = Math.max(1, Math.round(r.speakingMs / 1000 / 60));
+          return (
+            <div key={i}>
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="truncate">{r.name}</span>
+                <span className="shrink-0 text-[10px] tabular-nums text-slate-500">
+                  {mins} min
+                </span>
+              </div>
+              <div className="h-1.5 overflow-hidden rounded-full bg-white">
+                <div
+                  className="h-full bg-[var(--ev-blue)] transition-all"
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </details>
   );
 }

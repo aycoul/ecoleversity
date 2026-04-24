@@ -680,6 +680,10 @@
     "trialAlreadyUsed": "You have already used your free trial with this teacher. Book a paid class to continue.",
     "savedClasses": "Saved classes",
     "noSavedClasses": "No saved classes yet. Browse the catalog and bookmark classes you're interested in.",
+    "selectChildren": "Select one or more children",
+    "confirmEnrollMany": "Enroll {count} children",
+    "enrollMustAddChild": "Please add a child to your profile first.",
+    "trialOneChildOnly": "Trial sessions are limited to one child per family per teacher.",
     "browseClasses": "Browse classes",
     "viewDetails": "View details"
   },

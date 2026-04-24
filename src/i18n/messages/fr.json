@@ -680,6 +680,10 @@
     "trialAlreadyUsed": "Vous avez déjà utilisé votre essai gratuit avec cet enseignant. Réservez un cours payant pour continuer.",
     "savedClasses": "Cours favoris",
     "noSavedClasses": "Aucun cours favori. Parcourez le catalogue et ajoutez des cours à vos favoris.",
+    "selectChildren": "Sélectionnez un ou plusieurs enfants",
+    "confirmEnrollMany": "Inscrire {count} enfants",
+    "enrollMustAddChild": "Veuillez ajouter un enfant dans votre profil.",
+    "trialOneChildOnly": "Les sessions d'essai sont limitées à un seul enfant par famille par enseignant.",
     "browseClasses": "Parcourir les cours",
     "viewDetails": "Voir les détails"
   },
