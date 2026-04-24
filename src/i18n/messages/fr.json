@@ -305,6 +305,16 @@
       "title": "Enseignants en vedette"
     }
   },
+  "kidStrip": {
+    "all": "Tous",
+    "allInitial": "Tous",
+    "allSubtitle": "{count, plural, one {# enfant} other {# enfants}}",
+    "upcoming": "{count, plural, one {# cours à venir} other {# cours à venir}}",
+    "noUpcoming": "Aucun cours à venir",
+    "addChild": "Ajouter un enfant",
+    "hasAlert": "Attention requise",
+    "hasAlertTooltip": "Un cours commence bientôt"
+  },
   "navigation": {
     "home": "Accueil",
     "findTeacher": "Trouver un prof",

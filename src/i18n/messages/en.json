@@ -305,6 +305,16 @@
       "title": "Featured teachers"
     }
   },
+  "kidStrip": {
+    "all": "All",
+    "allInitial": "All",
+    "allSubtitle": "{count, plural, one {# child} other {# children}}",
+    "upcoming": "{count, plural, one {# upcoming class} other {# upcoming classes}}",
+    "noUpcoming": "No upcoming classes",
+    "addChild": "Add a child",
+    "hasAlert": "Needs attention",
+    "hasAlertTooltip": "A class is starting soon"
+  },
   "navigation": {
     "home": "Home",
     "findTeacher": "Find a tutor",

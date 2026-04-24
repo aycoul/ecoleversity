@@ -18,6 +18,7 @@ export default async function DashboardLayout({
       avatarUrl={shell.avatarUrl}
       activeLearnerId={shell.activeLearnerId}
       learners={shell.learners}
+      learnerStats={shell.learnerStats}
     >
       {children}
     </DashboardShell>

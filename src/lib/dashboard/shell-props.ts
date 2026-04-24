@@ -10,12 +10,20 @@ import {
   type AdminScope,
 } from "@/lib/admin/scopes";
 
+export type LearnerStats = {
+  upcomingCount: number;
+  hasAlert: boolean;
+};
+
 export type DashboardShellProps = {
   role: UserRole;
   userName: string;
   avatarUrl: string | null;
   activeLearnerId: string | null;
   learners: AvatarSwitcherLearner[];
+  /** Keyed by learner id — upcoming session count + urgency flag per kid.
+   *  Used by the parent-dashboard kid strip. */
+  learnerStats: Record<string, LearnerStats>;
   links: Array<{ href: string; label: string; icon: string; badge?: number }>;
 };
 
@@ -44,6 +52,7 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
   const adminScope = (profile.admin_scope as AdminScope | null) ?? null;
 
   let learners: AvatarSwitcherLearner[] = [];
+  let learnerStats: Record<string, LearnerStats> = {};
   let pendingPaymentsCount = 0;
   if (role === "parent") {
     const { data: learnerRows } = await supabase
@@ -66,6 +75,33 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
       .eq("status", "pending")
       .gte("created_at", expiryCutoff);
     pendingPaymentsCount = count ?? 0;
+
+    // Per-kid stats for the top "kid strip". Upcoming sessions count +
+    // "hasAlert" flag (red dot) when a session starts in < 30 min.
+    if (learners.length > 0) {
+      const learnerIds = learners.map((l) => l.id);
+      const nowIso = new Date().toISOString();
+      const soonIso = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+      const { data: upcomingRows } = await supabase
+        .from("enrollments")
+        .select("learner_id, live_classes!inner(id, status, scheduled_at)")
+        .in("learner_id", learnerIds)
+        .eq("live_classes.status", "scheduled")
+        .gte("live_classes.scheduled_at", nowIso);
+      for (const id of learnerIds) {
+        learnerStats[id] = { upcomingCount: 0, hasAlert: false };
+      }
+      for (const row of (upcomingRows ?? []) as Array<{
+        learner_id: string;
+        live_classes: { scheduled_at: string } | { scheduled_at: string }[];
+      }>) {
+        const stats = learnerStats[row.learner_id];
+        if (!stats) continue;
+        stats.upcomingCount += 1;
+        const lc = Array.isArray(row.live_classes) ? row.live_classes[0] : row.live_classes;
+        if (lc && lc.scheduled_at <= soonIso) stats.hasAlert = true;
+      }
+    }
   }
 
   const t = await getTranslations("dashboard.sidebar");
@@ -212,6 +248,7 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
     avatarUrl: (profile.avatar_url as string | null) ?? null,
     activeLearnerId: (profile.active_learner_id as string | null) ?? null,
     learners,
+    learnerStats,
     links: navConfig[role] ?? navConfig.parent,
   };
 }

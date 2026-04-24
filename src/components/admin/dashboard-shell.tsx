@@ -8,6 +8,7 @@ import Image from "next/image";
 import type { UserRole } from "@/types/domain";
 import { AvatarSwitcher, type AvatarSwitcherLearner } from "@/components/nav/avatar-switcher";
 import { SwitchToParentButton } from "@/components/nav/switch-to-parent-button";
+import { KidStrip, type KidStripStats } from "@/components/dashboard/kid-strip";
 import { useLogout } from "@/hooks/use-logout";
 import {
   Sheet,
@@ -67,6 +68,8 @@ type DashboardShellProps = {
   avatarUrl?: string | null;
   activeLearnerId?: string | null;
   learners?: AvatarSwitcherLearner[];
+  /** Per-learner upcoming session count + alert flag. Only used by parent role. */
+  learnerStats?: Record<string, KidStripStats>;
   children: React.ReactNode;
 };
 
@@ -169,6 +172,7 @@ export function DashboardShell({
   avatarUrl,
   activeLearnerId = null,
   learners = [],
+  learnerStats = {},
   children,
 }: DashboardShellProps) {
   const pathname = usePathname();
@@ -284,6 +288,16 @@ export function DashboardShell({
             dropdownPosition="top"
           />
         </div>
+
+        {/* Parent-only: Outschool-style kid strip sits above the greeting
+            so switching a kid is the first thing parents reach. */}
+        {role === "parent" && learners.length > 0 && (
+          <KidStrip
+            learners={learners}
+            learnerStats={learnerStats}
+            activeLearnerId={activeLearnerId}
+          />
+        )}
 
         {/* Persistent identity banner — visible on every dashboard page */}
         <div className="mb-6">

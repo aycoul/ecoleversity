@@ -27,6 +27,7 @@ export default async function MarketplaceLayout({
       avatarUrl={shell.avatarUrl}
       activeLearnerId={shell.activeLearnerId}
       learners={shell.learners}
+      learnerStats={shell.learnerStats}
     >
       {children}
     </DashboardShell>
