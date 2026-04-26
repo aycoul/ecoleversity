@@ -4,7 +4,8 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Link } from "@/i18n/routing";
 import { SUBJECT_LABELS, type Subject } from "@/types/domain";
-import { PlayCircle, Calendar, Clock, Video } from "lucide-react";
+import { PlayCircle, Calendar, Clock, Video, Lock } from "lucide-react";
+import { getRecordingVisibility } from "@/lib/platform-config";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,28 @@ export default async function ParentRecordingsPage() {
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
+
+  // Recordings of minors stay locked behind a founder-controlled switch
+  // until we're explicitly ready to expose them. Skip every DB hop and
+  // render a placeholder if the visibility flag is off.
+  const visibility = await getRecordingVisibility();
+  if (!visibility.parent) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold text-slate-900">{t("title")}</h1>
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 py-16 text-center">
+          <Lock className="mb-3 size-10 text-slate-400" />
+          <p className="text-sm font-semibold text-slate-700">
+            Bient&ocirc;t disponible
+          </p>
+          <p className="mt-1 max-w-sm text-xs text-slate-500">
+            La relecture des s&eacute;ances enregistr&eacute;es n&apos;est pas encore activ&eacute;e
+            pour les parents. Vous recevrez un r&eacute;sum&eacute; par email apr&egrave;s chaque cours.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const admin = createAdminClient();
 
