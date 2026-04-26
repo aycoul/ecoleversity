@@ -505,24 +505,23 @@ function BlurButton() {
         setEnabled(true);
       }
     } catch (err) {
-      console.warn("[blur] failed:", err);
-      // Roll back — if setProcessor threw mid-init the track might be
-      // in a half-installed state. Try stopProcessor to restore the
-      // original camera publication, otherwise the tile goes black.
+      // Verbose error capture — surface the underlying message in the
+      // toast so the user can report it. Generic toasts make remote
+      // diagnosis impossible.
+      const msg =
+        err instanceof Error
+          ? `${err.name}: ${err.message}`
+          : String(err);
+      console.error("[blur] setProcessor failed:", err);
       try {
         await track.stopProcessor();
       } catch {
         /* noop */
       }
       setEnabled(false);
-      toast.error(t("blurUnavailable"));
-      // Don't hide the button on first failure — the user might just
-      // need to enable camera first. Hide only if support probe failed.
-      const supportProbe =
-        typeof window !== "undefined" &&
-        "MediaStreamTrackGenerator" in window &&
-        typeof OffscreenCanvas !== "undefined";
-      if (!supportProbe) setSupported(false);
+      toast.error(`${t("blurUnavailable")} — ${msg.slice(0, 140)}`, {
+        duration: 8000,
+      });
     } finally {
       setBusy(false);
     }

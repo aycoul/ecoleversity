@@ -22,7 +22,11 @@ const csp = [
   // Next.js needs unsafe-inline + unsafe-eval for React hydration / dev
   // tooling. Tightening further is a P2 — pin to a hash-list once the app
   // stabilizes.
-  `script-src 'self' 'unsafe-inline' 'unsafe-eval' ${PAYPAL_HOSTS}`,
+  // 'wasm-unsafe-eval' is required by Chrome 104+ for WebAssembly
+  // compilation even when 'unsafe-eval' is present. Mediapipe (used
+  // by track-processors for background blur) compiles ~9MB of WASM
+  // at runtime — without this token, that compilation throws.
+  `script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' ${PAYPAL_HOSTS}`,
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: blob: ${SUPABASE_HOST} ${R2_HOST} ${PAYPAL_HOSTS}`,
   `media-src 'self' blob: ${SUPABASE_HOST} ${R2_HOST}`,
