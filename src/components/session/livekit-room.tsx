@@ -493,13 +493,17 @@ function BlurButton() {
         setEnabled(false);
       } else {
         const { BackgroundProcessor } = await import("@livekit/track-processors");
-        // BackgroundBlur(radius) is deprecated in v0.7+; the new API
-        // is BackgroundProcessor({ mode, blurRadius }). Mid-strength
-        // (10) — higher values tax low-end mobile GPUs, lower values
-        // produce visible halos around hair.
+        // Self-hosted assets at /public/mediapipe/. Avoids the
+        // four-layer CSP allowlist for cdn.jsdelivr.net +
+        // storage.googleapis.com (script-src + connect-src + worker
+        // + wasm-unsafe-eval). Same-origin = no CSP friction.
         const processor = BackgroundProcessor({
           mode: "background-blur",
           blurRadius: 10,
+          assetPaths: {
+            tasksVisionFileSet: "/mediapipe/wasm",
+            modelAssetPath: "/mediapipe/selfie_segmenter.tflite",
+          },
         });
         await track.setProcessor(processor);
         setEnabled(true);
