@@ -29,7 +29,7 @@ import { ModeratedChat } from "./moderated-chat";
 import { SessionSlides } from "./session-slides";
 import { useLocale } from "next-intl";
 import { Hand, Users, Loader2, Presentation, LayoutGrid, Maximize2, Minimize2, Pin, PinOff, ChevronRight, ChevronLeft, MicOff, Settings2, Sparkles as BlurIcon, FileText, DoorOpen, MessageCircle, Monitor, MonitorOff } from "lucide-react";
-import { Whiteboard } from "./whiteboard";
+import { TldrawWhiteboard } from "./tldraw-whiteboard";
 
 // LiveKit room options. Simulcast is on by default in the JS client but we
 // pin the ladder explicitly so low-bandwidth subscribers (3G mobile in CI)
@@ -225,18 +225,31 @@ function MuteAllButton({ liveClassId }: { liveClassId: string }) {
   const t = useTranslations("session");
   const [busy, setBusy] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  // Track whether the teacher locked audio in this session. Local-only —
+  // the LiveKit room state is the source of truth, but tracking it
+  // client-side lets us show "Réautoriser" instead of "Couper tous"
+  // when the teacher already locked.
+  const [locked, setLocked] = useState(false);
 
-  const run = async () => {
+  const run = async (action: "mute" | "lock" | "unlock") => {
     setBusy(true);
     try {
       const res = await fetch("/api/livekit/mute-all", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ liveClassId }),
+        body: JSON.stringify({ liveClassId, action }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "mute-all failed");
-      toast.success(t("muteAllDone", { count: data.muted ?? 0 }));
+      if (action === "mute") {
+        toast.success(t("muteAllDone", { count: data.muted ?? 0 }));
+      } else if (action === "lock") {
+        toast.success(t("muteAllLockedDone", { count: data.permissionsChanged ?? 0 }));
+        setLocked(true);
+      } else {
+        toast.success(t("muteAllUnlockedDone"));
+        setLocked(false);
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erreur");
     } finally {
@@ -244,6 +257,22 @@ function MuteAllButton({ liveClassId }: { liveClassId: string }) {
       setConfirming(false);
     }
   };
+
+  // When already locked, the primary action is unlocking — no confirm step.
+  if (locked) {
+    return (
+      <button
+        type="button"
+        onClick={() => run("unlock")}
+        disabled={busy}
+        className="lk-button flex items-center gap-1.5 rounded-md bg-amber-500 px-3 py-2 text-sm font-medium text-white hover:bg-amber-600 disabled:opacity-50"
+        title={t("muteAllUnlockTooltip")}
+      >
+        {busy ? <Loader2 className="size-4 animate-spin" /> : <MicOff className="size-4" />}
+        {t("muteAllUnlock")}
+      </button>
+    );
+  }
 
   if (!confirming) {
     return (
@@ -259,16 +288,27 @@ function MuteAllButton({ liveClassId }: { liveClassId: string }) {
     );
   }
 
+  // Confirm step: two destructive options (mute / lock) + cancel.
   return (
     <div className="flex items-center gap-1">
       <button
         type="button"
-        onClick={run}
+        onClick={() => run("mute")}
         disabled={busy}
         className="lk-button flex items-center gap-1.5 rounded-md bg-red-500 px-3 py-2 text-sm font-medium text-white hover:bg-red-600 disabled:opacity-50"
+        title={t("muteAllConfirmTooltip")}
       >
         {busy ? <Loader2 className="size-4 animate-spin" /> : <MicOff className="size-4" />}
         {t("muteAllConfirm")}
+      </button>
+      <button
+        type="button"
+        onClick={() => run("lock")}
+        disabled={busy}
+        className="lk-button flex items-center gap-1.5 rounded-md bg-red-700 px-3 py-2 text-sm font-medium text-white hover:bg-red-800 disabled:opacity-50"
+        title={t("muteAllLockTooltip")}
+      >
+        {t("muteAllLock")}
       </button>
       <button
         type="button"
@@ -1499,7 +1539,7 @@ function RoomLayout({
           className={`absolute inset-0 z-30 ${whiteboardOpen ? "" : "hidden"}`}
           aria-hidden={!whiteboardOpen}
         >
-          <Whiteboard onClose={() => setWhiteboardOpen(false)} />
+          <TldrawWhiteboard onClose={() => setWhiteboardOpen(false)} />
         </div>
       </div>
 

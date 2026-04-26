@@ -583,7 +583,14 @@
     "screenShareStop": "Arrêter le partage",
     "screenShareTooltip": "Partager votre écran",
     "screenShareStopTooltip": "Arrêter de partager votre écran",
-    "screenShareActive": "Vous partagez votre écran"
+    "screenShareActive": "Vous partagez votre écran",
+    "muteAllLock": "Couper et verrouiller",
+    "muteAllLockTooltip": "Couper les micros et empêcher de se réactiver",
+    "muteAllLockedDone": "{count, plural, one {# micro coupé et verrouillé} other {# micros coupés et verrouillés}}",
+    "muteAllUnlock": "Réautoriser les micros",
+    "muteAllUnlockTooltip": "Permettre aux élèves de se réactiver",
+    "muteAllUnlockedDone": "Les élèves peuvent à nouveau parler",
+    "muteAllConfirmTooltip": "Couper tous les micros (les élèves peuvent se réactiver)"
   },
   "rating": {
     "title": "Évaluer votre cours",
