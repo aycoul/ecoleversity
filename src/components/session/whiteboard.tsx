@@ -225,29 +225,46 @@ export function Whiteboard({ onClose }: WhiteboardProps) {
     return () => cancelAnimationFrame(raf);
   }, [redraw]);
 
-  // Resize handling + DPR-correct canvas
+  // Resize handling + DPR-correct canvas.
+  //
+  // The whiteboard parent is kept mounted with display:none when the
+  // panel is closed (so strokes survive close+reopen). With display:none,
+  // getBoundingClientRect returns 0x0 — if we only listened for
+  // window.resize, the canvas would init at 0x0 and stay there until the
+  // viewport itself resized, so the panel "doesn't work" when reopened.
+  // ResizeObserver fires whenever the container's box changes (including
+  // hidden -> visible), which is exactly what we need.
+  //
+  // setTransform replaces (rather than multiplies) the DPR scale so
+  // repeated resizes don't compound and blur the strokes.
   useEffect(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
     const resize = () => {
       const rect = container.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
       const dpr = window.devicePixelRatio || 1;
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
+      canvas.width = Math.round(rect.width * dpr);
+      canvas.height = Math.round(rect.height * dpr);
       canvas.style.width = `${rect.width}px`;
       canvas.style.height = `${rect.height}px`;
       const ctx = canvas.getContext("2d");
       if (ctx) {
-        ctx.scale(dpr, dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
       }
       redraw();
     };
     resize();
+    const ro = new ResizeObserver(resize);
+    ro.observe(container);
     window.addEventListener("resize", resize);
-    return () => window.removeEventListener("resize", resize);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", resize);
+    };
   }, [redraw]);
 
   // ── Data channel listener ───────────────────────────────────────
