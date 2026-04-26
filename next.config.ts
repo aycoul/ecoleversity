@@ -10,8 +10,6 @@ const LIVEKIT_HOST = "https://*.livekit.cloud wss://*.livekit.cloud";
 const R2_HOST = "https://*.r2.cloudflarestorage.com https://*.r2.dev";
 const PAYPAL_HOSTS = "https://www.paypal.com https://www.sandbox.paypal.com https://*.paypal.com";
 const SUPPORT_BOT = "https://api.anthropic.com";
-// tldraw fetches its icon + asset bundle from this CDN at runtime.
-const TLDRAW_HOST = "https://cdn.tldraw.com";
 
 const csp = [
   "default-src 'self'",
@@ -20,14 +18,11 @@ const csp = [
   // stabilizes.
   `script-src 'self' 'unsafe-inline' 'unsafe-eval' ${PAYPAL_HOSTS}`,
   "style-src 'self' 'unsafe-inline'",
-  `img-src 'self' data: blob: ${SUPABASE_HOST} ${R2_HOST} ${PAYPAL_HOSTS} ${TLDRAW_HOST}`,
+  `img-src 'self' data: blob: ${SUPABASE_HOST} ${R2_HOST} ${PAYPAL_HOSTS}`,
   `media-src 'self' blob: ${SUPABASE_HOST} ${R2_HOST}`,
-  `font-src 'self' data: ${TLDRAW_HOST}`,
-  `connect-src 'self' ${SUPABASE_HOST} wss://${SUPABASE_HOST.replace("https://", "")} ${LIVEKIT_HOST} ${R2_HOST} ${PAYPAL_HOSTS} ${SUPPORT_BOT} ${TLDRAW_HOST}`,
-  // tldraw uses Web Workers for image-export rasterisation. blob: scheme
-  // is required because the worker bundle is materialised client-side.
+  "font-src 'self' data:",
+  `connect-src 'self' ${SUPABASE_HOST} wss://${SUPABASE_HOST.replace("https://", "")} ${LIVEKIT_HOST} ${R2_HOST} ${PAYPAL_HOSTS} ${SUPPORT_BOT}`,
   "worker-src 'self' blob:",
-  "child-src 'self' blob:",
   `frame-src 'self' ${PAYPAL_HOSTS}`,
   "frame-ancestors 'none'",
   "base-uri 'self'",
