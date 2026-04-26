@@ -49,9 +49,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ data: { status: "already_confirmed" } });
     }
 
-    // Verify amount (PayPal amount in EUR, convert to XOF)
-    if (verification.amountXof < transaction.amount_xof * 0.95) {
-      // Allow 5% tolerance for currency conversion rounding
+    // Verify amount (PayPal amount in EUR, convert to XOF). Tolerance of
+    // 1% for currency-conversion rounding only — anything beyond that is
+    // an underpayment we refuse. Comparison is integer-only.
+    if (verification.amountXof * 100 < transaction.amount_xof * 99) {
       console.warn(
         `[paypal] Amount mismatch: expected=${transaction.amount_xof} XOF, got=${verification.amountXof} XOF (${verification.amount} ${verification.currency})`,
       );

@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { CreditCard, Loader2 } from "lucide-react";
-import { xofToEur } from "@/lib/payments/paypal";
+import { xofToEur } from "@/lib/payments/paypal-money";
 import { getPaypalClientId } from "@/lib/payments/config";
 
 type PaypalCheckoutProps = {

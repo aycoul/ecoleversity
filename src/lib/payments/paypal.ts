@@ -1,24 +1,14 @@
+import "server-only";
+
 /**
- * PayPal payment helpers for diaspora credit card payments.
- * Uses PayPal REST API for order verification.
- * Bootstrap phase: personal PayPal account, no business registration needed.
+ * Server-only PayPal helpers — anything that needs the secret lives here.
+ * Pure money helpers (xofToEur / eurToXof / EUR_TO_XOF) are exported from
+ * `./paypal-money` so client bundles can import them safely.
  */
 
-// XOF is not supported by PayPal — convert to EUR for checkout
-// EUR→FCFA fixed peg rate (CFA franc pegged to Euro since 1999)
-const EUR_TO_XOF = 655.957;
+import { eurToXof } from "./paypal-money";
 
-/** Convert FCFA amount to EUR for PayPal checkout */
-export function xofToEur(amountXof: number): number {
-  return Math.round((amountXof / EUR_TO_XOF) * 100) / 100;
-}
-
-/** Convert EUR back to FCFA */
-export function eurToXof(amountEur: number): number {
-  return Math.round(amountEur * EUR_TO_XOF);
-}
-
-/** Verify a PayPal order via their API */
+/** Verify a PayPal order via their REST API. */
 export async function verifyPaypalOrder(
   orderId: string,
 ): Promise<{
@@ -29,8 +19,7 @@ export async function verifyPaypalOrder(
   payerEmail: string;
   captureId: string;
 }> {
-  // Client ID is the same value used client-side (public), so we reuse
-  // the config helper with its hardcoded fallback. Secret stays env-only.
+  // Client ID matches the public value used client-side; secret stays env-only.
   const { getPaypalClientId } = await import("./config");
   const clientId = getPaypalClientId();
   const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
@@ -45,7 +34,6 @@ export async function verifyPaypalOrder(
     : "https://api-m.sandbox.paypal.com";
 
   try {
-    // Get access token
     const authRes = await fetch(`${baseUrl}/v1/oauth2/token`, {
       method: "POST",
       headers: {
@@ -54,34 +42,36 @@ export async function verifyPaypalOrder(
       },
       body: "grant_type=client_credentials",
     });
-
     if (!authRes.ok) {
       console.error("[paypal] Auth failed:", authRes.status);
       return { success: false, amount: 0, currency: "", amountXof: 0, payerEmail: "", captureId: "" };
     }
-
     const { access_token } = await authRes.json();
 
-    // Get order details
     const orderRes = await fetch(`${baseUrl}/v2/checkout/orders/${orderId}`, {
       headers: { Authorization: `Bearer ${access_token}` },
     });
-
     if (!orderRes.ok) {
       console.error("[paypal] Order fetch failed:", orderRes.status);
       return { success: false, amount: 0, currency: "", amountXof: 0, payerEmail: "", captureId: "" };
     }
-
     const order = await orderRes.json();
-
     if (order.status !== "COMPLETED") {
       return { success: false, amount: 0, currency: "", amountXof: 0, payerEmail: "", captureId: "" };
     }
 
     const capture = order.purchase_units?.[0]?.payments?.captures?.[0];
-    const amount = parseFloat(capture?.amount?.value ?? "0");
+    // PayPal returns amount as a string like "12.34". Parse to integer
+    // cents-of-EUR first to avoid float drift, then convert to XOF.
+    const valueStr = String(capture?.amount?.value ?? "0");
+    const cents = Math.round(parseFloat(valueStr) * 100);
+    const amount = cents / 100;
     const currency = capture?.amount?.currency_code ?? "EUR";
-    const amountXof = currency === "EUR" ? eurToXof(amount) : Math.round(amount * 605); // USD fallback
+    // EUR → XOF integer; USD fallback uses an approximate rate. Both stay integer.
+    const amountXof =
+      currency === "EUR"
+        ? eurToXof(amount)
+        : Math.round((cents * 605) / 100);
 
     return {
       success: true,
@@ -96,3 +86,7 @@ export async function verifyPaypalOrder(
     return { success: false, amount: 0, currency: "", amountXof: 0, payerEmail: "", captureId: "" };
   }
 }
+
+// Re-export the money helpers so existing server-side imports of
+// `@/lib/payments/paypal` keep working without code changes.
+export { xofToEur, eurToXof, EUR_TO_XOF } from "./paypal-money";

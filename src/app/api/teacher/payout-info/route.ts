@@ -1,6 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+
+// Côte d'Ivoire mobile is +225 followed by a 10-digit subscriber number
+// (numbering plan since 2021). Allow either local format or full E.164.
+const CI_PHONE_RE = /^(?:\+?225)?\d{10}$/;
+const PAYOUT_PROVIDERS = ["orange_money", "wave", "mtn_momo", "wallet", "manual"] as const;
+
+const patchSchema = z.object({
+  payout_phone: z
+    .string()
+    .trim()
+    .min(10)
+    .max(15)
+    .regex(CI_PHONE_RE, "Numéro Côte d'Ivoire invalide"),
+  payout_provider: z.enum(PAYOUT_PROVIDERS),
+});
 
 /**
  * GET: Fetch teacher's payout info (phone + provider).
@@ -63,23 +79,15 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
     }
 
-    const body = await request.json().catch(() => ({}));
-    const { payout_phone, payout_provider } = body;
-
-    if (!payout_phone || typeof payout_phone !== "string") {
+    const raw = await request.json().catch(() => ({}));
+    const parsed = patchSchema.safeParse(raw);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Numéro de paiement requis" },
+        { error: "Données invalides", details: parsed.error.issues },
         { status: 400 }
       );
     }
-
-    const validProviders = ["orange_money", "wave", "mtn_momo", "wallet", "manual"];
-    if (!payout_provider || !validProviders.includes(payout_provider)) {
-      return NextResponse.json(
-        { error: "Moyen de paiement invalide" },
-        { status: 400 }
-      );
-    }
+    const { payout_phone, payout_provider } = parsed.data;
 
     const admin = createAdminClient();
     const { error } = await admin
@@ -93,7 +101,7 @@ export async function PATCH(request: NextRequest) {
 
     if (error) {
       console.error("[payout-info] Update error:", error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "Echec de la mise à jour" }, { status: 500 });
     }
 
     return NextResponse.json({ ok: true });

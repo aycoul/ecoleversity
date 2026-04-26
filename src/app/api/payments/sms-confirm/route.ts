@@ -14,7 +14,12 @@ const smsConfirmSchema = z.object({
   timestamp: z.number().int().positive(),
 });
 
-const ALLOWED_IPS = (process.env.SMS_ALLOWED_IPS ?? "72.62.237.25,127.0.0.1").split(",").map((ip) => ip.trim());
+// No fallback IP allowlist — if the env var is missing in prod we fail
+// closed rather than accepting requests from a hardcoded "demo" address.
+const RAW_ALLOWED_IPS = process.env.SMS_ALLOWED_IPS ?? "";
+const ALLOWED_IPS = RAW_ALLOWED_IPS
+  ? RAW_ALLOWED_IPS.split(",").map((ip) => ip.trim()).filter(Boolean)
+  : [];
 const MAX_AGE_MS = 5 * 60 * 1000; // 5 minutes
 
 function verifyHmac(payload: string, signature: string, secret: string): boolean {
@@ -24,6 +29,14 @@ function verifyHmac(payload: string, signature: string, secret: string): boolean
 
 export async function POST(request: NextRequest) {
   try {
+    // Refuse to serve if the operator forgot to set SMS_ALLOWED_IPS in
+    // prod — better to surface the misconfig as a 503 than silently let
+    // any IP attempt confirmations.
+    if (ALLOWED_IPS.length === 0) {
+      console.error("[sms-confirm] SMS_ALLOWED_IPS not configured");
+      return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
+    }
+
     // IP allowlist check
     const clientIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
       ?? request.headers.get("x-real-ip")

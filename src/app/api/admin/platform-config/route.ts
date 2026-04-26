@@ -1,7 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { canAccess, type AdminScope } from "@/lib/admin/scopes";
+
+// Allowlist of platform_config keys an admin endpoint may write — kept
+// tight so a future scope expansion can't accidentally let the admin
+// mutate a key the app reads as security-sensitive (e.g. payout caps).
+const ALLOWED_KEYS = [
+  "ai_services_default",
+  "twin_public_access",
+  "twin_qa_only_mode",
+  "ai_provider_anthropic",
+  "ai_provider_openai",
+  "support_bot_enabled",
+  "moderation_strict",
+] as const;
+
+const bodySchema = z.object({
+  key: z.enum(ALLOWED_KEYS),
+  value: z.unknown(),
+});
 
 /**
  * Update one platform_config row. Admin-only with ai_settings scope.
@@ -24,25 +43,28 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
-  const body = (await req.json().catch(() => ({}))) as {
-    key?: string;
-    value?: unknown;
-  };
-  if (!body.key) {
-    return NextResponse.json({ error: "key required" }, { status: 400 });
+  const raw = await req.json().catch(() => ({}));
+  const parsed = bodySchema.safeParse(raw);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "invalid body", details: parsed.error.issues },
+      { status: 400 }
+    );
   }
+  const { key, value } = parsed.data;
 
   const admin = createAdminClient();
   const { error } = await admin
     .from("platform_config")
     .update({
-      value: body.value,
+      value,
       updated_at: new Date().toISOString(),
       updated_by: user.id,
     })
-    .eq("key", body.key);
+    .eq("key", key);
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[platform-config] update failed:", error.message);
+    return NextResponse.json({ error: "update failed" }, { status: 500 });
   }
   return NextResponse.json({ ok: true });
 }
