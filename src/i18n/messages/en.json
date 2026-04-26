@@ -583,7 +583,14 @@
     "screenShareStop": "Stop sharing",
     "screenShareTooltip": "Share your screen",
     "screenShareStopTooltip": "Stop sharing your screen",
-    "screenShareActive": "You are sharing your screen"
+    "screenShareActive": "You are sharing your screen",
+    "muteAllLock": "Mute and lock",
+    "muteAllLockTooltip": "Mute everyone and prevent them from unmuting",
+    "muteAllLockedDone": "{count, plural, one {# mic muted and locked} other {# mics muted and locked}}",
+    "muteAllUnlock": "Allow mics again",
+    "muteAllUnlockTooltip": "Let students unmute themselves again",
+    "muteAllUnlockedDone": "Students can speak again",
+    "muteAllConfirmTooltip": "Mute everyone (they can unmute themselves)"
   },
   "rating": {
     "title": "Rate your session",
