@@ -1497,7 +1497,12 @@ function RoomLayout({
           screenShare is disabled on LiveKit's ControlBar because it has
           responsive quirks on narrow viewports — we ship our own explicit
           <ScreenShareButton /> so tablet users always see the control. */}
-      <div className="flex items-center justify-center gap-2 overflow-x-auto border-t border-white/10 bg-[var(--lk-bg,#111)] px-2 py-2">
+      {/* flex-wrap (not overflow-x-auto) so the row never creates a
+          clipping context — overflow:auto on either axis silently
+          clips popovers like the Plus menu's dropdown that need to
+          escape the bar bounds. With wrap, narrow viewports get a
+          two-row bar instead of a horizontally-scrolling one. */}
+      <div className="flex flex-wrap items-center justify-center gap-2 border-t border-white/10 bg-[var(--lk-bg,#111)] px-2 py-2">
         <ControlBar
           variation="minimal"
           controls={{
