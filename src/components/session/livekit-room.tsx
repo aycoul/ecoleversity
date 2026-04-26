@@ -499,7 +499,11 @@ function BlurButton() {
         // + wasm-unsafe-eval). Same-origin = no CSP friction.
         const processor = BackgroundProcessor({
           mode: "background-blur",
-          blurRadius: 10,
+          // 18 is a visibly stronger blur than the package default
+          // (10) — closer to the Zoom / Microsoft Teams feel. We can
+          // dial higher (~25) if needed; above ~30 starts to ghost
+          // hair edges on low-end mobile GPUs.
+          blurRadius: 18,
           assetPaths: {
             tasksVisionFileSet: "/mediapipe/wasm",
             modelAssetPath: "/mediapipe/selfie_segmenter.tflite",
