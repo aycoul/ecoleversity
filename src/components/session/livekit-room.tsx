@@ -29,7 +29,23 @@ import { ModeratedChat } from "./moderated-chat";
 import { SessionSlides } from "./session-slides";
 import { useLocale } from "next-intl";
 import { Hand, Users, Loader2, Presentation, LayoutGrid, Maximize2, Minimize2, Pin, PinOff, ChevronRight, ChevronLeft, MicOff, Settings2, Sparkles as BlurIcon, FileText, DoorOpen, MessageCircle, Monitor, MonitorOff } from "lucide-react";
-import { TldrawWhiteboard } from "./tldraw-whiteboard";
+import dynamic from "next/dynamic";
+
+// Tldraw + its CSS are pulled into the bundle via this dynamic import,
+// which Next.js skips entirely during SSR. A static import would let
+// tldraw's module code run on the server and crash the route since
+// tldraw touches `window` / `document` at module init.
+const TldrawWhiteboard = dynamic(
+  () => import("./tldraw-whiteboard").then((m) => m.TldrawWhiteboard),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="absolute inset-0 flex items-center justify-center bg-white">
+        <div className="size-6 animate-spin rounded-full border-2 border-slate-300 border-t-slate-700" />
+      </div>
+    ),
+  }
+);
 
 // LiveKit room options. Simulcast is on by default in the JS client but we
 // pin the ladder explicitly so low-bandwidth subscribers (3G mobile in CI)
