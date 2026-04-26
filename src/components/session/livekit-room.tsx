@@ -445,14 +445,22 @@ function BlurButton() {
   const [busy, setBusy] = useState(false);
   const [supported, setSupported] = useState(true);
 
-  // Probe support at mount. Even Chrome on Android lacks
-  // MediaStreamTrackGenerator on some hardware (older mid-range phones).
+  // Probe support at mount. Use the package's own support helper —
+  // it returns false for iOS Safari + low-end Android, where any of
+  // OffscreenCanvas / MediaStreamTrackGenerator / WebGL is missing.
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const ok =
-      "MediaStreamTrackGenerator" in window &&
-      typeof OffscreenCanvas !== "undefined";
-    if (!ok) setSupported(false);
+    let cancelled = false;
+    void (async () => {
+      try {
+        const mod = await import("@livekit/track-processors");
+        if (!cancelled) setSupported(mod.supportsBackgroundProcessors());
+      } catch {
+        if (!cancelled) setSupported(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Reflect actual track state — if blur was on and the track got
@@ -484,10 +492,15 @@ function BlurButton() {
         await track.stopProcessor();
         setEnabled(false);
       } else {
-        const { BackgroundBlur } = await import("@livekit/track-processors");
-        // Mid-strength blur. Higher values (e.g. 15) tax low-end
-        // mobile GPUs and produce frame-drops; 10 is the sweet spot.
-        const processor = BackgroundBlur(10);
+        const { BackgroundProcessor } = await import("@livekit/track-processors");
+        // BackgroundBlur(radius) is deprecated in v0.7+; the new API
+        // is BackgroundProcessor({ mode, blurRadius }). Mid-strength
+        // (10) — higher values tax low-end mobile GPUs, lower values
+        // produce visible halos around hair.
+        const processor = BackgroundProcessor({
+          mode: "background-blur",
+          blurRadius: 10,
+        });
         await track.setProcessor(processor);
         setEnabled(true);
       }
