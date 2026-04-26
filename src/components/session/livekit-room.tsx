@@ -812,8 +812,14 @@ function PlusMenu({ children }: { children: React.ReactNode }) {
 // cancels the picker, permission denied) are non-fatal.
 function ScreenShareButton() {
   const t = useTranslations("session");
-  const { localParticipant } = useLocalParticipant();
-  const [sharing, setSharing] = useState(false);
+  // useLocalParticipant returns a reactive isScreenShareEnabled flag —
+  // simpler and more reliable than wiring trackPublished/Unpublished
+  // listeners ourselves (the previous approach desynced when the user
+  // hit the browser's native "Stop sharing" toolbar instead of our
+  // button, leaving sharing=true in React state and the button wedged
+  // in red MonitorOff mode that did nothing on click).
+  const { localParticipant, isScreenShareEnabled } = useLocalParticipant();
+  const sharing = !!isScreenShareEnabled;
   const [busy, setBusy] = useState(false);
   const [supported, setSupported] = useState(true);
 
@@ -829,29 +835,11 @@ function ScreenShareButton() {
     }
   }, []);
 
-  // Mirror LiveKit's current screen-share state so the button reflects
-  // reality if something else toggled it (e.g. the share dialog itself,
-  // a remote "stop sharing" command).
-  useEffect(() => {
-    const update = () => {
-      setSharing(
-        localParticipant
-          .getTrackPublications()
-          .some((pub) => pub.source === Track.Source.ScreenShare && !pub.isMuted)
-      );
-    };
-    update();
-    localParticipant.on("trackPublished", update);
-    localParticipant.on("trackUnpublished", update);
-    return () => {
-      localParticipant.off("trackPublished", update);
-      localParticipant.off("trackUnpublished", update);
-    };
-  }, [localParticipant]);
-
   const toggle = async () => {
     setBusy(true);
     try {
+      // Read sharing state inline so the latest reactive value is used,
+      // not a captured closure from a render where state was stale.
       await localParticipant.setScreenShareEnabled(!sharing, {
         audio: true, // capture tab audio if the user grants it
       });
@@ -889,6 +877,33 @@ function ScreenShareButton() {
         {sharing ? t("screenShareStop") : t("screenShare")}
       </span>
     </button>
+  );
+}
+
+// Zoom-style floating "you are sharing" banner. Always visible at the
+// top of the video area when this user is currently screen-sharing, so
+// they can stop without hunting for the control bar (which can scroll
+// out of view on tablet portrait or be hidden behind the share preview).
+function ScreenShareBanner() {
+  const t = useTranslations("session");
+  const { localParticipant, isScreenShareEnabled } = useLocalParticipant();
+  if (!isScreenShareEnabled) return null;
+  return (
+    <div className="pointer-events-none absolute inset-x-0 top-3 z-50 flex justify-center">
+      <div className="pointer-events-auto flex items-center gap-3 rounded-full bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-lg ring-2 ring-red-300/40">
+        <span className="size-2 animate-pulse rounded-full bg-white" />
+        <span>{t("screenShareActive")}</span>
+        <button
+          type="button"
+          onClick={() => {
+            void localParticipant.setScreenShareEnabled(false);
+          }}
+          className="rounded-md bg-white/20 px-3 py-1 text-xs font-semibold transition-colors hover:bg-white/30"
+        >
+          {t("screenShareStop")}
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -1431,6 +1446,7 @@ function RoomLayout({
           )}
           <RaisedHandsPanel userRole={userRole} />
           <CaptionsOverlay />
+          <ScreenShareBanner />
           {effectiveMode === "speaker" ? (
             <PresentationLayout
               tracks={tracks}

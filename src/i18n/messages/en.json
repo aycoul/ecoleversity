@@ -582,7 +582,8 @@
     "screenShare": "Share",
     "screenShareStop": "Stop sharing",
     "screenShareTooltip": "Share your screen",
-    "screenShareStopTooltip": "Stop sharing your screen"
+    "screenShareStopTooltip": "Stop sharing your screen",
+    "screenShareActive": "You are sharing your screen"
   },
   "rating": {
     "title": "Rate your session",
