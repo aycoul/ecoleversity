@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+
+const STATUS_FILTER = z.enum(["pending", "approved", "denied", "all"]).optional();
 
 /**
  * GET /api/refunds
@@ -11,7 +14,11 @@ import { createAdminClient } from "@/lib/supabase/admin";
  */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const status = searchParams.get("status"); // 'pending' | 'approved' | 'denied' | 'all'
+  const statusParse = STATUS_FILTER.safeParse(searchParams.get("status") ?? undefined);
+  if (!statusParse.success) {
+    return NextResponse.json({ error: "status invalide" }, { status: 400 });
+  }
+  const status = statusParse.data;
 
   const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();

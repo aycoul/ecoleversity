@@ -13,20 +13,26 @@ export async function GET(request: NextRequest) {
       return new NextResponse("Missing parameters", { status: 400 });
     }
 
-    // HMAC token verification — requires service role key
-    const secret = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    // Dedicated HMAC secret — never reuse SUPABASE_SERVICE_ROLE_KEY for
+    // app-level signing. Falling back to the service-role key would mean
+    // every leaked calendar URL is a 128-bit prefix of an HMAC keyed
+    // with the platform's most sensitive secret.
+    const secret = process.env.CALENDAR_FEED_SECRET;
     if (!secret) {
+      console.error("[calendar] CALENDAR_FEED_SECRET not configured");
       return new NextResponse("Calendar feed not configured", { status: 503 });
     }
 
     const crypto = await import("crypto");
-    const expectedToken = crypto
+    const expected = crypto
       .createHmac("sha256", secret)
       .update(userId)
       .digest("hex")
       .slice(0, 32);
 
-    if (token !== expectedToken) {
+    const a = Buffer.from(token);
+    const b = Buffer.from(expected);
+    if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
       return new NextResponse("Invalid token", { status: 401 });
     }
 

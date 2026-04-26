@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { canAccess, type AdminScope } from "@/lib/admin/scopes";
+
+const bodySchema = z.object({
+  userId: z.string().uuid(),
+  enabled: z.boolean(),
+});
 
 /**
  * Admin toggle for profiles.ai_services_enabled. Only authenticated admins
@@ -24,24 +30,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
-  const body = (await req.json().catch(() => ({}))) as {
-    userId?: string;
-    enabled?: boolean;
-  };
-  if (!body.userId || typeof body.enabled !== "boolean") {
+  const raw = await req.json().catch(() => ({}));
+  const parsed = bodySchema.safeParse(raw);
+  if (!parsed.success) {
     return NextResponse.json(
-      { error: "userId and enabled required" },
+      { error: "invalid body", details: parsed.error.issues },
       { status: 400 }
     );
   }
+  const { userId, enabled } = parsed.data;
 
   const admin = createAdminClient();
   const { error } = await admin
     .from("profiles")
-    .update({ ai_services_enabled: body.enabled })
-    .eq("id", body.userId);
+    .update({ ai_services_enabled: enabled })
+    .eq("id", userId);
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[ai-services-toggle] update failed:", error.message);
+    return NextResponse.json({ error: "update failed" }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });
