@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { timingSafeEqual } from "crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getTranscriptReviewMode } from "@/lib/platform-config";
 import { signRecordingUrl } from "@/lib/video/r2-signing";
 import { transcribeRecording, TranscribeError } from "@/lib/ai/transcribe";
 import { buildTwinPayload } from "@/lib/ai/twin-payload";
@@ -233,6 +234,18 @@ export async function POST(req: NextRequest) {
     // ── Parent-facing summary ──────────────────────────────────────────
     const summary = await buildSessionSummary(whisper.text);
 
+    // Review mode controls who has to approve the summary before parent
+    // emails go out. 'auto' preserves the original behavior (immediate
+    // send); 'teacher_review' and 'admin_review' park the recording in
+    // an awaiting state for /api/recordings/[id]/approve-summary.
+    const reviewMode = await getTranscriptReviewMode();
+    const reviewStatus =
+      reviewMode === "teacher_review"
+        ? "awaiting_teacher"
+        : reviewMode === "admin_review"
+          ? "awaiting_admin"
+          : "auto_sent";
+
     await admin
       .from("session_recordings")
       .update({
@@ -240,8 +253,21 @@ export async function POST(req: NextRequest) {
         ai_status: "done",
         ai_status_error: null,
         ai_processed_at: new Date().toISOString(),
+        summary_review_status: reviewStatus,
       })
       .eq("id", recordingId);
+
+    if (reviewMode !== "auto") {
+      // Park: a reviewer will fire the email via the approve endpoint.
+      return NextResponse.json({
+        ok: true,
+        status: "awaiting_review",
+        reviewMode,
+        transcriptChars: whisper.text.length,
+        segments: payload.segments.length,
+        twinId,
+      });
+    }
 
     // ── Parent emails (gated per-parent on ai_services_enabled) ────────
     const parents = await loadParentRecipients(admin, liveClass.id);

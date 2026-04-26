@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { signRecordingUrl } from "@/lib/video/r2-signing";
+import { getRecordingVisibility } from "@/lib/platform-config";
 
 const paramsSchema = z.object({
   liveClassId: z.string().uuid(),
@@ -60,13 +61,16 @@ export async function GET(
       return NextResponse.json({ error: "Cours introuvable" }, { status: 404 });
     }
 
-    // Authorization
+    // Authorization. Admins always; teachers + parents only when the
+    // founder has flipped the corresponding visibility flag in
+    // platform_config (default off — recordings of minors stay locked
+    // until the founder is ready to expose them).
+    const visibility = await getRecordingVisibility();
     let authorized = role === "admin";
-    if (!authorized && role === "teacher" && liveClass.teacher_id === user.id) {
+    if (!authorized && role === "teacher" && visibility.teacher && liveClass.teacher_id === user.id) {
       authorized = true;
     }
-    if (!authorized && role === "parent") {
-      // Any learner of this parent must be enrolled in the class
+    if (!authorized && role === "parent" && visibility.parent) {
       const { data: enrolled } = await admin
         .from("enrollments")
         .select("learner_id")

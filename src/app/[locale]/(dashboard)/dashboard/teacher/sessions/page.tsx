@@ -4,7 +4,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { SUBJECT_LABELS, type Subject } from "@/types/domain";
 import { Link } from "@/i18n/routing";
-import { Calendar, Clock, Users, Video, PlayCircle } from "lucide-react";
+import { Calendar, Clock, Users, Video, PlayCircle, Lock } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -92,11 +92,18 @@ export default async function TeacherSessionsPage() {
     (myClassRows ?? []).map((c) => [c.id as string, c])
   );
 
+  const { getRecordingVisibility } = await import("@/lib/platform-config");
+  const visibility = await getRecordingVisibility();
+
+  // Recordings stay hidden from teachers until the founder flips
+  // recording_visibility_teacher in admin → settings. The summary text
+  // is still shown though (teacher needs it for review when the review
+  // mode requires their approval before parent emails go out).
   const { data: recRows } =
     myClassIds.length > 0
       ? await adminSupabase
           .from("session_recordings")
-          .select("id, live_class_id, duration_seconds, ended_at, summary, ai_status")
+          .select("id, live_class_id, duration_seconds, ended_at, summary, ai_status, summary_review_status")
           .in("live_class_id", myClassIds)
           .eq("status", "completed")
           .order("ended_at", { ascending: false })
@@ -238,15 +245,22 @@ export default async function TeacherSessionsPage() {
                       </div>
                     </div>
 
-                    <a
-                      href={`/api/recordings/${cls.id}/play?recordingId=${rec.id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 rounded-lg bg-[var(--ev-blue)] px-4 py-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[var(--ev-blue-light)]"
-                    >
-                      <PlayCircle className="size-3" />
-                      Revoir
-                    </a>
+                    {visibility.teacher ? (
+                      <a
+                        href={`/api/recordings/${cls.id}/play?recordingId=${rec.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 rounded-lg bg-[var(--ev-blue)] px-4 py-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[var(--ev-blue-light)]"
+                      >
+                        <PlayCircle className="size-3" />
+                        Revoir
+                      </a>
+                    ) : (
+                      <span className="flex items-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-xs font-medium text-slate-400">
+                        <Lock className="size-3" />
+                        Vid&eacute;o verrouill&eacute;e
+                      </span>
+                    )}
                   </div>
 
                   {summary ? (

@@ -15,6 +15,9 @@ const ALLOWED_KEYS = [
   "ai_provider_openai",
   "support_bot_enabled",
   "moderation_strict",
+  "recording_visibility_teacher",
+  "recording_visibility_parent",
+  "transcript_review_mode",
 ] as const;
 
 const bodySchema = z.object({
