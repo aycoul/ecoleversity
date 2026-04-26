@@ -1,29 +1,21 @@
 "use client";
 
+// IMPORTANT: this whole module is loaded only via next/dynamic from
+// livekit-room.tsx, with ssr: false. That means the static `import`
+// statements below — including `tldraw/tldraw.css` and `Tldraw` from
+// the tldraw package — only ever execute in the browser. Going static
+// here is fine because the dynamic boundary is upstream.
+
 import { useCallback, useEffect, useRef, useState } from "react";
-import dynamic from "next/dynamic";
 import { useRoomContext } from "@livekit/components-react";
 import {
   RoomEvent,
   type DataPublishOptions,
   type RemoteParticipant,
 } from "livekit-client";
+import { Tldraw } from "tldraw";
 import "tldraw/tldraw.css";
-import { Loader2, X } from "lucide-react";
-
-// Tldraw mounts a complex DOM tree synchronously and keeps a global
-// editor instance — Next.js App Router SSR'ing the page would crash
-// before hydration. `next/dynamic({ ssr: false })` ensures it only
-// renders client-side. The 'use client' directive on this file alone
-// is not sufficient; the parent page can still SSR the wrapper.
-const Tldraw = dynamic(async () => (await import("tldraw")).Tldraw, {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-full w-full items-center justify-center bg-white">
-      <Loader2 className="size-6 animate-spin text-slate-400" />
-    </div>
-  ),
-});
+import { X } from "lucide-react";
 
 // Editor type imported lazily — we only need it for the onMount typing.
 // Using `unknown` keeps the static bundle from pulling in the type
