@@ -143,6 +143,7 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
     ai_settings: "Paramètres IA",
     admins: "Administrateurs",
     review: "Revue des résumés",
+    finance: "Finance & KPI",
   };
   const ADMIN_PAGE_ICON: Record<AdminPage, string> = {
     overview: "layout-dashboard",
@@ -158,6 +159,7 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
     ai_settings: "settings",
     admins: "shield-check",
     review: "video",
+    finance: "trending-up",
   };
   // Section labels for sidebar grouping. Order here defines display order.
   // Keys map 1:1 to AdminPage. 'overview' has no section (sits above the
@@ -175,6 +177,7 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
     overview: undefined,
     payments: S_FINANCES,
     payouts: S_FINANCES,
+    finance: S_FINANCES,
     reports: S_MODERATION,
     strikes: S_MODERATION,
     tickets: S_MODERATION,
