@@ -2,19 +2,27 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { normalizeCIPhone } from "@/lib/phone";
 
-// Côte d'Ivoire mobile is +225 followed by a 10-digit subscriber number
-// (numbering plan since 2021). Allow either local format or full E.164.
-const CI_PHONE_RE = /^(?:\+?225)?\d{10}$/;
 const PAYOUT_PROVIDERS = ["orange_money", "wave", "mtn_momo", "wallet", "manual"] as const;
 
 const patchSchema = z.object({
   payout_phone: z
     .string()
-    .trim()
-    .min(10)
-    .max(15)
-    .regex(CI_PHONE_RE, "Numéro Côte d'Ivoire invalide"),
+    .min(8)
+    .max(20)
+    .transform((v, ctx) => {
+      const normalized = normalizeCIPhone(v);
+      if (!normalized) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "Numéro Côte d'Ivoire invalide. Format attendu : 10 chiffres (ex : 07 01 02 03 04, +225 07 01 02 03 04).",
+        });
+        return z.NEVER;
+      }
+      return normalized;
+    }),
   payout_provider: z.enum(PAYOUT_PROVIDERS),
 });
 
