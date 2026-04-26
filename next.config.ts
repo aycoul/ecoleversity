@@ -10,12 +10,8 @@ const LIVEKIT_HOST = "https://*.livekit.cloud wss://*.livekit.cloud";
 const R2_HOST = "https://*.r2.cloudflarestorage.com https://*.r2.dev";
 const PAYPAL_HOSTS = "https://www.paypal.com https://www.sandbox.paypal.com https://*.paypal.com";
 const SUPPORT_BOT = "https://api.anthropic.com";
-// LiveKit's track-processors package fetches Mediapipe's WASM + the
-// selfie segmenter model from these two CDNs at runtime. Without them
-// in connect-src the model download silently fails and Background
-// Blur "succeeds" but emits unblurred frames.
-const MEDIAPIPE_WASM = "https://cdn.jsdelivr.net";
-const MEDIAPIPE_MODEL = "https://storage.googleapis.com";
+// (Mediapipe WASM + segmenter model are now self-hosted under
+// /public/mediapipe/, so we no longer need CDN allowlists for them.)
 
 const csp = [
   "default-src 'self'",
@@ -23,16 +19,15 @@ const csp = [
   // tooling. Tightening further is a P2 — pin to a hash-list once the app
   // stabilizes.
   // 'wasm-unsafe-eval' is required by Chrome 104+ for WebAssembly
-  // compilation. MEDIAPIPE_WASM (cdn.jsdelivr.net) is needed because
-  // @mediapipe/tasks-vision loads vision_wasm_internal.js as a
-  // <script> tag at runtime, not a fetch — so script-src (not
-  // connect-src) is what gates it.
-  `script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' ${PAYPAL_HOSTS} ${MEDIAPIPE_WASM}`,
+  // compilation (Mediapipe segmenter, ~9MB of WASM). Mediapipe's
+  // helper script loads from /mediapipe/wasm/ — same-origin, so
+  // 'self' covers it without a CDN allowlist.
+  `script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' ${PAYPAL_HOSTS}`,
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: blob: ${SUPABASE_HOST} ${R2_HOST} ${PAYPAL_HOSTS}`,
   `media-src 'self' blob: ${SUPABASE_HOST} ${R2_HOST}`,
   "font-src 'self' data:",
-  `connect-src 'self' ${SUPABASE_HOST} wss://${SUPABASE_HOST.replace("https://", "")} ${LIVEKIT_HOST} ${R2_HOST} ${PAYPAL_HOSTS} ${SUPPORT_BOT} ${MEDIAPIPE_WASM} ${MEDIAPIPE_MODEL}`,
+  `connect-src 'self' ${SUPABASE_HOST} wss://${SUPABASE_HOST.replace("https://", "")} ${LIVEKIT_HOST} ${R2_HOST} ${PAYPAL_HOSTS} ${SUPPORT_BOT}`,
   "worker-src 'self' blob:",
   `frame-src 'self' ${PAYPAL_HOSTS}`,
   "frame-ancestors 'none'",
