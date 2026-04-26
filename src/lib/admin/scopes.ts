@@ -34,7 +34,9 @@ export type AdminPage =
   | "agents"
   | "analytics"
   | "ai_twins"
-  | "ai_settings";
+  | "ai_settings"
+  | "admins"
+  | "review";
 
 /** Scope → the set of pages that scope can access. */
 export const SCOPE_PAGES: Record<AdminScope, AdminPage[]> = {
@@ -50,9 +52,11 @@ export const SCOPE_PAGES: Record<AdminScope, AdminPage[]> = {
     "analytics",
     "ai_twins",
     "ai_settings",
+    "admins",
+    "review",
   ],
   finance: ["overview", "payments", "payouts", "analytics"],
-  moderation: ["overview", "reports", "strikes", "tickets"],
+  moderation: ["overview", "reports", "strikes", "tickets", "review"],
   verification: ["overview", "verification"],
   support: ["overview", "tickets"],
   analytics_viewer: ["overview", "analytics"],
@@ -75,6 +79,8 @@ export const PAGE_PATHS: Record<AdminPage, string> = {
   analytics: "/dashboard/admin/analytics",
   ai_twins: "/dashboard/admin/ai-twins",
   ai_settings: "/dashboard/admin/ai-settings",
+  admins: "/dashboard/admin/admins",
+  review: "/dashboard/admin/review",
 };
 
 /**

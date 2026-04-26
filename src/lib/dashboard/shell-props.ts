@@ -108,6 +108,25 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
     }
   }
 
+  // Teacher review badge — count of recordings awaiting this teacher's
+  // approval. Cheap query (one count(*) with a small index hit).
+  let teacherPendingReviewCount = 0;
+  if (role === "teacher") {
+    const { data: myClasses } = await supabase
+      .from("live_classes")
+      .select("id")
+      .eq("teacher_id", user.id);
+    const ids = (myClasses ?? []).map((c) => c.id as string);
+    if (ids.length > 0) {
+      const { count } = await supabase
+        .from("session_recordings")
+        .select("id", { count: "exact", head: true })
+        .in("live_class_id", ids)
+        .eq("summary_review_status", "awaiting_teacher");
+      teacherPendingReviewCount = count ?? 0;
+    }
+  }
+
   const t = await getTranslations("dashboard.sidebar");
 
   const ADMIN_PAGE_LABEL: Record<AdminPage, string> = {
@@ -122,6 +141,8 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
     analytics: t("analytics"),
     ai_twins: "Jumeaux IA",
     ai_settings: "Paramètres IA",
+    admins: "Administrateurs",
+    review: "Revue des résumés",
   };
   const ADMIN_PAGE_ICON: Record<AdminPage, string> = {
     overview: "layout-dashboard",
@@ -135,6 +156,8 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
     analytics: "bar-chart",
     ai_twins: "cpu",
     ai_settings: "settings",
+    admins: "shield-check",
+    review: "video",
   };
   // Section labels for sidebar grouping. Order here defines display order.
   // Keys map 1:1 to AdminPage. 'overview' has no section (sits above the
@@ -155,11 +178,13 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
     reports: S_MODERATION,
     strikes: S_MODERATION,
     tickets: S_MODERATION,
+    review: S_MODERATION,
     verification: S_OPERATIONS,
     analytics: S_OPERATIONS,
     ai_twins: S_IA,
     ai_settings: S_IA,
     agents: S_IA,
+    admins: S_OPERATIONS,
   };
 
   // Preserve the SCOPE_PAGES order for access control, but re-order within
@@ -221,6 +246,7 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
       { href: "/dashboard/teacher/sessions", label: t("upcomingSessions"), icon: "video", section: S_TEACHING },
       { href: "/dashboard/teacher/classes", label: t("liveClasses"), icon: "video", section: S_TEACHING },
       { href: "/dashboard/teacher/courses", label: t("recordedCourses"), icon: "play-circle", section: S_TEACHING },
+      { href: "/dashboard/teacher/review", label: "Revue des résumés", icon: "video", section: S_TEACHING, badge: teacherPendingReviewCount },
       { href: "/dashboard/teacher/earnings", label: t("earnings"), icon: "wallet", section: S_FINANCES },
       { href: "/dashboard/teacher/transactions", label: t("payments"), icon: "receipt", section: S_FINANCES },
       { href: "/dashboard/teacher/messages", label: t("messages"), icon: "message-circle", section: S_COMMS },
