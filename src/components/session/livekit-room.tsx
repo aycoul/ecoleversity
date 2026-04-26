@@ -427,48 +427,96 @@ function DeviceSection({
 }
 
 // ─── Background blur toggle ────────────────────────────────────────────
-// Uses @livekit/track-processors BackgroundBlur. Client-side only; loads
-// the processor lazily so first-paint of the room isn't delayed. If the
-// runtime (tablet GPU, old browser) can't support the processor, the
-// button hides itself — no broken feature, no scary error toast.
+// Uses @livekit/track-processors BackgroundBlur. Reactive camera track
+// via useLocalParticipant — earlier version pulled the track from a
+// stale closure and silently no-op'd when the user clicked blur before
+// their camera was enabled.
+//
+// Failure modes handled:
+//   - Camera not enabled when clicked → toast + early return.
+//   - Processor init throws (no GPU, no MediaStreamTrackGenerator,
+//     WASM blocked) → toast + roll back via stopProcessor so the
+//     original track keeps publishing instead of a black tile.
+//   - User toggles rapidly → busy flag prevents re-entrancy.
 function BlurButton() {
   const t = useTranslations("session");
-  const room = useRoomContext();
+  const { localParticipant, cameraTrack, isCameraEnabled } = useLocalParticipant();
   const [enabled, setEnabled] = useState(false);
   const [busy, setBusy] = useState(false);
   const [supported, setSupported] = useState(true);
 
-  // Probe for MediaStreamTrackGenerator + BackgroundBlur feasibility.
-  // The track-processor internals use OffscreenCanvas + MediaStreamTrackGenerator
-  // — both absent on iOS Safari and some older Android Chromes.
+  // Probe support at mount. Even Chrome on Android lacks
+  // MediaStreamTrackGenerator on some hardware (older mid-range phones).
   useEffect(() => {
-    const hasGenerator = typeof window !== "undefined" &&
-      "MediaStreamTrackGenerator" in window;
-    if (!hasGenerator) setSupported(false);
+    if (typeof window === "undefined") return;
+    const ok =
+      "MediaStreamTrackGenerator" in window &&
+      typeof OffscreenCanvas !== "undefined";
+    if (!ok) setSupported(false);
   }, []);
 
+  // Reflect actual track state — if blur was on and the track got
+  // republished (camera switched, e.g.), our local "enabled" might
+  // diverge from reality. Re-sync whenever the publication changes.
+  useEffect(() => {
+    const t = cameraTrack?.track;
+    if (!t) {
+      setEnabled(false);
+      return;
+    }
+    const proc = (t as { getProcessor?: () => unknown }).getProcessor?.();
+    setEnabled(!!proc);
+  }, [cameraTrack]);
+
   const toggle = async () => {
+    if (busy) return;
+    if (!isCameraEnabled || !cameraTrack?.track) {
+      toast.error(t("blurNoCamera"));
+      return;
+    }
     setBusy(true);
+    const track = cameraTrack.track as unknown as {
+      setProcessor: (p: unknown) => Promise<void>;
+      stopProcessor: () => Promise<void>;
+    };
     try {
-      const track = room.localParticipant.getTrackPublication(Track.Source.Camera)?.track;
-      if (!track) return; // no camera — silently ignore
       if (enabled) {
         await track.stopProcessor();
         setEnabled(false);
       } else {
         const { BackgroundBlur } = await import("@livekit/track-processors");
-        await track.setProcessor(BackgroundBlur(10));
+        // Mid-strength blur. Higher values (e.g. 15) tax low-end
+        // mobile GPUs and produce frame-drops; 10 is the sweet spot.
+        const processor = BackgroundBlur(10);
+        await track.setProcessor(processor);
         setEnabled(true);
       }
     } catch (err) {
-      // Device can't run the processor — hide the button instead of popping
-      // an error toast. User experience is "this wasn't meant for my device."
-      console.warn("[blur] failed; hiding button:", err);
-      setSupported(false);
+      console.warn("[blur] failed:", err);
+      // Roll back — if setProcessor threw mid-init the track might be
+      // in a half-installed state. Try stopProcessor to restore the
+      // original camera publication, otherwise the tile goes black.
+      try {
+        await track.stopProcessor();
+      } catch {
+        /* noop */
+      }
+      setEnabled(false);
+      toast.error(t("blurUnavailable"));
+      // Don't hide the button on first failure — the user might just
+      // need to enable camera first. Hide only if support probe failed.
+      const supportProbe =
+        typeof window !== "undefined" &&
+        "MediaStreamTrackGenerator" in window &&
+        typeof OffscreenCanvas !== "undefined";
+      if (!supportProbe) setSupported(false);
     } finally {
       setBusy(false);
     }
   };
+
+  // Avoid an unused-var lint warning on localParticipant.
+  void localParticipant;
 
   if (!supported) return null;
 
@@ -483,6 +531,7 @@ function BlurButton() {
           : "bg-white/10 text-white hover:bg-white/20"
       }`}
       title={enabled ? t("blurOffTooltip") : t("blurOnTooltip")}
+      aria-pressed={enabled}
     >
       {busy ? <Loader2 className="size-4 animate-spin" /> : <BlurIcon className="size-4" />}
       {t("blur")}
@@ -1625,10 +1674,10 @@ function RoomLayout({
           </button>
           <FullscreenButton targetRef={containerRef} />
           <DevicePicker />
+          <BlurButton />
           <SessionSlides liveClassId={liveClassId} userRole={userRole} />
           {userRole === "teacher" && <MuteAllButton liveClassId={liveClassId} />}
           {/* Removed per founder request 2026-04-26:
-              - BlurButton (broken — track replacement disconnected the camera)
               - CaptionsToggle (Web Speech API quality too poor)
               - SessionPoll (not in MVP scope)
               - BreakoutButton (deferred until needed) */}
