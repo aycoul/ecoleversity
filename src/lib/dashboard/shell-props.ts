@@ -144,6 +144,7 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
     admins: "Administrateurs",
     review: "Revue des résumés",
     finance: "Finance & KPI",
+    operations: "Opérations en direct",
   };
   const ADMIN_PAGE_ICON: Record<AdminPage, string> = {
     overview: "layout-dashboard",
@@ -160,6 +161,7 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
     admins: "shield-check",
     review: "video",
     finance: "trending-up",
+    operations: "video",
   };
   // Section labels for sidebar grouping. Order here defines display order.
   // Keys map 1:1 to AdminPage. 'overview' has no section (sits above the
@@ -188,6 +190,7 @@ export async function getDashboardShellProps(): Promise<DashboardShellProps | nu
     ai_settings: S_IA,
     agents: S_IA,
     admins: S_OPERATIONS,
+    operations: S_OPERATIONS,
   };
 
   // Preserve the SCOPE_PAGES order for access control, but re-order within
