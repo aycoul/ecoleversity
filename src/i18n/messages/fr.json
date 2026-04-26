@@ -582,7 +582,8 @@
     "screenShare": "Partager",
     "screenShareStop": "Arrêter le partage",
     "screenShareTooltip": "Partager votre écran",
-    "screenShareStopTooltip": "Arrêter de partager votre écran"
+    "screenShareStopTooltip": "Arrêter de partager votre écran",
+    "screenShareActive": "Vous partagez votre écran"
   },
   "rating": {
     "title": "Évaluer votre cours",
