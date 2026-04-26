@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { TeacherVerificationCard } from "@/components/admin/teacher-verification-card";
 import { ShieldCheck } from "lucide-react";
 import { canAccess, type AdminScope } from "@/lib/admin/scopes";
+import { signTeacherDocPath } from "@/lib/storage/teacher-documents";
 
 // Don't prerender — the teacher queue changes every time a new teacher
 // submits docs. Always hit the DB at request time.
@@ -72,6 +73,21 @@ export default async function VerificationPage() {
     (profileRows ?? []).map((p) => [p.id as string, p])
   );
 
+  // Mint signed URLs for the private bucket so admins can view docs.
+  // Old data still stored as full URLs returns null here — the card
+  // shows a "needs re-upload" prompt in that case.
+  const signedUrlsByTeacher = new Map<string, { cni: string | null; diploma: string | null; video: string | null }>();
+  await Promise.all(
+    teachers.map(async (t) => {
+      const [cni, diploma, video] = await Promise.all([
+        signTeacherDocPath(t.id_document_url as string | null),
+        signTeacherDocPath(t.diploma_url as string | null),
+        signTeacherDocPath(t.video_intro_url as string | null, 60 * 30),
+      ]);
+      signedUrlsByTeacher.set(t.id as string, { cni, diploma, video });
+    })
+  );
+
   return (
     <div className="space-y-6 pb-16">
       <div className="flex items-center gap-3">
@@ -98,6 +114,7 @@ export default async function VerificationPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {teachers.map((teacher) => {
             const p = profileById.get(teacher.id as string);
+            const signed = signedUrlsByTeacher.get(teacher.id as string);
             return (
               <TeacherVerificationCard
                 key={teacher.id as string}
@@ -108,9 +125,9 @@ export default async function VerificationPage() {
                 avatarUrl={(p?.avatar_url as string | null | undefined) ?? null}
                 subjects={(teacher.subjects as string[]) ?? []}
                 gradeLevels={(teacher.grade_levels as string[]) ?? []}
-                cniUrl={(teacher.id_document_url as string | null) ?? null}
-                diplomaUrl={(teacher.diploma_url as string | null) ?? null}
-                videoUrl={(teacher.video_intro_url as string | null) ?? null}
+                cniUrl={signed?.cni ?? null}
+                diplomaUrl={signed?.diploma ?? null}
+                videoUrl={signed?.video ?? null}
                 createdAt={teacher.created_at as string}
               />
             );
