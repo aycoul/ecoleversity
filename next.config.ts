@@ -24,6 +24,10 @@ const csp = [
   `media-src 'self' blob: ${SUPABASE_HOST} ${R2_HOST}`,
   `font-src 'self' data: ${TLDRAW_HOST}`,
   `connect-src 'self' ${SUPABASE_HOST} wss://${SUPABASE_HOST.replace("https://", "")} ${LIVEKIT_HOST} ${R2_HOST} ${PAYPAL_HOSTS} ${SUPPORT_BOT} ${TLDRAW_HOST}`,
+  // tldraw uses Web Workers for image-export rasterisation. blob: scheme
+  // is required because the worker bundle is materialised client-side.
+  "worker-src 'self' blob:",
+  "child-src 'self' blob:",
   `frame-src 'self' ${PAYPAL_HOSTS}`,
   "frame-ancestors 'none'",
   "base-uri 'self'",

@@ -1546,17 +1546,21 @@ function RoomLayout({
           </div>
         </aside>
 
-        {/* Whiteboard overlay (z-30) sits above the slides viewer (z-20)
-            so a teacher can annotate over their slides if they open both.
-            Kept mounted always (CSS-hidden when closed) so strokes drawn
-            before closing the panel survive reopening. Full unmount would
-            reset itemsRef, making the board appear empty on reopen. */}
-        <div
-          className={`absolute inset-0 z-30 ${whiteboardOpen ? "" : "hidden"}`}
-          aria-hidden={!whiteboardOpen}
-        >
-          <TldrawWhiteboard onClose={() => setWhiteboardOpen(false)} />
-        </div>
+        {/* Whiteboard overlay (z-30). Conditionally mounted — tldraw's
+            built-in IndexedDB persistence keeps the local store across
+            mount/unmount, and remote peers send a snapshot via the
+            handshake so reopens restore state. Conditional mount avoids
+            the "appear-and-disappear" failure mode caused by tldraw
+            measuring its 0x0 hidden container at first mount and then
+            never recovering when the parent flipped to visible. */}
+        {whiteboardOpen && (
+          <div
+            className="absolute inset-0 z-30"
+            aria-hidden={!whiteboardOpen}
+          >
+            <TldrawWhiteboard onClose={() => setWhiteboardOpen(false)} />
+          </div>
+        )}
       </div>
 
       {/* Primary control bar — compact, identical on tablet + laptop.
