@@ -100,6 +100,26 @@ export async function SessionPageContent({
   }
   if (!authorized) redirect("/");
 
+  // Time-gate: parents can only enter the live room within the class
+  // window. Teachers and admins can enter any time (set-up before,
+  // wrap-up after). Window: 15 min before scheduled_at → 30 min after
+  // expected end. Outside window, redirect to dashboard with a flag
+  // so the page can show a "session not yet started / already ended"
+  // message.
+  if (role === "parent") {
+    const startMs = new Date(liveClass.scheduled_at as string).getTime();
+    const endMs = startMs + ((liveClass.duration_minutes as number) ?? 60) * 60 * 1000;
+    const now = Date.now();
+    const earliestEntryMs = startMs - 15 * 60 * 1000;
+    const latestEntryMs = endMs + 30 * 60 * 1000;
+    if (now < earliestEntryMs) {
+      redirect("/dashboard/parent/sessions?notice=too_early");
+    }
+    if (now > latestEntryMs) {
+      redirect("/dashboard/parent/sessions?notice=ended");
+    }
+  }
+
   const { count: completedRecordings } = await supabase
     .from("session_recordings")
     .select("id", { count: "exact", head: true })

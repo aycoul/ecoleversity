@@ -150,6 +150,17 @@ export function LoginForm() {
       return;
     }
 
+    // Single-session enforcement: kick any other session for this user
+    // (other browsers / devices). Best-effort — if Supabase declines
+    // the call we still proceed with the new session. Prevents account
+    // sharing where two people log in to the same account on different
+    // devices simultaneously.
+    try {
+      await supabase.auth.signOut({ scope: "others" });
+    } catch {
+      /* noop */
+    }
+
     const { path } = await getAuthRedirect(supabase);
     // Full-page navigation — see note above.
     window.location.href = path;
