@@ -26,11 +26,9 @@ import "@livekit/components-styles";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { ModeratedChat } from "./moderated-chat";
-import { SessionPoll } from "./session-poll";
 import { SessionSlides } from "./session-slides";
-import { CaptionsToggle, CaptionsOverlay } from "./session-captions";
 import { useLocale } from "next-intl";
-import { Hand, Users, Loader2, Presentation, LayoutGrid, Maximize2, Minimize2, Pin, PinOff, ChevronRight, ChevronLeft, MicOff, Settings2, Sparkles as BlurIcon, BarChart3, FileText, DoorOpen, Captions, MessageCircle, Monitor, MonitorOff } from "lucide-react";
+import { Hand, Users, Loader2, Presentation, LayoutGrid, Maximize2, Minimize2, Pin, PinOff, ChevronRight, ChevronLeft, MicOff, Settings2, Sparkles as BlurIcon, FileText, DoorOpen, MessageCircle, Monitor, MonitorOff } from "lucide-react";
 import { Whiteboard } from "./whiteboard";
 
 // LiveKit room options. Simulcast is on by default in the JS client but we
@@ -1445,7 +1443,6 @@ function RoomLayout({
             />
           )}
           <RaisedHandsPanel userRole={userRole} />
-          <CaptionsOverlay />
           <ScreenShareBanner />
           {effectiveMode === "speaker" ? (
             <PresentationLayout
@@ -1585,18 +1582,13 @@ function RoomLayout({
           </button>
           <FullscreenButton targetRef={containerRef} />
           <DevicePicker />
-          <BlurButton />
-          <CaptionsToggle locale={locale} />
-          <SessionPoll userRole={userRole} />
           <SessionSlides liveClassId={liveClassId} userRole={userRole} />
           {userRole === "teacher" && <MuteAllButton liveClassId={liveClassId} />}
-          <BreakoutButton
-            liveClassId={liveClassId}
-            userRole={userRole}
-            inBreakout={!!breakout}
-            onSwap={onSwapBreakout}
-            onReturn={onReturnToMain}
-          />
+          {/* Removed per founder request 2026-04-26:
+              - BlurButton (broken — track replacement disconnected the camera)
+              - CaptionsToggle (Web Speech API quality too poor)
+              - SessionPoll (not in MVP scope)
+              - BreakoutButton (deferred until needed) */}
         </PlusMenu>
       </div>
     </div>
