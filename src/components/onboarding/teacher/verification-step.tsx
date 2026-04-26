@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { createClient } from "@/lib/supabase/client";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,8 +33,7 @@ export function VerificationStep({ onSaved }: VerificationStepProps) {
 
   const uploadFile = async (
     file: File,
-    folder: string,
-    field: string,
+    docType: "cni" | "diploma" | "video",
     setStatus: (s: UploadStatus) => void,
     setName: (n: string) => void
   ) => {
@@ -43,28 +41,18 @@ export function VerificationStep({ onSaved }: VerificationStepProps) {
     setName(file.name);
 
     try {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifié");
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("docType", docType);
 
-      const ext = file.name.split(".").pop();
-      const path = `${folder}/${user.id}.${ext}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("teacher-documents")
-        .upload(path, file, { upsert: true });
-      if (uploadError) throw uploadError;
-
-      const { data: urlData } = supabase.storage
-        .from("teacher-documents")
-        .getPublicUrl(path);
-
-      const { error: dbError } = await supabase
-        .from("teacher_profiles")
-        .update({ [field]: urlData.publicUrl })
-        .eq("user_id", user.id);
-      if (dbError) throw dbError;
-
+      const res = await fetch("/api/teacher/upload-document", {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error ?? "Echec du telechargement");
+      }
       setStatus("done");
     } catch (err) {
       setStatus("error");
@@ -74,14 +62,13 @@ export function VerificationStep({ onSaved }: VerificationStepProps) {
 
   const handleFileSelect = (
     e: React.ChangeEvent<HTMLInputElement>,
-    folder: string,
-    field: string,
+    docType: "cni" | "diploma" | "video",
     setStatus: (s: UploadStatus) => void,
     setName: (n: string) => void
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    uploadFile(file, folder, field, setStatus, setName);
+    uploadFile(file, docType, setStatus, setName);
   };
 
   const allDone = cniStatus === "done" && diplomaStatus === "done";
@@ -93,8 +80,7 @@ export function VerificationStep({ onSaved }: VerificationStepProps) {
     status: UploadStatus,
     fileName: string,
     icon: React.ReactNode,
-    folder: string,
-    field: string,
+    docType: "cni" | "diploma" | "video",
     setStatus: (s: UploadStatus) => void,
     setName: (n: string) => void
   ) => (
@@ -143,7 +129,7 @@ export function VerificationStep({ onSaved }: VerificationStepProps) {
         id={id}
         type="file"
         accept={accept}
-        onChange={(e) => handleFileSelect(e, folder, field, setStatus, setName)}
+        onChange={(e) => handleFileSelect(e, docType, setStatus, setName)}
         className="hidden"
         disabled={status === "uploading"}
       />
@@ -165,7 +151,6 @@ export function VerificationStep({ onSaved }: VerificationStepProps) {
         cniName,
         <FileText className="size-8 text-slate-400" />,
         "cni",
-        "id_document_url",
         setCniStatus,
         setCniName
       )}
@@ -177,8 +162,7 @@ export function VerificationStep({ onSaved }: VerificationStepProps) {
         diplomaStatus,
         diplomaName,
         <Upload className="size-8 text-slate-400" />,
-        "diplomas",
-        "diploma_url",
+        "diploma",
         setDiplomaStatus,
         setDiplomaName
       )}
@@ -190,8 +174,7 @@ export function VerificationStep({ onSaved }: VerificationStepProps) {
         videoStatus,
         videoName,
         <Video className="size-8 text-slate-400" />,
-        "videos",
-        "video_intro_url",
+        "video",
         setVideoStatus,
         setVideoName
       )}

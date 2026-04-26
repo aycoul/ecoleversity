@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { timingSafeEqual } from "crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { signRecordingUrl } from "@/lib/video/r2-signing";
 import { transcribeRecording, TranscribeError } from "@/lib/ai/transcribe";
@@ -76,7 +77,10 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
-  if (req.headers.get(POST_PROCESS_SECRET_HEADER) !== secret) {
+  const provided = req.headers.get(POST_PROCESS_SECRET_HEADER) ?? "";
+  const a = Buffer.from(provided);
+  const b = Buffer.from(secret);
+  if (a.length !== b.length || !timingSafeEqual(a, b)) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
@@ -94,10 +98,8 @@ export async function POST(req: NextRequest) {
     .eq("id", recordingId)
     .maybeSingle<RecordingRow>();
   if (recErr || !recording) {
-    return NextResponse.json(
-      { error: `recording not found: ${recErr?.message ?? "null"}` },
-      { status: 404 }
-    );
+    console.error("[post-process] recording not found:", recErr?.message);
+    return NextResponse.json({ error: "recording_not_found" }, { status: 404 });
   }
 
   // Idempotency: if a previous call already finished, short-circuit.
@@ -278,8 +280,9 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     const message = toErrorMessage(err);
+    console.error("[post-process] failed:", message);
     await markFailed(admin, recordingId, message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "post_process_failed" }, { status: 500 });
   }
 }
 

@@ -111,7 +111,7 @@ export async function POST(request: Request) {
     const e = err as Error;
     console.error("[verify-teacher] error:", e.name, e.message);
     return NextResponse.json(
-      { error: "Erreur interne du serveur", hint: e.message },
+      { error: "Erreur interne du serveur" },
       { status: 500 }
     );
   }

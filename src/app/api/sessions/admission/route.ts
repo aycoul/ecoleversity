@@ -123,7 +123,11 @@ export async function POST(request: NextRequest) {
   }
 }
 
-/** GET /api/sessions/admission?liveClassId=<uuid> — list admissions */
+/** GET /api/sessions/admission?liveClassId=<uuid> — list admissions
+ *
+ * Roster contains kid display names — restricted to the teacher of the
+ * class, parents with an enrolled learner, or admins. Anyone else gets 403.
+ */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const liveClassId = searchParams.get("liveClassId");
@@ -142,6 +146,39 @@ export async function GET(request: NextRequest) {
   }
 
   const admin = createAdminClient();
+
+  const { data: liveClass } = await admin
+    .from("live_classes")
+    .select("teacher_id")
+    .eq("id", liveClassId)
+    .maybeSingle();
+  if (!liveClass) {
+    return NextResponse.json({ error: "Cours introuvable" }, { status: 404 });
+  }
+
+  const isTeacher = liveClass.teacher_id === user.id;
+
+  const { data: profile } = await admin
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+  const isAdmin = profile?.role === "admin";
+
+  let isEnrolledParent = false;
+  if (!isTeacher && !isAdmin) {
+    const { data: enrolled } = await admin
+      .from("enrollments")
+      .select("learner_id, learner_profiles!inner(parent_id)")
+      .eq("live_class_id", liveClassId)
+      .eq("learner_profiles.parent_id", user.id)
+      .limit(1);
+    isEnrolledParent = (enrolled ?? []).length > 0;
+  }
+
+  if (!isTeacher && !isAdmin && !isEnrolledParent) {
+    return NextResponse.json({ error: "Non autorise" }, { status: 403 });
+  }
 
   const { data: admissions } = await admin
     .from("session_admissions")

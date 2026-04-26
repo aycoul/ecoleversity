@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { z } from "zod";
 import { chatWithAma } from "@/lib/ai/support-bot";
+import { rateLimit } from "@/lib/rate-limit";
 
 const chatSchema = z.object({
   messages: z.array(
@@ -18,6 +19,16 @@ export async function POST(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+    }
+
+    // Cap each user to 30 Ama messages per hour — every reply hits Claude
+    // and counts against the platform's API budget.
+    const limit = await rateLimit("support-chat", user.id, 30, 60 * 60);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: "Trop de messages. Réessayez dans une heure." },
+        { status: 429 },
+      );
     }
 
     const body = await request.json();

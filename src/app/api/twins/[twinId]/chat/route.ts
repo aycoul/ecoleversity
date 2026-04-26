@@ -6,6 +6,7 @@ import { embedQuery } from "@/lib/ai/embeddings";
 import { SUBJECT_LABELS, type Subject } from "@/types/domain";
 import { isTwinPublicAccessEnabled } from "@/lib/ai/twin-access";
 import type { TeachingStyleProfile } from "@/lib/ai/twin-style-aggregator";
+import { rateLimit } from "@/lib/rate-limit";
 
 /**
  * Twin conversation endpoint — the brain. Retrieves relevant transcript
@@ -65,6 +66,16 @@ export async function POST(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
+  // Cap each user to 40 twin messages per hour — chat hits Claude +
+  // pgvector embedding on every turn.
+  const limit = await rateLimit("twin-chat", user.id, 40, 60 * 60);
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { error: "Trop de messages. Réessayez dans une heure." },
+      { status: 429 },
+    );
+  }
 
   const { data: me } = await supabase
     .from("profiles")
