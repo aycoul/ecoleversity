@@ -1,125 +1,159 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { useRoomContext } from "@livekit/components-react";
 import {
   RoomEvent,
   type DataPublishOptions,
   type RemoteParticipant,
 } from "livekit-client";
-import {
-  Tldraw,
-  type Editor,
-  type TLStoreSnapshot,
-  type RecordsDiff,
-  type TLRecord,
-} from "tldraw";
 import "tldraw/tldraw.css";
-import { X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
+
+// Tldraw mounts a complex DOM tree synchronously and keeps a global
+// editor instance — Next.js App Router SSR'ing the page would crash
+// before hydration. `next/dynamic({ ssr: false })` ensures it only
+// renders client-side. The 'use client' directive on this file alone
+// is not sufficient; the parent page can still SSR the wrapper.
+const Tldraw = dynamic(async () => (await import("tldraw")).Tldraw, {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full w-full items-center justify-center bg-white">
+      <Loader2 className="size-6 animate-spin text-slate-400" />
+    </div>
+  ),
+});
+
+// Editor type imported lazily — we only need it for the onMount typing.
+// Using `unknown` keeps the static bundle from pulling in the type
+// graph just for one annotation.
+type AnyEditor = {
+  store: {
+    listen: (
+      cb: (entry: {
+        source: string;
+        changes: unknown;
+      }) => void,
+      opts?: { source?: string; scope?: string }
+    ) => () => void;
+    mergeRemoteChanges: (cb: () => void) => void;
+    applyDiff: (changes: unknown) => void;
+    getStoreSnapshot: () => unknown;
+    loadStoreSnapshot: (snapshot: unknown) => void;
+    schema: { serialize: () => unknown };
+  };
+};
 
 /**
- * Real-time multi-user whiteboard backed by tldraw, synchronised over
- * LiveKit data channels. Drop-in replacement for the previous custom
- * canvas whiteboard — same `onClose` contract, same "kept mounted with
- * display:none when closed" pattern in the parent.
+ * tldraw whiteboard with LiveKit-data-channel sync.
  *
- * Sync protocol (room data channel, JSON over Uint8Array):
- *   - { type: "tld_diff", changes }   broadcast on local edit
- *   - { type: "tld_request" }         late-joiner asks for snapshot
- *   - { type: "tld_snapshot", store } any peer answers with full state
+ * Sync is best-effort: if the broadcast fails or a peer sends a diff
+ * we can't apply, we log + continue rather than break the local board.
+ * That way a sync regression never blocks the user from drawing.
  *
- * "user" source filtering on outgoing diffs prevents echoing remote
- * changes back to the network. mergeRemoteChanges + applyDiff on
- * incoming makes those edits invisible to the local change listener,
- * which is what the framework expects for cross-peer sync.
+ * Protocol over the room data channel:
+ *   { type: "tld_diff", changes }    local user edit
+ *   { type: "tld_request" }          new joiner asks for current state
+ *   { type: "tld_snapshot", store }  any peer answers (jittered 0-250ms)
  */
 export function TldrawWhiteboard({ onClose }: { onClose: () => void }) {
   const room = useRoomContext();
-  const [editor, setEditor] = useState<Editor | null>(null);
-  const editorRef = useRef<Editor | null>(null);
-  // Set once we've received a snapshot from any peer (or determined
-  // we're the first one in). Until then, we hold local edits aside —
-  // they'd be overwritten the moment a snapshot arrives.
+  const [editor, setEditor] = useState<AnyEditor | null>(null);
+  const editorRef = useRef<AnyEditor | null>(null);
   const ready = useRef(false);
-  // Avoid a thundering snapshot reply when many peers are present:
-  // the first peer that broadcasts a snapshot wins, others stand down.
   const snapshotPending = useRef(false);
 
-  // ── Outgoing: broadcast local edits ─────────────────────────────
+  // Outgoing — broadcast local user edits.
   useEffect(() => {
     if (!editor) return;
-    const off = editor.store.listen(
-      (entry) => {
-        if (entry.source !== "user") return;
-        if (!ready.current) return; // pre-handshake edits don't count
-        const payload = new TextEncoder().encode(
-          JSON.stringify({ type: "tld_diff", changes: entry.changes })
-        );
-        room.localParticipant
-          .publishData(payload, { reliable: true } as DataPublishOptions)
-          .catch((err) => console.warn("[tldraw] publish diff failed:", err));
-      },
-      { source: "user", scope: "document" }
-    );
-    return () => off();
+    let off: (() => void) | undefined;
+    try {
+      off = editor.store.listen(
+        (entry) => {
+          if (entry.source !== "user") return;
+          if (!ready.current) return;
+          try {
+            const payload = new TextEncoder().encode(
+              JSON.stringify({ type: "tld_diff", changes: entry.changes })
+            );
+            void room.localParticipant.publishData(payload, {
+              reliable: true,
+            } as DataPublishOptions);
+          } catch (err) {
+            console.warn("[tldraw] publish diff failed:", err);
+          }
+        },
+        { source: "user", scope: "document" }
+      );
+    } catch (err) {
+      console.warn("[tldraw] store.listen failed:", err);
+    }
+    return () => {
+      try { off?.(); } catch { /* noop */ }
+    };
   }, [editor, room]);
 
-  // ── Incoming: apply diffs / handle handshake ────────────────────
+  // Incoming — apply diffs / handle handshake.
   useEffect(() => {
     if (!editor) return;
-
     const send = (payload: object) => {
-      const data = new TextEncoder().encode(JSON.stringify(payload));
-      room.localParticipant
-        .publishData(data, { reliable: true } as DataPublishOptions)
-        .catch((err) => console.warn("[tldraw] publish failed:", err));
+      try {
+        const data = new TextEncoder().encode(JSON.stringify(payload));
+        void room.localParticipant.publishData(data, {
+          reliable: true,
+        } as DataPublishOptions);
+      } catch (err) {
+        console.warn("[tldraw] publish failed:", err);
+      }
     };
 
     const onData = (
       payload: Uint8Array,
-      _participant?: RemoteParticipant,
-      _kind?: unknown,
-      _topic?: string
+      _participant?: RemoteParticipant
     ) => {
-      let msg: { type: string; changes?: RecordsDiff<TLRecord>; store?: TLStoreSnapshot["store"] };
+      let msg: { type?: string; changes?: unknown; store?: unknown };
       try {
         msg = JSON.parse(new TextDecoder().decode(payload));
       } catch {
         return;
       }
+      if (!msg.type || !String(msg.type).startsWith("tld_")) return;
 
-      if (msg.type === "tld_diff" && msg.changes) {
-        editor.store.mergeRemoteChanges(() => {
-          editor.store.applyDiff(msg.changes!);
-        });
-        ready.current = true;
-        return;
-      }
-
-      if (msg.type === "tld_request") {
-        // Race protection: only the first peer responds within ~250ms.
-        if (snapshotPending.current) return;
-        snapshotPending.current = true;
-        setTimeout(() => {
-          if (!editorRef.current) return;
-          const snapshot = editorRef.current.store.getStoreSnapshot();
-          send({ type: "tld_snapshot", store: snapshot.store });
-          snapshotPending.current = false;
-        }, Math.floor(Math.random() * 250));
-        return;
-      }
-
-      if (msg.type === "tld_snapshot" && msg.store) {
-        // Apply the authoritative snapshot. Any local edits made before
-        // the handshake are overwritten by design — first joiner wins.
-        editor.store.mergeRemoteChanges(() => {
-          editor.store.loadStoreSnapshot({
-            store: msg.store!,
-            schema: editor.store.schema.serialize(),
+      try {
+        if (msg.type === "tld_diff" && msg.changes) {
+          editor.store.mergeRemoteChanges(() => {
+            editor.store.applyDiff(msg.changes);
           });
-        });
-        ready.current = true;
-        return;
+          ready.current = true;
+          return;
+        }
+        if (msg.type === "tld_request") {
+          if (snapshotPending.current) return;
+          snapshotPending.current = true;
+          setTimeout(() => {
+            try {
+              if (editorRef.current) {
+                const snap = editorRef.current.store.getStoreSnapshot();
+                send({ type: "tld_snapshot", store: snap });
+              }
+            } catch (err) {
+              console.warn("[tldraw] snapshot reply failed:", err);
+            } finally {
+              snapshotPending.current = false;
+            }
+          }, Math.floor(Math.random() * 250));
+          return;
+        }
+        if (msg.type === "tld_snapshot" && msg.store) {
+          editor.store.mergeRemoteChanges(() => {
+            editor.store.loadStoreSnapshot(msg.store);
+          });
+          ready.current = true;
+          return;
+        }
+      } catch (err) {
+        console.warn("[tldraw] apply incoming failed:", err);
       }
     };
 
@@ -129,33 +163,27 @@ export function TldrawWhiteboard({ onClose }: { onClose: () => void }) {
     };
   }, [editor, room]);
 
-  // ── Handshake on mount: ask any peer for the current state ──────
-  // After ~1.2s with no reply we assume we're alone and unblock local
-  // edits. We re-ask whenever a new peer connects, in case we were
-  // alone when we joined and now there's someone else to learn from.
+  // Handshake on mount: ask for state, fall back after 1.2s if no reply.
   useEffect(() => {
     if (!editor) return;
     editorRef.current = editor;
-
-    const requestSnapshot = () => {
+    try {
       const data = new TextEncoder().encode(JSON.stringify({ type: "tld_request" }));
-      room.localParticipant
-        .publishData(data, { reliable: true } as DataPublishOptions)
-        .catch(() => {});
-    };
-
-    requestSnapshot();
+      void room.localParticipant.publishData(data, {
+        reliable: true,
+      } as DataPublishOptions);
+    } catch {
+      /* noop */
+    }
     const fallback = setTimeout(() => {
       ready.current = true;
     }, 1200);
-
     return () => clearTimeout(fallback);
   }, [editor, room]);
 
-  // Lock the canvas behind the panel's visibility — when the panel is
-  // hidden by display:none in the parent, we don't bother handshaking.
-  const onMount = useCallback((ed: Editor) => {
-    setEditor(ed);
+  // tldraw v4 onMount provides the Editor instance.
+  const onMount = useCallback((ed: unknown) => {
+    setEditor(ed as AnyEditor);
   }, []);
 
   return (
