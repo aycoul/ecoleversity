@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
       e?.stack,
     );
     return NextResponse.json(
-      { error: "Erreur interne du serveur", hint: e?.message ?? String(err) },
+      { error: "Erreur interne du serveur" },
       { status: 500 }
     );
   }

@@ -109,7 +109,7 @@ export async function PATCH(request: NextRequest) {
     const e = err as Error;
     console.error("[agents/config PATCH]:", e.name, e.message);
     return NextResponse.json(
-      { error: "Erreur interne du serveur", hint: e.message },
+      { error: "Erreur interne du serveur" },
       { status: 500 }
     );
   }

@@ -3,6 +3,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { z } from "zod";
 import { detectPII, blockReasonMessage } from "@/lib/moderation/pii-detector";
 import { sendNotification } from "@/lib/notifications/service";
+import { rateLimit } from "@/lib/rate-limit";
 
 const sendMessageSchema = z.object({
   conversationId: z.string().uuid(),
@@ -116,6 +117,16 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+    }
+
+    // Cap each user to 20 messages/min — every send fans out to WhatsApp,
+    // email, and push notifications, all of which cost real money.
+    const limit = await rateLimit("messages", user.id, 20, 60);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: "Trop de messages. Patientez quelques instants." },
+        { status: 429 },
+      );
     }
 
     // Verify user is a participant

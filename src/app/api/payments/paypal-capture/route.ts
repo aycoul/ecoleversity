@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
         updateError.details,
       );
       return NextResponse.json(
-        { error: "Erreur lors de la confirmation du paiement", hint: updateError.message },
+        { error: "Erreur lors de la confirmation du paiement" },
         { status: 500 },
       );
     }

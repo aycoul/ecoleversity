@@ -35,6 +35,32 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Cours introuvable" }, { status: 404 });
   }
 
+  // Restrict to teacher / enrolled parent / admin so the teacher↔class
+  // graph isn't enumerable by any logged-in user.
+  const isTeacher = liveClass.teacher_id === user.id;
+  let allowed = isTeacher;
+  if (!allowed) {
+    const { data: profile } = await admin
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (profile?.role === "admin") {
+      allowed = true;
+    } else {
+      const { data: enrolled } = await admin
+        .from("enrollments")
+        .select("learner_id, learner_profiles!inner(parent_id)")
+        .eq("live_class_id", liveClassId)
+        .eq("learner_profiles.parent_id", user.id)
+        .limit(1);
+      allowed = (enrolled ?? []).length > 0;
+    }
+  }
+  if (!allowed) {
+    return NextResponse.json({ error: "Non autorise" }, { status: 403 });
+  }
+
   // Check if teacher has an admission record (they auto-admit themselves when joining)
   const { data: admission } = await admin
     .from("session_admissions")

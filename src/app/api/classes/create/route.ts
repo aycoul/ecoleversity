@@ -98,6 +98,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Only fully-verified teachers may publish classes — pending or rejected
+    // accounts must not appear in the catalog.
+    const { data: teacherProfile } = await supabase
+      .from("teacher_profiles")
+      .select("verification_status")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (!teacherProfile || teacherProfile.verification_status !== "fully_verified") {
+      return NextResponse.json(
+        { error: "Votre compte enseignant doit etre verifie pour creer un cours" },
+        { status: 403 }
+      );
+    }
+
     // Build the classes to insert. For weekly: N sessions spaced 7 days apart.
     // For one_time: exactly 1 session.
     const totalSessions = recurrence === "weekly" ? sessionsCount : 1;
