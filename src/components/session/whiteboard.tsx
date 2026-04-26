@@ -1,820 +1,1388 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+/**
+ * Whiteboard v2 — designed for stylus + writing pad input.
+ *
+ * Architecture
+ * ─────────────
+ * - World coordinates (absolute floats), not normalised 0..1. Viewport
+ *   transform (translate + scale) maps world → screen so pan/zoom is a
+ *   pure CSS-free, ctx.setTransform call.
+ * - Two canvases stacked:
+ *     bgCanvas   — persistent items, redraw only when items change OR
+ *                  viewport changes. Heavy.
+ *     liveCanvas — the stroke currently being drawn. Redrawn per-frame
+ *                  with rAF. Cheap.
+ *   This separation is what lets writing feel smooth on a tablet — we
+ *   never touch the heavy bg canvas during a stroke.
+ * - Pointer Events (not mouse/touch). pointerEvent.getCoalescedEvents()
+ *   feeds us 240Hz+ samples on stylus on Android Chrome. We push every
+ *   sample, so the rendered stroke matches the pen's actual path even
+ *   between rAF frames.
+ * - Catmull-Rom smoothing applied on stroke commit (not during) to
+ *   make strokes look like ink instead of polylines, without paying
+ *   smoothing cost during dragging.
+ * - Pressure (event.pressure ∈ [0,1]) modulates per-segment thickness.
+ *
+ * Sync over LiveKit data channels (versioned wb2_*):
+ *   wb2_add      { item }                broadcast on commit
+ *   wb2_update   { id, changes }         broadcast on move
+ *   wb2_delete   { id }                  broadcast on erase
+ *   wb2_clear    { }                     broadcast on Clear All
+ *   wb2_request  { }                     late joiner asks for state
+ *   wb2_snapshot { items[] }             any peer answers (jittered)
+ */
+
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useRoomContext } from "@livekit/components-react";
-import { RoomEvent, type DataPublishOptions, type RemoteParticipant } from "livekit-client";
-import { useTranslations } from "next-intl";
+import {
+  RoomEvent,
+  type DataPublishOptions,
+  type RemoteParticipant,
+} from "livekit-client";
+import { getStroke } from "perfect-freehand";
 import {
   Pen,
   Highlighter,
   Eraser,
-  Slash,
   Square,
   Circle,
+  Slash,
+  ArrowUpRight,
   Type,
+  StickyNote,
   MousePointer2,
+  Hand,
   Undo2,
+  Redo2,
   Trash2,
+  Plus,
+  Minus,
+  Maximize,
   Download,
   X,
 } from "lucide-react";
 
-// ─── Item model ───────────────────────────────────────────────────────
-// Every mark on the board is an "item" that lives in a flat, ordered
-// list. Items are broadcast as whole objects over the LiveKit data
-// channel; undo/clear are separate message types. Coordinates are
-// normalized [0,1] so the board stays correct across window resizes
-// and different client viewport sizes.
+// ─── Types ─────────────────────────────────────────────────────────────
 
-type Point = { x: number; y: number };
-type ToolKind =
+type Point = { x: number; y: number; p?: number };
+
+type StrokeItem = {
+  id: string;
+  type: "stroke";
+  tool: "pen" | "highlighter";
+  color: string;
+  thickness: number;
+  points: Point[];
+};
+
+type ShapeItem = {
+  id: string;
+  type: "shape";
+  shape: "rect" | "ellipse" | "line" | "arrow";
+  color: string;
+  thickness: number;
+  from: Point;
+  to: Point;
+};
+
+type TextItem = {
+  id: string;
+  type: "text";
+  color: string;
+  size: number;
+  text: string;
+  pos: Point;
+};
+
+type StickyItem = {
+  id: string;
+  type: "sticky";
+  color: string;
+  text: string;
+  pos: Point;
+  width: number;
+  height: number;
+};
+
+type Item = StrokeItem | ShapeItem | TextItem | StickyItem;
+
+type Tool =
+  | "select"
+  | "pan"
   | "pen"
   | "highlighter"
   | "eraser"
-  | "line"
   | "rect"
-  | "circle"
+  | "ellipse"
+  | "line"
+  | "arrow"
   | "text"
-  | "laser";
+  | "sticky";
 
-type FreehandItem = {
-  kind: "freehand";
-  id: string;
-  sender: string;
-  tool: "pen" | "highlighter";
-  color: string;
-  width: number;
-  points: Point[];
-};
-type ShapeItem = {
-  kind: "shape";
-  id: string;
-  sender: string;
-  shape: "line" | "rect" | "circle";
-  color: string;
-  width: number;
-  start: Point;
-  end: Point;
-};
-type TextItem = {
-  kind: "text";
-  id: string;
-  sender: string;
-  pos: Point;
-  text: string;
-  color: string;
-  fontSize: number;
-};
-type Item = FreehandItem | ShapeItem | TextItem;
+type Viewport = { x: number; y: number; scale: number };
 
-type WBMsgAdd = { type: "wb_add"; item: Item };
-type WBMsgUndo = { type: "wb_undo"; ids: string[] };
-type WBMsgClear = { type: "wb_clear" };
-type WBMsgLaser = { type: "wb_laser"; sender: string; x: number; y: number };
-type WBMsgRequest = { type: "wb_request" };
-type WBMsgSnapshot = { type: "wb_snapshot"; items: Item[] };
+type HistoryAction =
+  | { kind: "add"; item: Item }
+  | { kind: "delete"; item: Item }
+  | { kind: "update"; before: Item; after: Item }
+  | { kind: "clear"; items: Item[] };
 
 const COLORS = [
-  "#111827", // near-black
-  "#EF4444", // red
-  "#F59E0B", // amber
-  "#10B981", // green
-  "#3B82F6", // blue
-  "#8B5CF6", // violet
+  "#0f172a", // slate-900
+  "#dc2626", // red-600
+  "#ea580c", // orange-600
+  "#ca8a04", // yellow-600
+  "#16a34a", // green-600
+  "#2563eb", // blue-600
+  "#7c3aed", // violet-600
+  "#be185d", // pink-700
 ];
 
-const encode = (m: unknown) => new TextEncoder().encode(JSON.stringify(m));
+const STICKY_COLORS = [
+  "#fef9c3", // yellow
+  "#fce7f3", // pink
+  "#dbeafe", // blue
+  "#dcfce7", // green
+];
 
-// Rough "does this stroke cross point p" check for the eraser tool.
-// Uses bounding box + point-to-segment distance. Threshold is generous
-// since users don't click pixel-perfectly.
-function itemHits(item: Item, p: Point, threshold = 0.02): boolean {
-  if (item.kind === "freehand") {
-    for (let i = 1; i < item.points.length; i++) {
-      if (pointToSegment(p, item.points[i - 1], item.points[i]) < threshold) {
-        return true;
+const THICKNESS_OPTIONS = [2, 4, 8, 16];
+
+// ─── Helpers ───────────────────────────────────────────────────────────
+
+const enc = new TextEncoder();
+const dec = new TextDecoder();
+const broadcast = (
+  publish: (data: Uint8Array, opts: DataPublishOptions) => Promise<void>,
+  msg: object
+) => {
+  try {
+    void publish(enc.encode(JSON.stringify(msg)), { reliable: true } as DataPublishOptions);
+  } catch (err) {
+    console.warn("[wb2] publish failed:", err);
+  }
+};
+
+const newId = (): string =>
+  globalThis.crypto?.randomUUID?.() ??
+  Math.random().toString(36).slice(2) + Date.now().toString(36);
+
+/**
+ * Render a stroke using perfect-freehand — same library tldraw and
+ * Excalidraw use. Generates a tapered polygon outline with pressure-
+ * varying thickness, then we fill it as a single path. This is what
+ * gives writing the "ink on paper" feel rather than the chunky
+ * polyline a naive stroke() produces.
+ *
+ * Tuning notes:
+ *   - thinning: 0.6 → strong pressure → thickness mapping
+ *   - smoothing: 0.5 → Bezier-grade curve smoothing on the input
+ *   - streamline: 0.45 → low-pass filter on jittery samples
+ *   - simulatePressure: false because we receive real pressure from
+ *     the stylus; falling back to a velocity-based model only when
+ *     pressure is the default 0.5 (which is the spec default for mouse
+ *     and unsupported pens).
+ */
+function strokePath(ctx: CanvasRenderingContext2D, pts: Point[], size: number) {
+  if (pts.length === 0) return;
+  if (pts.length === 1) {
+    ctx.beginPath();
+    ctx.arc(pts[0].x, pts[0].y, size / 2, 0, Math.PI * 2);
+    ctx.fill();
+    return;
+  }
+  // Treat pressure 0.5 as "no real pressure" → simulate via velocity.
+  const hasRealPressure = pts.some((p) => p.p !== undefined && p.p !== 0.5);
+  const outline = getStroke(
+    pts.map((p) => [p.x, p.y, p.p ?? 0.5]),
+    {
+      size,
+      thinning: 0.6,
+      smoothing: 0.5,
+      streamline: 0.45,
+      simulatePressure: !hasRealPressure,
+      last: true,
+      easing: (t: number) => t,
+      start: { taper: 0, cap: true },
+      end: { taper: 0, cap: true },
+    }
+  );
+  if (outline.length === 0) return;
+  ctx.beginPath();
+  ctx.moveTo(outline[0][0], outline[0][1]);
+  for (let i = 1; i < outline.length; i++) {
+    ctx.lineTo(outline[i][0], outline[i][1]);
+  }
+  ctx.closePath();
+  ctx.fill();
+}
+
+function drawItem(ctx: CanvasRenderingContext2D, it: Item) {
+  if (it.type === "stroke") {
+    ctx.fillStyle = it.color;
+    ctx.globalAlpha = it.tool === "highlighter" ? 0.32 : 1;
+    strokePath(ctx, it.points, it.thickness);
+    ctx.globalAlpha = 1;
+    return;
+  }
+  if (it.type === "shape") {
+    ctx.strokeStyle = it.color;
+    ctx.lineWidth = it.thickness;
+    if (it.shape === "rect") {
+      const x = Math.min(it.from.x, it.to.x);
+      const y = Math.min(it.from.y, it.to.y);
+      const w = Math.abs(it.to.x - it.from.x);
+      const h = Math.abs(it.to.y - it.from.y);
+      ctx.strokeRect(x, y, w, h);
+    } else if (it.shape === "ellipse") {
+      const cx = (it.from.x + it.to.x) / 2;
+      const cy = (it.from.y + it.to.y) / 2;
+      const rx = Math.abs(it.to.x - it.from.x) / 2;
+      const ry = Math.abs(it.to.y - it.from.y) / 2;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    } else if (it.shape === "line") {
+      ctx.beginPath();
+      ctx.moveTo(it.from.x, it.from.y);
+      ctx.lineTo(it.to.x, it.to.y);
+      ctx.stroke();
+    } else if (it.shape === "arrow") {
+      const dx = it.to.x - it.from.x;
+      const dy = it.to.y - it.from.y;
+      const len = Math.hypot(dx, dy);
+      const head = Math.min(20, len * 0.3);
+      const angle = Math.atan2(dy, dx);
+      ctx.beginPath();
+      ctx.moveTo(it.from.x, it.from.y);
+      ctx.lineTo(it.to.x, it.to.y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(it.to.x, it.to.y);
+      ctx.lineTo(
+        it.to.x - head * Math.cos(angle - Math.PI / 6),
+        it.to.y - head * Math.sin(angle - Math.PI / 6)
+      );
+      ctx.lineTo(
+        it.to.x - head * Math.cos(angle + Math.PI / 6),
+        it.to.y - head * Math.sin(angle + Math.PI / 6)
+      );
+      ctx.closePath();
+      ctx.fillStyle = it.color;
+      ctx.fill();
+    }
+    return;
+  }
+  if (it.type === "text") {
+    ctx.fillStyle = it.color;
+    ctx.font = `${it.size}px sans-serif`;
+    ctx.textBaseline = "top";
+    for (const [i, line] of it.text.split("\n").entries()) {
+      ctx.fillText(line, it.pos.x, it.pos.y + i * it.size * 1.25);
+    }
+    return;
+  }
+  if (it.type === "sticky") {
+    // shadow
+    ctx.fillStyle = "rgba(0,0,0,0.10)";
+    ctx.fillRect(it.pos.x + 4, it.pos.y + 4, it.width, it.height);
+    // body
+    ctx.fillStyle = it.color;
+    ctx.fillRect(it.pos.x, it.pos.y, it.width, it.height);
+    // text
+    ctx.fillStyle = "#0f172a";
+    ctx.font = "16px sans-serif";
+    ctx.textBaseline = "top";
+    const lineHeight = 20;
+    const padding = 12;
+    const maxWidth = it.width - padding * 2;
+    let y = it.pos.y + padding;
+    for (const para of it.text.split("\n")) {
+      const words = para.split(" ");
+      let line = "";
+      for (const w of words) {
+        const test = line ? line + " " + w : w;
+        if (ctx.measureText(test).width > maxWidth && line) {
+          ctx.fillText(line, it.pos.x + padding, y);
+          y += lineHeight;
+          line = w;
+        } else {
+          line = test;
+        }
+      }
+      if (line) {
+        ctx.fillText(line, it.pos.x + padding, y);
+        y += lineHeight;
       }
     }
-    return false;
   }
-  if (item.kind === "shape") {
-    if (item.shape === "line") {
-      return pointToSegment(p, item.start, item.end) < threshold;
+}
+
+/** Compute the axis-aligned bounding box of any item in world coords. */
+function itemBounds(it: Item): { x: number; y: number; w: number; h: number } {
+  if (it.type === "stroke") {
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const p of it.points) {
+      if (p.x < minX) minX = p.x;
+      if (p.y < minY) minY = p.y;
+      if (p.x > maxX) maxX = p.x;
+      if (p.y > maxY) maxY = p.y;
     }
-    if (item.shape === "rect") {
-      // Edge hit: near any of the four sides
-      const { start: a, end: b } = item;
-      const x1 = Math.min(a.x, b.x), x2 = Math.max(a.x, b.x);
-      const y1 = Math.min(a.y, b.y), y2 = Math.max(a.y, b.y);
-      const onTop = pointToSegment(p, { x: x1, y: y1 }, { x: x2, y: y1 }) < threshold;
-      const onBottom = pointToSegment(p, { x: x1, y: y2 }, { x: x2, y: y2 }) < threshold;
-      const onLeft = pointToSegment(p, { x: x1, y: y1 }, { x: x1, y: y2 }) < threshold;
-      const onRight = pointToSegment(p, { x: x2, y: y1 }, { x: x2, y: y2 }) < threshold;
-      return onTop || onBottom || onLeft || onRight;
-    }
-    if (item.shape === "circle") {
-      const cx = (item.start.x + item.end.x) / 2;
-      const cy = (item.start.y + item.end.y) / 2;
-      const r = Math.hypot(item.end.x - item.start.x, item.end.y - item.start.y) / 2;
-      const d = Math.hypot(p.x - cx, p.y - cy);
-      return Math.abs(d - r) < threshold;
-    }
+    const pad = it.thickness;
+    return { x: minX - pad, y: minY - pad, w: maxX - minX + pad * 2, h: maxY - minY + pad * 2 };
   }
-  if (item.kind === "text") {
-    // Approximate: text bbox is small, fontSize is pixel-ish — treat as a dot
-    return Math.hypot(p.x - item.pos.x, p.y - item.pos.y) < threshold * 2;
+  if (it.type === "shape") {
+    const x = Math.min(it.from.x, it.to.x);
+    const y = Math.min(it.from.y, it.to.y);
+    const w = Math.abs(it.to.x - it.from.x);
+    const h = Math.abs(it.to.y - it.from.y);
+    return { x, y, w, h };
+  }
+  if (it.type === "text") {
+    const lines = it.text.split("\n");
+    return {
+      x: it.pos.x,
+      y: it.pos.y,
+      w: Math.max(20, ...lines.map((l) => l.length * it.size * 0.55)),
+      h: lines.length * it.size * 1.25,
+    };
+  }
+  return { x: it.pos.x, y: it.pos.y, w: it.width, h: it.height };
+}
+
+function pointInBounds(p: Point, b: { x: number; y: number; w: number; h: number }): boolean {
+  return p.x >= b.x && p.x <= b.x + b.w && p.y >= b.y && p.y <= b.y + b.h;
+}
+
+function strokeHit(item: StrokeItem, p: Point, threshold: number): boolean {
+  for (const sp of item.points) {
+    const dx = sp.x - p.x;
+    const dy = sp.y - p.y;
+    if (dx * dx + dy * dy <= (threshold + item.thickness) ** 2) return true;
   }
   return false;
 }
 
-function pointToSegment(p: Point, a: Point, b: Point): number {
-  const dx = b.x - a.x;
-  const dy = b.y - a.y;
-  if (dx === 0 && dy === 0) return Math.hypot(p.x - a.x, p.y - a.y);
-  const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / (dx * dx + dy * dy)));
-  return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy));
-}
+// ─── Component ─────────────────────────────────────────────────────────
 
-// ─── Component ────────────────────────────────────────────────────────
-
-interface WhiteboardProps {
-  onClose: () => void;
-}
-
-export function Whiteboard({ onClose }: WhiteboardProps) {
-  const t = useTranslations("session");
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+export function Whiteboard({ onClose }: { onClose: () => void }) {
   const room = useRoomContext();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const bgCanvasRef = useRef<HTMLCanvasElement>(null);
+  const liveCanvasRef = useRef<HTMLCanvasElement>(null);
 
-  const [tool, setTool] = useState<ToolKind>("pen");
+  const [tool, setTool] = useState<Tool>("pen");
   const [color, setColor] = useState<string>(COLORS[0]);
-  const [width, setWidth] = useState<number>(3);
-  const [showColorPalette, setShowColorPalette] = useState(false);
+  const [thickness, setThickness] = useState<number>(THICKNESS_OPTIONS[1]);
 
-  // Shared state: all finalized items across the room.
-  const itemsRef = useRef<Item[]>([]);
-  // Local ephemeral state for the current in-progress draw.
-  const inFlightRef = useRef<Item | null>(null);
-  // Remote laser-pointer positions (per sender, fades after 1.5s).
-  const lasersRef = useRef<Map<string, { x: number; y: number; at: number }>>(new Map());
-  const localIdRef = useRef<string>("");
-  // Throttle flag for shape-preview redraws (full-canvas refreshes
-  // are expensive; rAF keeps them under 60fps).
-  const shapeRedrawScheduledRef = useRef(false);
+  // Items + selection live in refs so pointer handlers don't re-create
+  // on each render. React state mirrors the bits the UI cares about.
+  const itemsRef = useRef<Map<string, Item>>(new Map());
+  const itemOrderRef = useRef<string[]>([]); // z-order
+  const selectedRef = useRef<Set<string>>(new Set());
+  const [selectedCount, setSelectedCount] = useState(0);
+  const [editing, setEditing] = useState<{ id: string; kind: "text" | "sticky" } | null>(null);
 
-  // Establish a local sender id once.
-  useEffect(() => {
-    localIdRef.current = room.localParticipant.identity;
-  }, [room]);
+  const historyRef = useRef<HistoryAction[]>([]);
+  const futureRef = useRef<HistoryAction[]>([]);
 
-  // ── Render loop ──────────────────────────────────────────────────
-  // Redraws the entire board from items + in-flight + lasers. Called
-  // imperatively whenever state changes so we don't blow up React.
-  const redraw = useCallback(() => {
-    const canvas = canvasRef.current;
-    const container = containerRef.current;
-    if (!canvas || !container) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    const rect = container.getBoundingClientRect();
-    ctx.save();
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // We set scale once on resize; here use CSS pixels
-    ctx.restore();
-    ctx.clearRect(0, 0, rect.width, rect.height);
+  const viewportRef = useRef<Viewport>({ x: 0, y: 0, scale: 1 });
+  const [, forceRender] = useState(0);
+  const tick = useCallback(() => forceRender((v) => v + 1), []);
 
-    // Finalized items
-    for (const item of itemsRef.current) {
-      drawItem(ctx, item, rect.width, rect.height);
-    }
-    // In-flight
-    if (inFlightRef.current) {
-      drawItem(ctx, inFlightRef.current, rect.width, rect.height);
-    }
-    // Lasers (ephemeral overlays)
-    const now = Date.now();
-    for (const [, l] of lasersRef.current) {
-      const age = now - l.at;
-      if (age > 1500) continue;
-      const alpha = Math.max(0, 1 - age / 1500);
-      ctx.beginPath();
-      ctx.arc(l.x * rect.width, l.y * rect.height, 10, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(239, 68, 68, ${alpha * 0.35})`;
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(l.x * rect.width, l.y * rect.height, 4, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(239, 68, 68, ${alpha})`;
-      ctx.fill();
-    }
+  // ── Coordinate transforms ────────────────────────────────────────────
+  const screenToWorld = useCallback((sx: number, sy: number): Point => {
+    const v = viewportRef.current;
+    return { x: (sx - v.x) / v.scale, y: (sy - v.y) / v.scale };
   }, []);
 
-  // Animation loop just for laser fade
-  useEffect(() => {
-    let raf = 0;
-    const tick = () => {
-      if (lasersRef.current.size > 0) redraw();
-      // Purge old lasers
-      const now = Date.now();
-      for (const [id, l] of lasersRef.current) {
-        if (now - l.at > 1500) lasersRef.current.delete(id);
-      }
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [redraw]);
-
-  // Resize handling + DPR-correct canvas.
-  //
-  // The whiteboard parent is kept mounted with display:none when the
-  // panel is closed (so strokes survive close+reopen). With display:none,
-  // getBoundingClientRect returns 0x0 — if we only listened for
-  // window.resize, the canvas would init at 0x0 and stay there until the
-  // viewport itself resized, so the panel "doesn't work" when reopened.
-  // ResizeObserver fires whenever the container's box changes (including
-  // hidden -> visible), which is exactly what we need.
-  //
-  // setTransform replaces (rather than multiplies) the DPR scale so
-  // repeated resizes don't compound and blur the strokes.
-  useEffect(() => {
-    const canvas = canvasRef.current;
+  // ── Render the bg canvas (persistent items) ──────────────────────────
+  const drawBg = useCallback(() => {
+    const canvas = bgCanvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
-    const resize = () => {
-      const rect = container.getBoundingClientRect();
-      if (rect.width === 0 || rect.height === 0) return;
-      const dpr = window.devicePixelRatio || 1;
+    const rect = container.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return;
+    const dpr = window.devicePixelRatio || 1;
+
+    if (canvas.width !== Math.round(rect.width * dpr)) {
       canvas.width = Math.round(rect.width * dpr);
       canvas.height = Math.round(rect.height * dpr);
       canvas.style.width = `${rect.width}px`;
       canvas.style.height = `${rect.height}px`;
-      const ctx = canvas.getContext("2d");
-      if (ctx) {
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        ctx.lineCap = "round";
-        ctx.lineJoin = "round";
+    }
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const v = viewportRef.current;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.setTransform(dpr * v.scale, 0, 0, dpr * v.scale, dpr * v.x, dpr * v.y);
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    // Subtle dotted grid in world space (rendering is invariant under zoom).
+    ctx.save();
+    ctx.fillStyle = "#e5e7eb";
+    const grid = 40;
+    const left = -v.x / v.scale;
+    const top = -v.y / v.scale;
+    const right = left + canvas.width / dpr / v.scale;
+    const bottom = top + canvas.height / dpr / v.scale;
+    const startX = Math.floor(left / grid) * grid;
+    const startY = Math.floor(top / grid) * grid;
+    for (let x = startX; x <= right; x += grid) {
+      for (let y = startY; y <= bottom; y += grid) {
+        ctx.beginPath();
+        ctx.arc(x, y, 1 / v.scale, 0, Math.PI * 2);
+        ctx.fill();
       }
-      redraw();
-    };
-    resize();
-    const ro = new ResizeObserver(resize);
-    ro.observe(container);
-    window.addEventListener("resize", resize);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("resize", resize);
-    };
-  }, [redraw]);
+    }
+    ctx.restore();
 
-  // ── Data channel listener ───────────────────────────────────────
-  useEffect(() => {
-    const handler = (payload: Uint8Array, participant?: RemoteParticipant) => {
-      try {
-        const msg = JSON.parse(new TextDecoder().decode(payload)) as
-          | WBMsgAdd
-          | WBMsgUndo
-          | WBMsgClear
-          | WBMsgLaser
-          | WBMsgRequest
-          | WBMsgSnapshot;
+    // Items in z-order.
+    for (const id of itemOrderRef.current) {
+      const it = itemsRef.current.get(id);
+      if (!it) continue;
+      drawItem(ctx, it);
+    }
 
-        if (msg.type === "wb_add") {
-          itemsRef.current.push(msg.item);
-          redraw();
-        } else if (msg.type === "wb_undo") {
-          const ids = new Set(msg.ids);
-          itemsRef.current = itemsRef.current.filter((i) => !ids.has(i.id));
-          redraw();
-        } else if (msg.type === "wb_clear") {
-          itemsRef.current = [];
-          redraw();
-        } else if (msg.type === "wb_laser") {
-          lasersRef.current.set(msg.sender, { x: msg.x, y: msg.y, at: Date.now() });
-          redraw();
-        } else if (msg.type === "wb_request" && participant) {
-          // Late joiner — snapshot the current state to them only if we
-          // happen to have any items (helps new students catch up).
-          if (itemsRef.current.length > 0) {
-            publish({ type: "wb_snapshot", items: itemsRef.current });
-          }
-        } else if (msg.type === "wb_snapshot") {
-          // Only merge in items we don't already have (dedupe by id).
-          const seen = new Set(itemsRef.current.map((i) => i.id));
-          for (const it of msg.items) if (!seen.has(it.id)) itemsRef.current.push(it);
-          redraw();
-        }
-      } catch {
-        // ignore non-whiteboard packets
+    // Selection halos.
+    if (selectedRef.current.size > 0) {
+      ctx.save();
+      ctx.strokeStyle = "#2563eb";
+      ctx.lineWidth = Math.max(1, 1.5 / v.scale);
+      ctx.setLineDash([6 / v.scale, 4 / v.scale]);
+      for (const id of selectedRef.current) {
+        const it = itemsRef.current.get(id);
+        if (!it) continue;
+        const b = itemBounds(it);
+        const pad = 4 / v.scale;
+        ctx.strokeRect(b.x - pad, b.y - pad, b.w + pad * 2, b.h + pad * 2);
       }
-    };
-    room.on(RoomEvent.DataReceived, handler);
-    return () => {
-      room.off(RoomEvent.DataReceived, handler);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [room]);
-
-  // On mount, request a snapshot from any already-open peer so late
-  // joiners catch up to the current board state.
-  useEffect(() => {
-    const t = setTimeout(() => {
-      publish({ type: "wb_request" });
-    }, 300);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+      ctx.restore();
+    }
   }, []);
 
-  function publish(msg: WBMsgAdd | WBMsgUndo | WBMsgClear | WBMsgLaser | WBMsgRequest | WBMsgSnapshot) {
-    room.localParticipant.publishData(encode(msg), {
-      reliable: msg.type !== "wb_laser", // laser is lossy — always current-state
-    } as DataPublishOptions);
-  }
+  // ── Live canvas redraw (in-flight stroke / shape / pan-marker) ──
+  const liveStateRef = useRef<{
+    inflight: Item | null;
+    selectionRect: { from: Point; to: Point } | null;
+  }>({ inflight: null, selectionRect: null });
 
-  // ── Pointer handling ───────────────────────────────────────────
-  const getPoint = (e: React.MouseEvent | React.TouchEvent): Point => {
-    const canvas = canvasRef.current;
-    if (!canvas) return { x: 0, y: 0 };
-    const rect = canvas.getBoundingClientRect();
-    const clientX =
-      "touches" in e && e.touches.length > 0
-        ? e.touches[0].clientX
-        : "changedTouches" in e && e.changedTouches.length > 0
-        ? e.changedTouches[0].clientX
-        : (e as React.MouseEvent).clientX;
-    const clientY =
-      "touches" in e && e.touches.length > 0
-        ? e.touches[0].clientY
-        : "changedTouches" in e && e.changedTouches.length > 0
-        ? e.changedTouches[0].clientY
-        : (e as React.MouseEvent).clientY;
-    return {
-      x: (clientX - rect.left) / rect.width,
-      y: (clientY - rect.top) / rect.height,
+  const drawLive = useCallback(() => {
+    const canvas = liveCanvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
+    const rect = container.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return;
+    const dpr = window.devicePixelRatio || 1;
+    if (canvas.width !== Math.round(rect.width * dpr)) {
+      canvas.width = Math.round(rect.width * dpr);
+      canvas.height = Math.round(rect.height * dpr);
+      canvas.style.width = `${rect.width}px`;
+      canvas.style.height = `${rect.height}px`;
+    }
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const v = viewportRef.current;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.setTransform(dpr * v.scale, 0, 0, dpr * v.scale, dpr * v.x, dpr * v.y);
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    if (liveStateRef.current.inflight) {
+      drawItem(ctx, liveStateRef.current.inflight);
+    }
+
+    if (liveStateRef.current.selectionRect) {
+      const r = liveStateRef.current.selectionRect;
+      const x = Math.min(r.from.x, r.to.x);
+      const y = Math.min(r.from.y, r.to.y);
+      const w = Math.abs(r.to.x - r.from.x);
+      const h = Math.abs(r.to.y - r.from.y);
+      ctx.save();
+      ctx.fillStyle = "rgba(37, 99, 235, 0.10)";
+      ctx.strokeStyle = "#2563eb";
+      ctx.lineWidth = 1 / v.scale;
+      ctx.fillRect(x, y, w, h);
+      ctx.strokeRect(x, y, w, h);
+      ctx.restore();
+    }
+  }, []);
+
+  // ── ResizeObserver: redraw when container size changes ──────────────
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      drawBg();
+      drawLive();
+    });
+    ro.observe(el);
+    drawBg();
+    drawLive();
+    return () => ro.disconnect();
+  }, [drawBg, drawLive]);
+
+  // ── Network listener ─────────────────────────────────────────────────
+  const snapshotPending = useRef(false);
+  useEffect(() => {
+    const onData = (
+      payload: Uint8Array,
+      _participant?: RemoteParticipant
+    ) => {
+      let msg: { type?: string } & Record<string, unknown>;
+      try {
+        msg = JSON.parse(dec.decode(payload));
+      } catch {
+        return;
+      }
+      if (!msg.type || !String(msg.type).startsWith("wb2_")) return;
+
+      if (msg.type === "wb2_add" && msg.item) {
+        const it = msg.item as Item;
+        if (!itemsRef.current.has(it.id)) {
+          itemsRef.current.set(it.id, it);
+          itemOrderRef.current.push(it.id);
+          drawBg();
+        }
+      } else if (msg.type === "wb2_update" && msg.id && msg.changes) {
+        const cur = itemsRef.current.get(msg.id as string);
+        if (cur) {
+          itemsRef.current.set(msg.id as string, { ...cur, ...(msg.changes as Partial<Item>) } as Item);
+          drawBg();
+        }
+      } else if (msg.type === "wb2_delete" && msg.id) {
+        if (itemsRef.current.delete(msg.id as string)) {
+          itemOrderRef.current = itemOrderRef.current.filter((x) => x !== msg.id);
+          selectedRef.current.delete(msg.id as string);
+          setSelectedCount(selectedRef.current.size);
+          drawBg();
+        }
+      } else if (msg.type === "wb2_clear") {
+        itemsRef.current.clear();
+        itemOrderRef.current = [];
+        selectedRef.current.clear();
+        setSelectedCount(0);
+        drawBg();
+      } else if (msg.type === "wb2_request") {
+        if (snapshotPending.current) return;
+        snapshotPending.current = true;
+        setTimeout(() => {
+          const items = itemOrderRef.current
+            .map((id) => itemsRef.current.get(id))
+            .filter((x): x is Item => !!x);
+          broadcast(
+            (d, o) => room.localParticipant.publishData(d, o),
+            { type: "wb2_snapshot", items }
+          );
+          snapshotPending.current = false;
+        }, Math.floor(Math.random() * 250));
+      } else if (msg.type === "wb2_snapshot" && Array.isArray(msg.items)) {
+        // Only adopt the snapshot if our state is empty — otherwise we'd
+        // overwrite local edits made during the handshake window.
+        if (itemsRef.current.size === 0) {
+          for (const it of msg.items as Item[]) {
+            itemsRef.current.set(it.id, it);
+            itemOrderRef.current.push(it.id);
+          }
+          drawBg();
+        }
+      }
     };
+    room.on(RoomEvent.DataReceived, onData);
+    // Ask peers for the current state on mount.
+    broadcast(
+      (d, o) => room.localParticipant.publishData(d, o),
+      { type: "wb2_request" }
+    );
+    return () => {
+      room.off(RoomEvent.DataReceived, onData);
+    };
+  }, [room, drawBg]);
+
+  // ── Pointer handling ─────────────────────────────────────────────────
+  type DragState =
+    | { kind: "stroke"; item: StrokeItem }
+    | { kind: "shape"; item: ShapeItem; from: Point }
+    | { kind: "select"; from: Point }
+    | { kind: "move"; from: Point; originals: Map<string, Item> }
+    | { kind: "pan"; sx: number; sy: number; vx: number; vy: number }
+    | null;
+  const dragRef = useRef<DragState>(null);
+
+  const publish = useCallback(
+    (msg: object) => broadcast((d, o) => room.localParticipant.publishData(d, o), msg),
+    [room]
+  );
+
+  const pushHistory = (action: HistoryAction) => {
+    historyRef.current.push(action);
+    if (historyRef.current.length > 100) historyRef.current.shift();
+    futureRef.current = [];
   };
 
-  const newId = () => `${localIdRef.current}:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
+  const commitItem = (it: Item) => {
+    itemsRef.current.set(it.id, it);
+    itemOrderRef.current.push(it.id);
+    pushHistory({ kind: "add", item: it });
+    publish({ type: "wb2_add", item: it });
+    drawBg();
+  };
 
-  const onPointerDown = (e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault();
-    const p = getPoint(e);
+  const onPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (editing) return; // text input has focus, don't capture
+    const canvas = liveCanvasRef.current;
+    if (!canvas) return;
+    canvas.setPointerCapture(e.pointerId);
+    const rect = canvas.getBoundingClientRect();
+    const sx = e.clientX - rect.left;
+    const sy = e.clientY - rect.top;
+    const w = screenToWorld(sx, sy);
 
-    if (tool === "laser") {
-      publish({ type: "wb_laser", sender: localIdRef.current, x: p.x, y: p.y });
-      return;
-    }
-
-    if (tool === "eraser") {
-      // Collect items we pass through, batch-undo on release.
-      inFlightRef.current = {
-        kind: "freehand",
-        id: newId(),
-        sender: localIdRef.current,
-        tool: "pen", // doesn't matter — we don't persist this
-        color: "rgba(0,0,0,0)",
-        width: 0,
-        points: [p],
-      };
-      // Immediately delete any item under cursor
-      eraseAt(p);
-      return;
-    }
-
-    if (tool === "text") {
-      const text = window.prompt(t("whiteboardTextPrompt")) ?? "";
-      if (!text.trim()) return;
-      const item: TextItem = {
-        kind: "text",
-        id: newId(),
-        sender: localIdRef.current,
-        pos: p,
-        text: text.trim(),
-        color,
-        fontSize: Math.max(16, width * 6),
-      };
-      itemsRef.current.push(item);
-      publish({ type: "wb_add", item });
-      redraw();
+    // Pan: middle mouse OR space-held OR pan tool
+    if (e.button === 1 || tool === "pan") {
+      const v = viewportRef.current;
+      dragRef.current = { kind: "pan", sx, sy, vx: v.x, vy: v.y };
       return;
     }
 
     if (tool === "pen" || tool === "highlighter") {
-      inFlightRef.current = {
-        kind: "freehand",
+      const stroke: StrokeItem = {
         id: newId(),
-        sender: localIdRef.current,
+        type: "stroke",
         tool,
         color,
-        width,
-        points: [p],
+        thickness: tool === "highlighter" ? Math.max(thickness, 12) : thickness,
+        points: [{ x: w.x, y: w.y, p: e.pressure || 0.5 }],
       };
+      liveStateRef.current.inflight = stroke;
+      dragRef.current = { kind: "stroke", item: stroke };
+      drawLive();
       return;
     }
 
-    if (tool === "line" || tool === "rect" || tool === "circle") {
-      inFlightRef.current = {
-        kind: "shape",
+    if (tool === "rect" || tool === "ellipse" || tool === "line" || tool === "arrow") {
+      const sh: ShapeItem = {
         id: newId(),
-        sender: localIdRef.current,
+        type: "shape",
         shape: tool,
         color,
-        width,
-        start: p,
-        end: p,
+        thickness,
+        from: w,
+        to: w,
       };
+      liveStateRef.current.inflight = sh;
+      dragRef.current = { kind: "shape", item: sh, from: w };
+      drawLive();
       return;
     }
-  };
-
-  const eraseAt = (p: Point) => {
-    const toRemove = itemsRef.current.filter((i) => itemHits(i, p));
-    if (toRemove.length === 0) return;
-    const ids = toRemove.map((i) => i.id);
-    itemsRef.current = itemsRef.current.filter((i) => !ids.includes(i.id));
-    publish({ type: "wb_undo", ids });
-    redraw();
-  };
-
-  const onPointerMove = (e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault();
-    const p = getPoint(e);
-
-    if (tool === "laser") {
-      // Only while a button is held (mouse) or finger down (touch).
-      const isDragging =
-        ("buttons" in e && (e as React.MouseEvent).buttons > 0) ||
-        "touches" in e;
-      if (isDragging) {
-        publish({ type: "wb_laser", sender: localIdRef.current, x: p.x, y: p.y });
-      }
-      return;
-    }
-
-    if (!inFlightRef.current) return;
 
     if (tool === "eraser") {
-      eraseAt(p);
+      // Hit-test items at this point and delete in one pass.
+      eraseAt(w);
+      dragRef.current = { kind: "stroke", item: { id: "_eraser_", type: "stroke", tool: "pen", color: "transparent", thickness: 0, points: [] } };
       return;
     }
 
-    // ── Performance: freehand draws the NEW segment only ───────────
-    // Redrawing the whole canvas on every pointer-move is the main
-    // source of tablet lag — with a few dozen strokes each move
-    // repaints every pixel. Instead we draw prev→current directly on
-    // top and only full-redraw for shape previews (which need the
-    // canvas cleared between frames to erase the old preview).
-    if (inFlightRef.current.kind === "freehand") {
-      const pts = inFlightRef.current.points;
-      const prev = pts[pts.length - 1];
-      pts.push(p);
-      const canvas = canvasRef.current;
-      const container = containerRef.current;
-      if (canvas && container) {
-        const ctx = canvas.getContext("2d");
-        if (ctx) {
-          const rect = container.getBoundingClientRect();
-          ctx.save();
-          const tool = inFlightRef.current.tool;
-          if (tool === "highlighter") {
-            ctx.globalAlpha = 0.35;
-            ctx.lineWidth = Math.max(inFlightRef.current.width * 3, 8);
-          } else {
-            ctx.lineWidth = inFlightRef.current.width;
-          }
-          ctx.strokeStyle = inFlightRef.current.color;
-          ctx.beginPath();
-          ctx.moveTo(prev.x * rect.width, prev.y * rect.height);
-          ctx.lineTo(p.x * rect.width, p.y * rect.height);
-          ctx.stroke();
-          ctx.restore();
+    if (tool === "text") {
+      const id = newId();
+      const it: TextItem = { id, type: "text", color, size: Math.max(thickness * 4, 18), text: "", pos: w };
+      itemsRef.current.set(id, it);
+      itemOrderRef.current.push(id);
+      setEditing({ id, kind: "text" });
+      drawBg();
+      return;
+    }
+
+    if (tool === "sticky") {
+      const id = newId();
+      const it: StickyItem = {
+        id,
+        type: "sticky",
+        color: STICKY_COLORS[Math.floor(Math.random() * STICKY_COLORS.length)],
+        text: "",
+        pos: w,
+        width: 180,
+        height: 140,
+      };
+      itemsRef.current.set(id, it);
+      itemOrderRef.current.push(id);
+      setEditing({ id, kind: "sticky" });
+      drawBg();
+      return;
+    }
+
+    if (tool === "select") {
+      // Click on existing item → select it (replace selection unless shift).
+      const hit = hitTest(w);
+      if (hit) {
+        if (!e.shiftKey) selectedRef.current.clear();
+        if (selectedRef.current.has(hit.id) && e.shiftKey) {
+          selectedRef.current.delete(hit.id);
+        } else {
+          selectedRef.current.add(hit.id);
         }
+        setSelectedCount(selectedRef.current.size);
+        const originals = new Map<string, Item>();
+        for (const id of selectedRef.current) {
+          const it = itemsRef.current.get(id);
+          if (it) originals.set(id, structuredClone(it));
+        }
+        dragRef.current = { kind: "move", from: w, originals };
+        drawBg();
+      } else {
+        if (!e.shiftKey) {
+          selectedRef.current.clear();
+          setSelectedCount(0);
+        }
+        liveStateRef.current.selectionRect = { from: w, to: w };
+        dragRef.current = { kind: "select", from: w };
+        drawBg();
+        drawLive();
       }
+    }
+  };
+
+  const onPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const drag = dragRef.current;
+    if (!drag) return;
+    const canvas = liveCanvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+
+    // Use coalesced events for dense sampling on stylus.
+    const events =
+      typeof e.nativeEvent.getCoalescedEvents === "function"
+        ? e.nativeEvent.getCoalescedEvents()
+        : [e.nativeEvent];
+
+    if (drag.kind === "pan") {
+      const last = events[events.length - 1];
+      const sx = last.clientX - rect.left;
+      const sy = last.clientY - rect.top;
+      viewportRef.current = {
+        ...viewportRef.current,
+        x: drag.vx + (sx - drag.sx),
+        y: drag.vy + (sy - drag.sy),
+      };
+      drawBg();
+      drawLive();
       return;
     }
 
-    // Shapes: full redraw is required because the previous preview
-    // outline has to be erased between frames. Batched via rAF below.
-    if (inFlightRef.current.kind === "shape") {
-      inFlightRef.current.end = p;
-      if (!shapeRedrawScheduledRef.current) {
-        shapeRedrawScheduledRef.current = true;
-        requestAnimationFrame(() => {
-          shapeRedrawScheduledRef.current = false;
-          redraw();
-        });
+    if (drag.kind === "stroke" && drag.item.id !== "_eraser_") {
+      for (const ev of events) {
+        const sx = ev.clientX - rect.left;
+        const sy = ev.clientY - rect.top;
+        const w = screenToWorld(sx, sy);
+        drag.item.points.push({ x: w.x, y: w.y, p: ev.pressure || 0.5 });
       }
+      drawLive();
+      return;
+    }
+
+    if (drag.kind === "stroke" && drag.item.id === "_eraser_") {
+      // Erase along the path.
+      const sx = e.clientX - rect.left;
+      const sy = e.clientY - rect.top;
+      eraseAt(screenToWorld(sx, sy));
+      return;
+    }
+
+    if (drag.kind === "shape") {
+      const last = events[events.length - 1];
+      const sx = last.clientX - rect.left;
+      const sy = last.clientY - rect.top;
+      drag.item.to = screenToWorld(sx, sy);
+      drawLive();
+      return;
+    }
+
+    if (drag.kind === "select") {
+      const sx = e.clientX - rect.left;
+      const sy = e.clientY - rect.top;
+      liveStateRef.current.selectionRect = {
+        from: drag.from,
+        to: screenToWorld(sx, sy),
+      };
+      drawLive();
+      return;
+    }
+
+    if (drag.kind === "move") {
+      const sx = e.clientX - rect.left;
+      const sy = e.clientY - rect.top;
+      const w = screenToWorld(sx, sy);
+      const dx = w.x - drag.from.x;
+      const dy = w.y - drag.from.y;
+      for (const [id, original] of drag.originals) {
+        itemsRef.current.set(id, translateItem(original, dx, dy));
+      }
+      drawBg();
+      return;
     }
   };
 
   const onPointerUp = () => {
-    const item = inFlightRef.current;
-    inFlightRef.current = null;
-    if (!item) return;
+    const drag = dragRef.current;
+    dragRef.current = null;
+    liveStateRef.current.inflight = null;
+    liveStateRef.current.selectionRect = null;
+    drawLive();
 
-    // Eraser's in-flight was just a sentinel; actual work happened per-move.
-    if (tool === "eraser") {
-      redraw();
+    if (!drag) return;
+
+    if (drag.kind === "stroke" && drag.item.id !== "_eraser_") {
+      // Drop near-duplicate consecutive samples.
+      const cleaned = drag.item.points.filter((p, i, arr) => {
+        if (i === 0) return true;
+        const prev = arr[i - 1];
+        return Math.hypot(p.x - prev.x, p.y - prev.y) > 0.5;
+      });
+      drag.item.points = cleaned.length >= 2 ? cleaned : drag.item.points;
+      commitItem(drag.item);
       return;
     }
 
-    // Only persist if non-trivial
-    if (item.kind === "freehand" && item.points.length < 2) {
-      redraw();
-      return;
-    }
-    if (
-      item.kind === "shape" &&
-      item.start.x === item.end.x &&
-      item.start.y === item.end.y
-    ) {
-      redraw();
+    if (drag.kind === "shape") {
+      // Discard zero-size shapes (accidental click).
+      const w = Math.abs(drag.item.to.x - drag.item.from.x);
+      const h = Math.abs(drag.item.to.y - drag.item.from.y);
+      if (w < 4 && h < 4) return;
+      commitItem(drag.item);
       return;
     }
 
-    itemsRef.current.push(item);
-    publish({ type: "wb_add", item });
-    redraw();
+    if (drag.kind === "select") {
+      // Lasso-rect select: any item whose center is inside the rect.
+      const r = liveStateRef.current.selectionRect ?? { from: drag.from, to: drag.from };
+      const rx = Math.min(r.from.x, r.to.x);
+      const ry = Math.min(r.from.y, r.to.y);
+      const rw = Math.abs(r.to.x - r.from.x);
+      const rh = Math.abs(r.to.y - r.from.y);
+      if (rw > 4 && rh > 4) {
+        for (const id of itemOrderRef.current) {
+          const it = itemsRef.current.get(id);
+          if (!it) continue;
+          const b = itemBounds(it);
+          const cx = b.x + b.w / 2;
+          const cy = b.y + b.h / 2;
+          if (cx >= rx && cx <= rx + rw && cy >= ry && cy <= ry + rh) {
+            selectedRef.current.add(id);
+          }
+        }
+        setSelectedCount(selectedRef.current.size);
+        drawBg();
+      }
+      return;
+    }
+
+    if (drag.kind === "move") {
+      // Broadcast each moved item's new state.
+      for (const [id] of drag.originals) {
+        const cur = itemsRef.current.get(id);
+        if (cur) publish({ type: "wb2_update", id, changes: cur });
+      }
+      // History: bundle per-item before/after.
+      for (const [id, before] of drag.originals) {
+        const after = itemsRef.current.get(id);
+        if (after) pushHistory({ kind: "update", before, after });
+      }
+      return;
+    }
   };
 
-  // ── Toolbar actions ─────────────────────────────────────────────
-  const undo = useCallback(() => {
-    // Undo *own* items — preserves collaborative sanity (you can't erase
-    // the teacher's notes by spamming undo).
-    const mine = itemsRef.current.filter((i) => i.sender === localIdRef.current);
-    if (mine.length === 0) return;
-    const last = mine[mine.length - 1];
-    itemsRef.current = itemsRef.current.filter((i) => i.id !== last.id);
-    publish({ type: "wb_undo", ids: [last.id] });
-    redraw();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [redraw]);
-
-  const clearBoard = () => {
-    // Confirm — clear broadcasts to every participant and can't be
-    // undone, so an accidental tap on a tablet would wipe a whole
-    // lesson's work.
-    if (itemsRef.current.length > 0) {
-      if (!window.confirm(t("whiteboardClearConfirm"))) return;
+  // ── Helpers used by handlers ──────────────────────────────────────────
+  const eraseAt = (w: Point) => {
+    const radius = thickness;
+    let touched = false;
+    for (const id of [...itemOrderRef.current].reverse()) {
+      const it = itemsRef.current.get(id);
+      if (!it) continue;
+      const b = itemBounds(it);
+      if (
+        w.x < b.x - radius ||
+        w.x > b.x + b.w + radius ||
+        w.y < b.y - radius ||
+        w.y > b.y + b.h + radius
+      ) {
+        continue;
+      }
+      let hit = false;
+      if (it.type === "stroke") hit = strokeHit(it, w, radius);
+      else hit = pointInBounds(w, b);
+      if (hit) {
+        itemsRef.current.delete(id);
+        itemOrderRef.current = itemOrderRef.current.filter((x) => x !== id);
+        selectedRef.current.delete(id);
+        pushHistory({ kind: "delete", item: it });
+        publish({ type: "wb2_delete", id });
+        touched = true;
+      }
     }
-    itemsRef.current = [];
-    publish({ type: "wb_clear" });
-    redraw();
+    if (touched) {
+      setSelectedCount(selectedRef.current.size);
+      drawBg();
+    }
   };
 
-  const exportPng = () => {
-    const canvas = canvasRef.current;
+  const hitTest = (w: Point): Item | null => {
+    for (const id of [...itemOrderRef.current].reverse()) {
+      const it = itemsRef.current.get(id);
+      if (!it) continue;
+      if (it.type === "stroke" && strokeHit(it, w, 8)) return it;
+      if (pointInBounds(w, itemBounds(it))) return it;
+    }
+    return null;
+  };
+
+  const translateItem = (it: Item, dx: number, dy: number): Item => {
+    if (it.type === "stroke") return { ...it, points: it.points.map((p) => ({ ...p, x: p.x + dx, y: p.y + dy })) };
+    if (it.type === "shape") return { ...it, from: { ...it.from, x: it.from.x + dx, y: it.from.y + dy }, to: { ...it.to, x: it.to.x + dx, y: it.to.y + dy } };
+    return { ...it, pos: { ...it.pos, x: it.pos.x + dx, y: it.pos.y + dy } };
+  };
+
+  // ── Wheel zoom ────────────────────────────────────────────────────────
+  const onWheel = (e: React.WheelEvent<HTMLCanvasElement>) => {
+    if (!e.ctrlKey && !e.metaKey && Math.abs(e.deltaY) < 50) return;
+    const canvas = liveCanvasRef.current;
     if (!canvas) return;
-    // Draw a white background first so the PNG isn't transparent
-    const off = document.createElement("canvas");
-    off.width = canvas.width;
-    off.height = canvas.height;
-    const offCtx = off.getContext("2d");
-    if (!offCtx) return;
-    offCtx.fillStyle = "#ffffff";
-    offCtx.fillRect(0, 0, off.width, off.height);
-    offCtx.drawImage(canvas, 0, 0);
-    const url = off.toDataURL("image/png");
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `ecoleversity-whiteboard-${Date.now()}.png`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    const rect = canvas.getBoundingClientRect();
+    const sx = e.clientX - rect.left;
+    const sy = e.clientY - rect.top;
+    const v = viewportRef.current;
+    const factor = Math.exp(-e.deltaY * 0.0015);
+    const newScale = Math.max(0.2, Math.min(8, v.scale * factor));
+    // Zoom toward cursor.
+    const wx = (sx - v.x) / v.scale;
+    const wy = (sy - v.y) / v.scale;
+    viewportRef.current = {
+      x: sx - wx * newScale,
+      y: sy - wy * newScale,
+      scale: newScale,
+    };
+    drawBg();
+    drawLive();
   };
 
-  // Keyboard shortcut: Ctrl/Cmd+Z for undo
+  // ── Toolbar actions ───────────────────────────────────────────────────
+  const undo = () => {
+    const a = historyRef.current.pop();
+    if (!a) return;
+    futureRef.current.push(a);
+    if (a.kind === "add") {
+      itemsRef.current.delete(a.item.id);
+      itemOrderRef.current = itemOrderRef.current.filter((x) => x !== a.item.id);
+      publish({ type: "wb2_delete", id: a.item.id });
+    } else if (a.kind === "delete") {
+      itemsRef.current.set(a.item.id, a.item);
+      itemOrderRef.current.push(a.item.id);
+      publish({ type: "wb2_add", item: a.item });
+    } else if (a.kind === "update") {
+      itemsRef.current.set(a.before.id, a.before);
+      publish({ type: "wb2_update", id: a.before.id, changes: a.before });
+    } else if (a.kind === "clear") {
+      for (const it of a.items) {
+        itemsRef.current.set(it.id, it);
+        itemOrderRef.current.push(it.id);
+        publish({ type: "wb2_add", item: it });
+      }
+    }
+    selectedRef.current.clear();
+    setSelectedCount(0);
+    drawBg();
+  };
+
+  const redo = () => {
+    const a = futureRef.current.pop();
+    if (!a) return;
+    historyRef.current.push(a);
+    if (a.kind === "add") {
+      itemsRef.current.set(a.item.id, a.item);
+      itemOrderRef.current.push(a.item.id);
+      publish({ type: "wb2_add", item: a.item });
+    } else if (a.kind === "delete") {
+      itemsRef.current.delete(a.item.id);
+      itemOrderRef.current = itemOrderRef.current.filter((x) => x !== a.item.id);
+      publish({ type: "wb2_delete", id: a.item.id });
+    } else if (a.kind === "update") {
+      itemsRef.current.set(a.after.id, a.after);
+      publish({ type: "wb2_update", id: a.after.id, changes: a.after });
+    } else if (a.kind === "clear") {
+      itemsRef.current.clear();
+      itemOrderRef.current = [];
+      publish({ type: "wb2_clear" });
+    }
+    selectedRef.current.clear();
+    setSelectedCount(0);
+    drawBg();
+  };
+
+  const clearAll = () => {
+    if (itemsRef.current.size === 0) return;
+    if (!window.confirm("Effacer tout le tableau ?")) return;
+    const items = Array.from(itemsRef.current.values());
+    pushHistory({ kind: "clear", items });
+    itemsRef.current.clear();
+    itemOrderRef.current = [];
+    selectedRef.current.clear();
+    setSelectedCount(0);
+    publish({ type: "wb2_clear" });
+    drawBg();
+  };
+
+  const deleteSelected = () => {
+    if (selectedRef.current.size === 0) return;
+    for (const id of selectedRef.current) {
+      const it = itemsRef.current.get(id);
+      if (!it) continue;
+      pushHistory({ kind: "delete", item: it });
+      itemsRef.current.delete(id);
+      itemOrderRef.current = itemOrderRef.current.filter((x) => x !== id);
+      publish({ type: "wb2_delete", id });
+    }
+    selectedRef.current.clear();
+    setSelectedCount(0);
+    drawBg();
+  };
+
+  const resetViewport = () => {
+    viewportRef.current = { x: 0, y: 0, scale: 1 };
+    drawBg();
+    drawLive();
+  };
+
+  const zoom = (factor: number) => {
+    const canvas = liveCanvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const cx = rect.width / 2;
+    const cy = rect.height / 2;
+    const v = viewportRef.current;
+    const newScale = Math.max(0.2, Math.min(8, v.scale * factor));
+    const wx = (cx - v.x) / v.scale;
+    const wy = (cy - v.y) / v.scale;
+    viewportRef.current = { x: cx - wx * newScale, y: cy - wy * newScale, scale: newScale };
+    drawBg();
+    drawLive();
+  };
+
+  // ── Keyboard shortcuts ────────────────────────────────────────────────
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (editing) return;
+      if (e.key === "Delete" || e.key === "Backspace") {
+        deleteSelected();
+        return;
+      }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
         e.preventDefault();
-        undo();
+        if (e.shiftKey) redo();
+        else undo();
+        return;
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "y") {
+        e.preventDefault();
+        redo();
+        return;
+      }
+      if (e.key === "Escape") {
+        selectedRef.current.clear();
+        setSelectedCount(0);
+        drawBg();
+        return;
+      }
+      // Tool shortcuts (no modifier)
+      if (!e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
+        const map: Record<string, Tool> = {
+          v: "select", p: "pen", h: "highlighter", e: "eraser",
+          r: "rect", o: "ellipse", l: "line", a: "arrow",
+          t: "text", s: "sticky", " ": "pan",
+        };
+        const next = map[e.key.toLowerCase()];
+        if (next) {
+          e.preventDefault();
+          setTool(next);
+        }
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [undo]);
+  }, [editing, undo, redo, drawBg]);
 
-  // Size 11 (44px) = iOS/Android recommended minimum touch target.
-  // Essential for the whiteboard, which is almost always used on a
-  // tablet with fingers or a stylus.
-  const ToolBtn = ({
-    id,
-    Icon,
-    label,
-  }: {
-    id: ToolKind;
-    Icon: React.ElementType;
-    label: string;
-  }) => (
+  // ── Editing overlay (text + sticky) ──────────────────────────────────
+  const editingItem = editing ? itemsRef.current.get(editing.id) : null;
+  const editingScreenPos = useMemo(() => {
+    if (!editingItem) return null;
+    const v = viewportRef.current;
+    if (editingItem.type === "text") {
+      return {
+        x: editingItem.pos.x * v.scale + v.x,
+        y: editingItem.pos.y * v.scale + v.y,
+        width: 240,
+        height: editingItem.size * 2,
+        scale: v.scale,
+      };
+    }
+    if (editingItem.type === "sticky") {
+      return {
+        x: editingItem.pos.x * v.scale + v.x,
+        y: editingItem.pos.y * v.scale + v.y,
+        width: editingItem.width * v.scale,
+        height: editingItem.height * v.scale,
+        scale: v.scale,
+      };
+    }
+    return null;
+  }, [editingItem]);
+
+  const finishEditing = (text: string) => {
+    if (!editing) return;
+    const it = itemsRef.current.get(editing.id);
+    if (!it) {
+      setEditing(null);
+      return;
+    }
+    if (text.trim() === "") {
+      itemsRef.current.delete(editing.id);
+      itemOrderRef.current = itemOrderRef.current.filter((x) => x !== editing.id);
+    } else if (it.type === "text" || it.type === "sticky") {
+      const updated = { ...it, text };
+      itemsRef.current.set(editing.id, updated);
+      pushHistory({ kind: "add", item: updated });
+      publish({ type: "wb2_add", item: updated });
+    }
+    setEditing(null);
+    drawBg();
+  };
+
+  // ── Toolbar UI ────────────────────────────────────────────────────────
+  const toolButton = (t: Tool, Icon: React.ElementType, title: string) => (
     <button
-      onClick={() => setTool(id)}
-      className={`flex size-11 shrink-0 items-center justify-center rounded-md border transition-colors ${
-        tool === id
-          ? "border-[var(--ev-blue)] bg-[var(--ev-blue)] text-white"
-          : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+      key={t}
+      type="button"
+      onClick={() => setTool(t)}
+      title={title}
+      className={`flex size-9 items-center justify-center rounded-md transition-colors ${
+        tool === t
+          ? "bg-[var(--ev-blue)] text-white"
+          : "text-slate-700 hover:bg-slate-100"
       }`}
-      title={label}
-      aria-label={label}
-      aria-pressed={tool === id}
     >
-      <Icon className="size-5" />
+      <Icon className="size-4" />
     </button>
   );
 
   return (
-    <div className="flex h-full flex-col bg-white">
-      {/* Toolbar — horizontal scroll on narrow viewports */}
-      <div className="flex items-center gap-2 overflow-x-auto border-b border-slate-200 bg-slate-50 px-2 py-2 text-slate-700">
-        {/* Drawing tools */}
-        <div className="flex shrink-0 items-center gap-1">
-          <ToolBtn id="pen" Icon={Pen} label={t("whiteboardPen")} />
-          <ToolBtn id="highlighter" Icon={Highlighter} label={t("whiteboardHighlighter")} />
-          <ToolBtn id="eraser" Icon={Eraser} label={t("whiteboardEraser")} />
+    <div className="absolute inset-0 flex flex-col bg-white">
+      {/* Top header */}
+      <div className="flex items-center justify-between border-b border-slate-200 bg-white px-3 py-2">
+        <div className="flex items-center gap-1">
+          {toolButton("select", MousePointer2, "Sélectionner (V)")}
+          {toolButton("pan", Hand, "Déplacer la vue (Espace)")}
+          <div className="mx-1 h-6 w-px bg-slate-200" />
+          {toolButton("pen", Pen, "Stylo (P)")}
+          {toolButton("highlighter", Highlighter, "Surligneur (H)")}
+          {toolButton("eraser", Eraser, "Gomme (E)")}
+          <div className="mx-1 h-6 w-px bg-slate-200" />
+          {toolButton("rect", Square, "Rectangle (R)")}
+          {toolButton("ellipse", Circle, "Ellipse (O)")}
+          {toolButton("line", Slash, "Ligne (L)")}
+          {toolButton("arrow", ArrowUpRight, "Flèche (A)")}
+          <div className="mx-1 h-6 w-px bg-slate-200" />
+          {toolButton("text", Type, "Texte (T)")}
+          {toolButton("sticky", StickyNote, "Note (S)")}
         </div>
 
-        <div className="h-6 w-px shrink-0 bg-slate-300" />
-
-        {/* Shape tools */}
-        <div className="flex shrink-0 items-center gap-1">
-          <ToolBtn id="line" Icon={Slash} label={t("whiteboardLine")} />
-          <ToolBtn id="rect" Icon={Square} label={t("whiteboardRect")} />
-          <ToolBtn id="circle" Icon={Circle} label={t("whiteboardCircle")} />
-          <ToolBtn id="text" Icon={Type} label={t("whiteboardText")} />
-        </div>
-
-        <div className="h-6 w-px shrink-0 bg-slate-300" />
-
-        {/* Laser */}
-        <ToolBtn id="laser" Icon={MousePointer2} label={t("whiteboardLaser")} />
-
-        <div className="h-6 w-px shrink-0 bg-slate-300" />
-
-        {/* Colors */}
-        <div className="relative shrink-0">
-          <button
-            onClick={() => setShowColorPalette((v) => !v)}
-            className="flex size-9 items-center justify-center rounded-md border border-slate-300 bg-white hover:bg-slate-50"
-            title={t("whiteboardColor")}
-            aria-label={t("whiteboardColor")}
-          >
-            <span
-              className="size-5 rounded-full border border-slate-300"
-              style={{ backgroundColor: color }}
-            />
-          </button>
-          {showColorPalette && (
-            <div className="absolute top-full left-0 z-30 mt-1 flex gap-1 rounded-md border border-slate-200 bg-white p-2 shadow-lg">
-              {COLORS.map((c) => (
-                <button
-                  key={c}
-                  onClick={() => {
-                    setColor(c);
-                    setShowColorPalette(false);
-                  }}
-                  className={`size-7 rounded-full border-2 transition-transform hover:scale-110 ${
-                    color === c ? "border-slate-800" : "border-white"
-                  }`}
-                  style={{ backgroundColor: c }}
-                  aria-label={c}
-                  title={c}
+        <div className="flex items-center gap-1">
+          {/* Color palette */}
+          <div className="flex items-center gap-1 rounded-md border border-slate-200 px-1 py-1">
+            {COLORS.map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setColor(c)}
+                aria-label={`Couleur ${c}`}
+                className={`size-6 rounded-full border-2 transition-transform ${
+                  color === c ? "scale-110 border-slate-800" : "border-white"
+                }`}
+                style={{ background: c }}
+              />
+            ))}
+          </div>
+          {/* Thickness */}
+          <div className="flex items-center gap-1 rounded-md border border-slate-200 px-1 py-1">
+            {THICKNESS_OPTIONS.map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setThickness(t)}
+                title={`Épaisseur ${t}px`}
+                className={`flex size-6 items-center justify-center rounded transition-colors ${
+                  thickness === t ? "bg-slate-200" : "hover:bg-slate-100"
+                }`}
+              >
+                <span
+                  className="rounded-full bg-slate-800"
+                  style={{ width: `${Math.min(t, 14)}px`, height: `${Math.min(t, 14)}px` }}
                 />
-              ))}
-            </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={undo}
+            disabled={historyRef.current.length === 0}
+            title="Annuler (Ctrl+Z)"
+            className="flex size-9 items-center justify-center rounded-md text-slate-700 hover:bg-slate-100 disabled:opacity-40"
+          >
+            <Undo2 className="size-4" />
+          </button>
+          <button
+            type="button"
+            onClick={redo}
+            disabled={futureRef.current.length === 0}
+            title="Rétablir (Ctrl+Y)"
+            className="flex size-9 items-center justify-center rounded-md text-slate-700 hover:bg-slate-100 disabled:opacity-40"
+          >
+            <Redo2 className="size-4" />
+          </button>
+          <div className="mx-1 h-6 w-px bg-slate-200" />
+          <button
+            type="button"
+            onClick={() => zoom(0.85)}
+            title="Zoom arrière"
+            className="flex size-9 items-center justify-center rounded-md text-slate-700 hover:bg-slate-100"
+          >
+            <Minus className="size-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => zoom(1.18)}
+            title="Zoom avant"
+            className="flex size-9 items-center justify-center rounded-md text-slate-700 hover:bg-slate-100"
+          >
+            <Plus className="size-4" />
+          </button>
+          <button
+            type="button"
+            onClick={resetViewport}
+            title="Recentrer"
+            className="flex size-9 items-center justify-center rounded-md text-slate-700 hover:bg-slate-100"
+          >
+            <Maximize className="size-4" />
+          </button>
+          <div className="mx-1 h-6 w-px bg-slate-200" />
+          {selectedCount > 0 && (
+            <button
+              type="button"
+              onClick={deleteSelected}
+              title={`Supprimer (${selectedCount})`}
+              className="flex h-9 items-center gap-1 rounded-md px-3 text-rose-600 hover:bg-rose-50"
+            >
+              <Trash2 className="size-4" />
+              <span className="text-xs font-medium">{selectedCount}</span>
+            </button>
           )}
+          <button
+            type="button"
+            onClick={clearAll}
+            title="Tout effacer"
+            className="flex size-9 items-center justify-center rounded-md text-slate-700 hover:bg-rose-50 hover:text-rose-700"
+          >
+            <Download className="size-4 rotate-180" />
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            title="Fermer"
+            className="flex size-9 items-center justify-center rounded-md text-slate-700 hover:bg-slate-100"
+          >
+            <X className="size-4" />
+          </button>
         </div>
-
-        {/* Width */}
-        <div className="flex shrink-0 items-center gap-1.5">
-          <input
-            type="range"
-            min={1}
-            max={12}
-            value={width}
-            onChange={(e) => setWidth(Number(e.target.value))}
-            className="w-16 accent-[var(--ev-blue)]"
-            aria-label={t("whiteboardWidth")}
-            title={t("whiteboardWidth")}
-          />
-          <span className="w-5 text-center text-xs tabular-nums text-slate-500">
-            {width}
-          </span>
-        </div>
-
-        <div className="h-6 w-px shrink-0 bg-slate-300" />
-
-        {/* Actions */}
-        <button
-          onClick={undo}
-          className="flex size-11 shrink-0 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-700 transition-colors hover:bg-slate-50"
-          title={t("whiteboardUndo")}
-          aria-label={t("whiteboardUndo")}
-        >
-          <Undo2 className="size-4" />
-        </button>
-        <button
-          onClick={exportPng}
-          className="flex size-11 shrink-0 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-700 transition-colors hover:bg-slate-50"
-          title={t("whiteboardExport")}
-          aria-label={t("whiteboardExport")}
-        >
-          <Download className="size-4" />
-        </button>
-        <button
-          onClick={clearBoard}
-          className="flex size-11 shrink-0 items-center justify-center rounded-md border border-red-300 bg-white text-red-600 transition-colors hover:bg-red-50"
-          title={t("whiteboardClearAll")}
-          aria-label={t("whiteboardClearAll")}
-        >
-          <Trash2 className="size-5" />
-        </button>
-
-        <div className="flex-1" />
-
-        <button
-          onClick={onClose}
-          className="flex size-9 shrink-0 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-700 transition-colors hover:bg-slate-100"
-          title={t("whiteboardClose")}
-          aria-label={t("whiteboardClose")}
-        >
-          <X className="size-4" />
-        </button>
       </div>
 
-      {/* Canvas */}
-      <div ref={containerRef} className="relative flex-1">
+      {/* Canvas area */}
+      <div
+        ref={containerRef}
+        className="relative flex-1 overflow-hidden bg-white"
+        style={{
+          cursor:
+            tool === "pan" ? "grab" :
+            tool === "select" ? "default" :
+            tool === "eraser" ? "cell" :
+            tool === "text" || tool === "sticky" ? "text" :
+            "crosshair",
+          touchAction: "none",
+        }}
+      >
         <canvas
-          ref={canvasRef}
-          onMouseDown={onPointerDown}
-          onMouseMove={onPointerMove}
-          onMouseUp={onPointerUp}
-          onMouseLeave={onPointerUp}
-          onTouchStart={onPointerDown}
-          onTouchMove={onPointerMove}
-          onTouchEnd={onPointerUp}
-          className="absolute inset-0 cursor-crosshair touch-none"
-          style={{ touchAction: "none" }}
+          ref={bgCanvasRef}
+          className="absolute inset-0"
+          style={{ pointerEvents: "none" }}
         />
+        <canvas
+          ref={liveCanvasRef}
+          className="absolute inset-0"
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
+          onPointerLeave={onPointerUp}
+          onWheel={onWheel}
+        />
+
+        {editing && editingItem && editingScreenPos && (editingItem.type === "text" || editingItem.type === "sticky") && (
+          <textarea
+            autoFocus
+            defaultValue={editingItem.text}
+            onBlur={(e) => finishEditing(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                e.currentTarget.blur();
+              }
+              if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                e.currentTarget.blur();
+              }
+            }}
+            style={{
+              position: "absolute",
+              left: editingScreenPos.x + (editingItem.type === "sticky" ? 12 * editingScreenPos.scale : 0),
+              top: editingScreenPos.y + (editingItem.type === "sticky" ? 12 * editingScreenPos.scale : 0),
+              width: editingScreenPos.width - (editingItem.type === "sticky" ? 24 * editingScreenPos.scale : 0),
+              minHeight: editingScreenPos.height - (editingItem.type === "sticky" ? 24 * editingScreenPos.scale : 0),
+              fontSize: editingItem.type === "text"
+                ? editingItem.size * editingScreenPos.scale
+                : 16 * editingScreenPos.scale,
+              fontFamily: "sans-serif",
+              color: editingItem.type === "text" ? editingItem.color : "#0f172a",
+              background: editingItem.type === "text" ? "transparent" : "transparent",
+              border: editingItem.type === "text" ? "1px dashed #94a3b8" : "none",
+              outline: "none",
+              resize: "none",
+              padding: editingItem.type === "text" ? 4 : 0,
+              lineHeight: 1.25,
+            }}
+          />
+        )}
+
+        <div className="pointer-events-none absolute bottom-3 right-3 rounded-md bg-slate-900/70 px-2 py-1 text-xs text-white">
+          {Math.round(viewportRef.current.scale * 100)}%
+        </div>
       </div>
     </div>
   );
-}
-
-// ─── Drawing ──────────────────────────────────────────────────────────
-
-function drawItem(ctx: CanvasRenderingContext2D, item: Item, w: number, h: number) {
-  if (item.kind === "freehand") {
-    if (item.points.length < 1) return;
-    ctx.save();
-    if (item.tool === "highlighter") {
-      ctx.globalAlpha = 0.35;
-      ctx.lineWidth = Math.max(item.width * 3, 8);
-    } else {
-      ctx.lineWidth = item.width;
-    }
-    ctx.strokeStyle = item.color;
-    ctx.beginPath();
-    ctx.moveTo(item.points[0].x * w, item.points[0].y * h);
-    for (let i = 1; i < item.points.length; i++) {
-      ctx.lineTo(item.points[i].x * w, item.points[i].y * h);
-    }
-    ctx.stroke();
-    ctx.restore();
-    return;
-  }
-  if (item.kind === "shape") {
-    ctx.save();
-    ctx.lineWidth = item.width;
-    ctx.strokeStyle = item.color;
-    ctx.beginPath();
-    if (item.shape === "line") {
-      ctx.moveTo(item.start.x * w, item.start.y * h);
-      ctx.lineTo(item.end.x * w, item.end.y * h);
-    } else if (item.shape === "rect") {
-      const x = Math.min(item.start.x, item.end.x) * w;
-      const y = Math.min(item.start.y, item.end.y) * h;
-      const rw = Math.abs(item.end.x - item.start.x) * w;
-      const rh = Math.abs(item.end.y - item.start.y) * h;
-      ctx.rect(x, y, rw, rh);
-    } else if (item.shape === "circle") {
-      const cx = ((item.start.x + item.end.x) / 2) * w;
-      const cy = ((item.start.y + item.end.y) / 2) * h;
-      const rx = (Math.abs(item.end.x - item.start.x) / 2) * w;
-      const ry = (Math.abs(item.end.y - item.start.y) / 2) * h;
-      ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
-    }
-    ctx.stroke();
-    ctx.restore();
-    return;
-  }
-  if (item.kind === "text") {
-    ctx.save();
-    ctx.fillStyle = item.color;
-    ctx.font = `${item.fontSize}px ui-sans-serif, system-ui, sans-serif`;
-    ctx.textBaseline = "top";
-    ctx.fillText(item.text, item.pos.x * w, item.pos.y * h);
-    ctx.restore();
-    return;
-  }
 }
