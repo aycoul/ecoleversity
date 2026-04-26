@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { CheckCircle2, Loader2, Phone, Smartphone, AlertTriangle, Save } from "lucide-react";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/utils";
+import { normalizeCIPhone, formatCIPhone } from "@/lib/phone";
 
 // Payout providers are a superset of incoming PaymentProvider — adds
 // 'wallet' (platform-internal credit) and 'manual' (founder pays
@@ -150,7 +151,7 @@ function TeacherCard({
             <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-slate-500">
               <span className="flex items-center gap-1">
                 <Phone className="size-3" />
-                {item.profilePayoutPhone}
+                {formatCIPhone(item.profilePayoutPhone)}
               </span>
               <span className="flex items-center gap-1">
                 <Smartphone className="size-3" />
@@ -255,8 +256,11 @@ function PayoutInfoForm({
   const [saving, setSaving] = useState(false);
 
   async function save() {
-    if (!/^(?:\+?225)?\d{10}$/.test(phone.trim())) {
-      toast.error("Numéro Côte d'Ivoire invalide (10 chiffres)");
+    const normalized = normalizeCIPhone(phone);
+    if (!normalized) {
+      toast.error(
+        "Numéro Côte d'Ivoire invalide. Tapez 10 chiffres (avec ou sans +225, espaces et tirets sont OK)."
+      );
       return;
     }
     setSaving(true);
@@ -265,7 +269,7 @@ function PayoutInfoForm({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         teacherId,
-        payout_phone: phone.trim(),
+        payout_phone: normalized,
         payout_provider: provider,
       }),
     });
@@ -289,7 +293,11 @@ function PayoutInfoForm({
           id={`phone-${teacherId}`}
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          placeholder="+225 07 01 02 03 04"
+          onBlur={() => {
+            const n = normalizeCIPhone(phone);
+            if (n) setPhone(formatCIPhone(n));
+          }}
+          placeholder="07 01 02 03 04"
           disabled={saving}
         />
       </div>

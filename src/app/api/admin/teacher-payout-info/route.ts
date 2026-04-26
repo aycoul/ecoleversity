@@ -4,6 +4,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { canAccess, type AdminScope } from "@/lib/admin/scopes";
 import { logAdminAction } from "@/lib/admin/audit";
+import { normalizeCIPhone } from "@/lib/phone";
 
 /**
  * POST /api/admin/teacher-payout-info
@@ -13,24 +14,33 @@ import { logAdminAction } from "@/lib/admin/audit";
  * Admin override for setting a teacher's payout details — used when the
  * teacher hasn't filled in their own form but the founder needs to
  * release an earned payout (e.g., test accounts, or paying a teacher
- * who's offline). Identical regex + provider enum as the teacher's own
- * /api/teacher/payout-info to keep validation consistent.
+ * who's offline). Phone is normalized to canonical +225XXXXXXXXXX so
+ * the admin can paste any reasonable formatting.
  *
  * Auth: admin role + 'payouts' scope.
  * Audit: full before/after captured.
  */
 
-const CI_PHONE_RE = /^(?:\+?225)?\d{10}$/;
 const PAYOUT_PROVIDERS = ["orange_money", "wave", "mtn_momo", "wallet", "manual"] as const;
 
 const bodySchema = z.object({
   teacherId: z.string().uuid(),
   payout_phone: z
     .string()
-    .trim()
-    .min(10)
-    .max(15)
-    .regex(CI_PHONE_RE, "Numéro Côte d'Ivoire invalide"),
+    .min(8)
+    .max(20)
+    .transform((v, ctx) => {
+      const normalized = normalizeCIPhone(v);
+      if (!normalized) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "Numéro Côte d'Ivoire invalide. Format attendu : 10 chiffres (ex : 07 01 02 03 04, +225 07 01 02 03 04).",
+        });
+        return z.NEVER;
+      }
+      return normalized;
+    }),
   payout_provider: z.enum(PAYOUT_PROVIDERS),
 });
 
