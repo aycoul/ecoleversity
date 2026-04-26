@@ -10,6 +10,12 @@ const LIVEKIT_HOST = "https://*.livekit.cloud wss://*.livekit.cloud";
 const R2_HOST = "https://*.r2.cloudflarestorage.com https://*.r2.dev";
 const PAYPAL_HOSTS = "https://www.paypal.com https://www.sandbox.paypal.com https://*.paypal.com";
 const SUPPORT_BOT = "https://api.anthropic.com";
+// LiveKit's track-processors package fetches Mediapipe's WASM + the
+// selfie segmenter model from these two CDNs at runtime. Without them
+// in connect-src the model download silently fails and Background
+// Blur "succeeds" but emits unblurred frames.
+const MEDIAPIPE_WASM = "https://cdn.jsdelivr.net";
+const MEDIAPIPE_MODEL = "https://storage.googleapis.com";
 
 const csp = [
   "default-src 'self'",
@@ -21,7 +27,7 @@ const csp = [
   `img-src 'self' data: blob: ${SUPABASE_HOST} ${R2_HOST} ${PAYPAL_HOSTS}`,
   `media-src 'self' blob: ${SUPABASE_HOST} ${R2_HOST}`,
   "font-src 'self' data:",
-  `connect-src 'self' ${SUPABASE_HOST} wss://${SUPABASE_HOST.replace("https://", "")} ${LIVEKIT_HOST} ${R2_HOST} ${PAYPAL_HOSTS} ${SUPPORT_BOT}`,
+  `connect-src 'self' ${SUPABASE_HOST} wss://${SUPABASE_HOST.replace("https://", "")} ${LIVEKIT_HOST} ${R2_HOST} ${PAYPAL_HOSTS} ${SUPPORT_BOT} ${MEDIAPIPE_WASM} ${MEDIAPIPE_MODEL}`,
   "worker-src 'self' blob:",
   `frame-src 'self' ${PAYPAL_HOSTS}`,
   "frame-ancestors 'none'",
