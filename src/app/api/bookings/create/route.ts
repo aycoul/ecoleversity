@@ -176,6 +176,8 @@ export async function POST(request: NextRequest) {
       .insert({
         parent_id: user.id,
         teacher_id: teacherId,
+        learner_id: learnerId,
+        live_class_id: liveClass.id,
         type: "class_booking",
         amount_xof: priceXof,
         currency: "XOF",

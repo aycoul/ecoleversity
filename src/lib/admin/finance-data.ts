@@ -392,6 +392,14 @@ export type TransactionRow = {
   id: string;
   parentName: string | null;
   teacherName: string | null;
+  /** Kid the booking is for. May be null on legacy rows. */
+  learnerFirstName: string | null;
+  learnerAge: number | null;
+  /** Class title — null for non-class transactions or legacy rows. */
+  classTitle: string | null;
+  classSubject: string | null;
+  classGradeLevel: string | null;
+  classScheduledAt: string | null;
   amountXof: number;
   commissionXof: number;
   teacherAmount: number;
@@ -413,7 +421,7 @@ export async function listTransactions(
   let q = supabase
     .from("transactions")
     .select(
-      "id, parent_id, teacher_id, amount_xof, commission_amount, teacher_amount, status, payment_provider, payment_reference, created_at",
+      "id, parent_id, teacher_id, learner_id, live_class_id, amount_xof, commission_amount, teacher_amount, status, payment_provider, payment_reference, created_at",
       { count: "exact" }
     )
     .eq("type", "class_booking")
@@ -435,33 +443,86 @@ export async function listTransactions(
   const { data: txs, count } = await q.range(from, to);
   const rows = txs ?? [];
 
-  const ids = Array.from(
+  // Resolve names + class + learner detail in 3 batched queries.
+  const profileIds = Array.from(
     new Set(
       rows.flatMap((r) => [r.parent_id as string, r.teacher_id as string]).filter(Boolean)
     )
   );
+  const learnerIds = Array.from(
+    new Set(rows.map((r) => r.learner_id as string | null).filter((v): v is string => !!v))
+  );
+  const classIds = Array.from(
+    new Set(rows.map((r) => r.live_class_id as string | null).filter((v): v is string => !!v))
+  );
+
+  const [profsRes, learnersRes, classesRes] = await Promise.all([
+    profileIds.length
+      ? supabase.from("profiles").select("id, display_name").in("id", profileIds)
+      : Promise.resolve({ data: [] as { id: string; display_name: string | null }[] }),
+    learnerIds.length
+      ? supabase
+          .from("learner_profiles")
+          .select("id, first_name, birth_year")
+          .in("id", learnerIds)
+      : Promise.resolve({ data: [] as { id: string; first_name: string | null; birth_year: number | null }[] }),
+    classIds.length
+      ? supabase
+          .from("live_classes")
+          .select("id, title, subject, grade_level, scheduled_at")
+          .in("id", classIds)
+      : Promise.resolve({ data: [] as { id: string; title: string | null; subject: string | null; grade_level: string | null; scheduled_at: string | null }[] }),
+  ]);
+
   const nameById = new Map<string, string>();
-  if (ids.length > 0) {
-    const { data: profs } = await supabase
-      .from("profiles")
-      .select("id, display_name")
-      .in("id", ids);
-    for (const p of profs ?? []) nameById.set(p.id as string, (p.display_name as string) ?? "—");
+  for (const p of profsRes.data ?? []) {
+    nameById.set(p.id as string, (p.display_name as string) ?? "—");
+  }
+  const currentYear = new Date().getUTCFullYear();
+  const learnerById = new Map<string, { firstName: string; age: number | null }>();
+  for (const l of learnersRes.data ?? []) {
+    const by = l.birth_year as number | null;
+    learnerById.set(l.id as string, {
+      firstName: (l.first_name as string) ?? "—",
+      age: by ? currentYear - by : null,
+    });
+  }
+  const classById = new Map<
+    string,
+    { title: string | null; subject: string | null; grade_level: string | null; scheduled_at: string | null }
+  >();
+  for (const c of classesRes.data ?? []) {
+    classById.set(c.id as string, {
+      title: (c.title as string | null) ?? null,
+      subject: (c.subject as string | null) ?? null,
+      grade_level: (c.grade_level as string | null) ?? null,
+      scheduled_at: (c.scheduled_at as string | null) ?? null,
+    });
   }
 
   return {
     total: count ?? 0,
-    rows: rows.map((r) => ({
-      id: r.id as string,
-      parentName: nameById.get(r.parent_id as string) ?? null,
-      teacherName: nameById.get(r.teacher_id as string) ?? null,
-      amountXof: (r.amount_xof as number) ?? 0,
-      commissionXof: (r.commission_amount as number) ?? 0,
-      teacherAmount: (r.teacher_amount as number) ?? 0,
-      status: (r.status as string) ?? "—",
-      provider: (r.payment_provider as string | null) ?? null,
-      reference: (r.payment_reference as string | null) ?? null,
-      createdAt: r.created_at as string,
-    })),
+    rows: rows.map((r) => {
+      const learner = r.learner_id ? learnerById.get(r.learner_id as string) : null;
+      const cls = r.live_class_id ? classById.get(r.live_class_id as string) : null;
+      return {
+        id: r.id as string,
+        parentName: nameById.get(r.parent_id as string) ?? null,
+        teacherName: nameById.get(r.teacher_id as string) ?? null,
+        learnerFirstName: learner?.firstName ?? null,
+        learnerAge: learner?.age ?? null,
+        classTitle: cls?.title ?? null,
+        classSubject: cls?.subject ?? null,
+        classGradeLevel: cls?.grade_level ?? null,
+        classScheduledAt: cls?.scheduled_at ?? null,
+        amountXof: (r.amount_xof as number) ?? 0,
+        commissionXof: (r.commission_amount as number) ?? 0,
+        teacherAmount: (r.teacher_amount as number) ?? 0,
+        status: (r.status as string) ?? "—",
+        provider: (r.payment_provider as string | null) ?? null,
+        reference: (r.payment_reference as string | null) ?? null,
+        createdAt: r.created_at as string,
+      };
+    }),
   };
 }

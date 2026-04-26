@@ -420,19 +420,20 @@ export default async function FinancePage({ searchParams }: { searchParams: SP }
             <thead className="border-b border-slate-200 bg-slate-50">
               <tr>
                 <th className="p-2 text-left text-xs font-medium text-slate-500">Date</th>
-                <th className="p-2 text-left text-xs font-medium text-slate-500">Parent</th>
+                <th className="p-2 text-left text-xs font-medium text-slate-500">Famille</th>
+                <th className="p-2 text-left text-xs font-medium text-slate-500">Élève</th>
+                <th className="p-2 text-left text-xs font-medium text-slate-500">Cours</th>
                 <th className="p-2 text-left text-xs font-medium text-slate-500">Enseignant</th>
                 <th className="p-2 text-right text-xs font-medium text-slate-500">Montant</th>
                 <th className="p-2 text-right text-xs font-medium text-slate-500">Commission</th>
                 <th className="p-2 text-left text-xs font-medium text-slate-500">Moyen</th>
                 <th className="p-2 text-left text-xs font-medium text-slate-500">Statut</th>
-                <th className="p-2 text-left text-xs font-medium text-slate-500">Réf.</th>
               </tr>
             </thead>
             <tbody>
               {txList.rows.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="p-6 text-center text-slate-400">
+                  <td colSpan={9} className="p-6 text-center text-slate-400">
                     Aucune transaction.
                   </td>
                 </tr>
@@ -443,10 +444,42 @@ export default async function FinancePage({ searchParams }: { searchParams: SP }
                     month: "2-digit",
                     year: "2-digit",
                   });
+                  const subject = r.classSubject ?? "";
+                  const classLabel = r.classTitle
+                    ? r.classTitle
+                    : subject
+                      ? `${subject} ${r.classGradeLevel ? "(" + r.classGradeLevel + ")" : ""}`
+                      : "—";
                   return (
-                    <tr key={r.id} className="border-b border-slate-100 last:border-0">
-                      <td className="p-2 text-xs text-slate-600 tabular-nums">{date}</td>
+                    <tr key={r.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
+                      <td className="p-2 text-xs text-slate-600 tabular-nums whitespace-nowrap">{date}</td>
                       <td className="p-2 text-xs">{r.parentName ?? "—"}</td>
+                      <td className="p-2 text-xs">
+                        {r.learnerFirstName ? (
+                          <span>
+                            {r.learnerFirstName}
+                            {r.learnerAge !== null && (
+                              <span className="ml-1 text-slate-400">{r.learnerAge}a</span>
+                            )}
+                          </span>
+                        ) : (
+                          "—"
+                        )}
+                      </td>
+                      <td className="p-2 text-xs">
+                        <div className="font-medium text-slate-700">{classLabel}</div>
+                        {r.classScheduledAt && (
+                          <div className="text-[10px] text-slate-400">
+                            {new Date(r.classScheduledAt).toLocaleDateString("fr-FR", {
+                              day: "numeric",
+                              month: "short",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              timeZone: "Africa/Abidjan",
+                            })}
+                          </div>
+                        )}
+                      </td>
                       <td className="p-2 text-xs">{r.teacherName ?? "—"}</td>
                       <td className="p-2 text-right text-xs tabular-nums">{fmtXof(r.amountXof)}</td>
                       <td className="p-2 text-right text-xs tabular-nums text-emerald-600">
@@ -455,9 +488,6 @@ export default async function FinancePage({ searchParams }: { searchParams: SP }
                       <td className="p-2 text-xs">{r.provider ? providerLabel(r.provider) : "—"}</td>
                       <td className="p-2 text-xs">
                         <StatusPill status={r.status} />
-                      </td>
-                      <td className="p-2 text-xs font-mono text-slate-500">
-                        {r.reference ?? "—"}
                       </td>
                     </tr>
                   );
