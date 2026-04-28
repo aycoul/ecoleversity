@@ -3,11 +3,13 @@ import { SessionPageContent } from "@/components/session/session-page-content";
 export const dynamic = "force-dynamic";
 
 /**
- * Kid-mode session room. Renders the same content as /session/[id] but
- * sits under the kid route tree so the kid layout's sidebar stays
- * visible — the child never loses their navigation while in class.
- * The kid layout already provides a "Retour en mode parent" button,
- * so we suppress the internal back bar.
+ * Kid-mode session room. Same backing component as /session/[id], but
+ * SessionPageContent enters fullscreen-overlay mode when hideBackBar is
+ * true — covering the kid dashboard chrome (sidebar, banner, avatar
+ * switcher) so the LiveKit room and whiteboard get the entire viewport.
+ * Without that, the sidebar steals ~225px and the whiteboard toolbar
+ * overflows past the right edge on tablet and phone. Navigation back
+ * to kid mode happens via the in-room "Quitter le cours" button.
  */
 export default async function KidClassRoomPage({
   params,

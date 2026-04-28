@@ -1184,8 +1184,24 @@ export function Whiteboard({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="absolute inset-0 flex flex-col bg-white">
-      {/* Top header */}
-      <div className="flex items-center justify-between border-b border-slate-200 bg-white px-3 py-2">
+      {/* Close button — pinned top-right of the whiteboard, outside the
+          toolbar's flex flow so it never gets clipped by overflow at any
+          viewport. Distinct rose styling so the "exit" affordance is
+          obvious among 25+ slate-700 toolbar buttons. */}
+      <button
+        type="button"
+        onClick={onClose}
+        title="Fermer le tableau"
+        aria-label="Fermer le tableau blanc"
+        className="absolute right-2 top-2 z-10 flex size-9 items-center justify-center rounded-md border border-rose-200 bg-white text-rose-600 shadow-sm transition-colors hover:bg-rose-50 hover:text-rose-700"
+      >
+        <X className="size-4" />
+      </button>
+
+      {/* Top header — flex-wrap so on narrow viewports buttons wrap to a
+          second row instead of overflowing off-screen. pr-12 reserves
+          space for the absolute-positioned X close button. */}
+      <div className="flex flex-wrap items-center gap-1 gap-y-1 border-b border-slate-200 bg-white px-3 py-2 pr-12">
         <div className="flex items-center gap-1">
           {toolButton("select", MousePointer2, "Sélectionner (V)")}
           {toolButton("pan", Hand, "Déplacer la vue (Espace)")}
@@ -1240,7 +1256,10 @@ export function Whiteboard({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-1">
+        {/* ml-auto pushes the utility group flush right when the toolbar
+            fits on one row. When wrapping, it sits at the start of its
+            own row — also fine since every button stays reachable. */}
+        <div className="ml-auto flex items-center gap-1">
           <button
             type="button"
             onClick={undo}
@@ -1303,14 +1322,6 @@ export function Whiteboard({ onClose }: { onClose: () => void }) {
             className="flex size-9 items-center justify-center rounded-md text-slate-700 hover:bg-rose-50 hover:text-rose-700"
           >
             <Download className="size-4 rotate-180" />
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            title="Fermer"
-            className="flex size-9 items-center justify-center rounded-md text-slate-700 hover:bg-slate-100"
-          >
-            <X className="size-4" />
           </button>
         </div>
       </div>

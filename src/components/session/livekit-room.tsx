@@ -949,6 +949,11 @@ function ScreenShareButton() {
 
   const toggle = async () => {
     setBusy(true);
+    // Safety timer: on some mobile browsers the OS share picker can be
+    // dismissed without the underlying promise ever settling, leaving
+    // the button wedged in the spinner state. Race the toggle against a
+    // 30s timeout so the UI always recovers.
+    const safety = setTimeout(() => setBusy(false), 30_000);
     try {
       // Read sharing state inline so the latest reactive value is used,
       // not a captured closure from a render where state was stale.
@@ -959,6 +964,7 @@ function ScreenShareButton() {
       console.warn("[screen-share]", err);
       // User probably cancelled the picker — no toast.
     } finally {
+      clearTimeout(safety);
       setBusy(false);
     }
   };
@@ -992,29 +998,29 @@ function ScreenShareButton() {
   );
 }
 
-// Zoom-style floating "you are sharing" banner. Always visible at the
-// top of the video area when this user is currently screen-sharing, so
-// they can stop without hunting for the control bar (which can scroll
-// out of view on tablet portrait or be hidden behind the share preview).
+// "You are sharing" banner, rendered as a regular flex row at the top of
+// the column above the video+chat area. Previously this was an absolute
+// overlay at top-3 / z-50 inside the video area, which sat directly on
+// top of the whiteboard's toolbar (covering the leftmost color swatches
+// when both were active). As a normal flex child it occupies its own
+// thin strip when active and disappears entirely when inactive.
 function ScreenShareBanner() {
   const t = useTranslations("session");
   const { localParticipant, isScreenShareEnabled } = useLocalParticipant();
   if (!isScreenShareEnabled) return null;
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-3 z-50 flex justify-center">
-      <div className="pointer-events-auto flex items-center gap-3 rounded-full bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-lg ring-2 ring-red-300/40">
-        <span className="size-2 animate-pulse rounded-full bg-white" />
-        <span>{t("screenShareActive")}</span>
-        <button
-          type="button"
-          onClick={() => {
-            void localParticipant.setScreenShareEnabled(false);
-          }}
-          className="rounded-md bg-white/20 px-3 py-1 text-xs font-semibold transition-colors hover:bg-white/30"
-        >
-          {t("screenShareStop")}
-        </button>
-      </div>
+    <div className="flex flex-shrink-0 items-center justify-center gap-3 bg-red-600 px-4 py-1.5 text-sm font-medium text-white shadow-sm">
+      <span className="size-2 animate-pulse rounded-full bg-white" />
+      <span>{t("screenShareActive")}</span>
+      <button
+        type="button"
+        onClick={() => {
+          void localParticipant.setScreenShareEnabled(false);
+        }}
+        className="rounded-md bg-white/20 px-3 py-1 text-xs font-semibold transition-colors hover:bg-white/30"
+      >
+        {t("screenShareStop")}
+      </button>
     </div>
   );
 }
@@ -1544,6 +1550,10 @@ function RoomLayout({
 
   return (
     <div className="flex h-full w-full flex-col">
+      {/* Renders only when actively screen-sharing. Sits above the
+          video+whiteboard row so it never overlaps the whiteboard's
+          color palette / toolbar. */}
+      <ScreenShareBanner />
       <div className="relative flex min-h-0 flex-1">
         <div className="relative min-w-0 flex-1">
           {userRole === "teacher" && !breakout && <TeacherWaitingList liveClassId={liveClassId} />}
@@ -1557,7 +1567,6 @@ function RoomLayout({
             />
           )}
           <RaisedHandsPanel userRole={userRole} />
-          <ScreenShareBanner />
           {effectiveMode === "speaker" ? (
             <PresentationLayout
               tracks={tracks}
@@ -1640,9 +1649,20 @@ function RoomLayout({
         />
         <ScreenShareButton />
         <RaiseHandButton />
+        {/* Whiteboard and Chat are mutually exclusive: opening one closes
+            the other. The flex layout can't fit both inside the
+            constrained max-w-6xl container without the chat panel
+            sliding behind the whiteboard's absolute overlay. Toggling
+            them keeps the right-side panel always fully visible. */}
         <button
           type="button"
-          onClick={() => setWhiteboardOpen((v) => !v)}
+          onClick={() => {
+            setWhiteboardOpen((v) => {
+              const next = !v;
+              if (next) setChatOpen(false);
+              return next;
+            });
+          }}
           className={`lk-button flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium ${
             whiteboardOpen
               ? "bg-[var(--ev-green)] text-white"
@@ -1656,7 +1676,13 @@ function RoomLayout({
         </button>
         <button
           type="button"
-          onClick={() => setChatOpen((v) => !v)}
+          onClick={() => {
+            setChatOpen((v) => {
+              const next = !v;
+              if (next) setWhiteboardOpen(false);
+              return next;
+            });
+          }}
           className={`lk-button flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium ${
             chatOpen
               ? "bg-white text-slate-900"
