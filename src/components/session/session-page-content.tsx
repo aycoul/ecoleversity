@@ -145,24 +145,55 @@ export async function SessionPageContent({
         : "/dashboard/parent/overview";
   const resolvedBackHref = backHref ?? defaultBackHref;
 
+  // Kid-mode (hideBackBar=true) renders as a fixed full-viewport overlay
+  // so the dashboard sidebar doesn't steal width from the LiveKit room.
+  // Without this, the whiteboard toolbar overflows and the kid loses
+  // access to Zoom/Recenter/Clear/Close on tablet and phone. SessionRoom
+  // surfaces "Quitter le cours" while LIVE; the small floating Retour
+  // pill below covers WAITING / READY / ENDED states where the kid
+  // would otherwise be trapped in the overlay.
+  if (hideBackBar) {
+    return (
+      <div className="fixed inset-0 z-50 overflow-y-auto bg-white">
+        <Link
+          href={resolvedBackHref}
+          className="absolute left-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white/95 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm backdrop-blur transition-colors hover:bg-slate-50 hover:text-slate-900"
+        >
+          <ArrowLeft className="size-3.5" />
+          Retour
+        </Link>
+        <div className="mx-auto max-w-6xl px-4 py-6">
+          <SessionRoom
+            sessionId={liveClass.id}
+            scheduledAt={liveClass.scheduled_at}
+            durationMinutes={liveClass.duration_minutes}
+            teacherName={teacherName}
+            subjectLabel={subjectLabel}
+            userRole={role === "teacher" ? "teacher" : "parent"}
+            hasRecording={hasRecording}
+            actingAsLearnerId={actingAsLearnerId}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
-      {!hideBackBar && (
-        <div className="sticky top-0 z-10 border-b border-slate-200 bg-white/90 backdrop-blur">
-          <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-            <Link
-              href={resolvedBackHref}
-              className="inline-flex items-center gap-2 rounded-md px-2 py-1 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-            >
-              <ArrowLeft className="size-4" />
-              Retour au tableau de bord
-            </Link>
-            <div className="hidden text-xs text-slate-500 sm:block">
-              {subjectLabel} · {teacherName}
-            </div>
+      <div className="sticky top-0 z-10 border-b border-slate-200 bg-white/90 backdrop-blur">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
+          <Link
+            href={resolvedBackHref}
+            className="inline-flex items-center gap-2 rounded-md px-2 py-1 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+          >
+            <ArrowLeft className="size-4" />
+            Retour au tableau de bord
+          </Link>
+          <div className="hidden text-xs text-slate-500 sm:block">
+            {subjectLabel} · {teacherName}
           </div>
         </div>
-      )}
+      </div>
 
       <div className="mx-auto max-w-6xl px-4 py-6">
         <SessionRoom
